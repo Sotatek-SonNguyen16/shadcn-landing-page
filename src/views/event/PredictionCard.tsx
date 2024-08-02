@@ -2,10 +2,10 @@ import React from 'react';
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import {clsx} from "clsx";
 import {Tab, UnderlineTabs} from "@/components/ui/tabs.tsx";
-import {HoverSelect} from "@/components/ui/hover-card.tsx";
 import BuyForm from "@/views/event/BuyForm.tsx";
 import SellForm from "@/views/event/SellForm.tsx";
 import {EFormStatus, EFormType, useEventContext} from "@/contexts/EventContext.tsx";
+import HoverCardSelect from "@/components/HoverCardSelect.tsx";
 
 const tabs: Tab<EFormStatus>[] = [
     {
@@ -59,7 +59,7 @@ const PredictionCard: React.FC = () => {
             </div>
             <div className={`w-full relative`}>
                 <div className={`absolute top-3 right-0 flex justify-end px-6`}>
-                    <HoverSelect selected={formType} options={formTypeList} onSelect={changeType}/>
+                    <HoverCardSelect<EFormType> selected={formType} options={formTypeList} onSelect={changeType}/>
                 </div>
                 <UnderlineTabs<EFormStatus> tabs={tabs} onClick={changeForm}/>
             </div>
