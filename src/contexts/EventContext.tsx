@@ -45,6 +45,8 @@ interface EventContextType {
     changeMarketDepth: (type: EMarketDepth) => void;
     betOption: EBetOption;
     changeBetOption: (option: EBetOption) => void;
+    selectedEvent: BetEvent | null;
+    setSelectedEvent: (event: BetEvent) => void;
     addEvent: (event: BetEvent) => void;
     removeEvent: (id: number) => void;
     updateEvent: (updatedEvent: BetEvent) => void;
@@ -62,6 +64,7 @@ const useEventContext = () => {
 
 const EventProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [events, setEvents] = useState<BetEvent[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<BetEvent | null>(null)
     const [formStatus, setFormStatus] = useState<EFormStatus>(EFormStatus.BUY)
     const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(EMarketDepth.GRAPH)
@@ -99,6 +102,7 @@ const EventProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
     useEffect(() => {
         setEvents(placholder.events)
+        setSelectedEvent(placholder.events[0] || null)
     }, []);
 
     return (
@@ -111,6 +115,8 @@ const EventProvider: React.FC<{ children: ReactNode }> = ({children}) => {
                 changeType,
                 betOption,
                 changeBetOption,
+                selectedEvent,
+                setSelectedEvent,
                 addEvent,
                 removeEvent,
                 updateEvent,

@@ -3,10 +3,10 @@ import {clsx} from "clsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Info, Minus, Plus, RefreshCcw, Settings} from "lucide-react";
 import {Checkbox, DataList, IconButton} from "@radix-ui/themes";
-import {EFormType, useEventContext} from "@/contexts/EventContext.tsx";
+import {EBetOption, EFormType, useEventContext} from "@/contexts/EventContext.tsx";
 
 const SellForm: React.FC = () => {
-    const {formType} = useEventContext()
+    const {formType, betOption, changeBetOption, selectedEvent} = useEventContext()
 
     const formFields = {
         [EFormType.MARKET]: <>
@@ -128,7 +128,7 @@ const SellForm: React.FC = () => {
     }
 
     return (
-        <div className={clsx("p-4")}>
+        <div className={clsx("p-6")}>
             <div className={`flex justify-between mb-3 font-semibold`}>
                 <div className={`flex items-center gap-2`}>
                     Outcome <Info width={15} height={15}/>
@@ -143,8 +143,10 @@ const SellForm: React.FC = () => {
             <div className={clsx((
                 "w-full flex justify-center items-center gap-4 mb-3"
             ))}>
-                <Button className={`flex-1`} variant={`successSolid`}>Yes</Button>
-                <Button className={`flex-1`} variant={`secondary`}>No</Button>
+                <Button className={`flex-1 py-6`} variant={betOption === EBetOption.YES ? "successSolid" : "secondary"}
+                        onClick={() => changeBetOption(EBetOption.YES)}>Yes {selectedEvent?.outcome.yes}c</Button>
+                <Button className={`flex-1 py-6`} variant={betOption === EBetOption.NO ? "accentSolid" : "secondary"}
+                        onClick={() => changeBetOption(EBetOption.NO)}>No {selectedEvent?.outcome.no}c</Button>
             </div>
             {_renderFormField()}
         </div>

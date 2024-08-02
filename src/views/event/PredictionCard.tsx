@@ -57,8 +57,8 @@ const PredictionCard: React.FC = () => {
                     Kamala Harris
                 </div>
             </div>
-            <div className={`w-full`}>
-                <div className={`flex justify-end px-6`}>
+            <div className={`w-full relative`}>
+                <div className={`absolute top-3 right-0 flex justify-end px-6`}>
                     <HoverSelect selected={formType} options={formTypeList} onSelect={changeType}/>
                 </div>
                 <UnderlineTabs<EFormStatus> tabs={tabs} onClick={changeForm}/>

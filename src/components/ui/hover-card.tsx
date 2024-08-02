@@ -15,7 +15,7 @@ const HoverSelect = <T extends string, >(props: HoverCardProps<T>): React.ReactE
     return (
         <HoverCard.Root>
             <HoverCard.Trigger>
-                <div className={`flex gap-4 items-center`}>
+                <div className={`flex gap-4 items-center font-semibold`}>
                     {`${selected}`} <ChevronDown width={15} height={15}/>
                 </div>
             </HoverCard.Trigger>

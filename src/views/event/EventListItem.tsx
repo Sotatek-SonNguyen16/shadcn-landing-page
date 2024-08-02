@@ -1,5 +1,5 @@
 import React, {memo, useCallback, useEffect} from 'react';
-import {BetEvent, EMarketDepth, useEventContext} from "@/contexts/EventContext.tsx";
+import {BetEvent, EBetOption, EMarketDepth, useEventContext} from "@/contexts/EventContext.tsx";
 import {clsx} from "clsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
 import {Code, Gift, Link2} from "lucide-react";
@@ -40,6 +40,7 @@ const Content = memo(({id}: { id: number }) => {
 })
 
 const EventListItem: React.FC<{ data: BetEvent }> = ({data}) => {
+    const {changeBetOption, betOption, selectedEvent, setSelectedEvent} = useEventContext()
     const {id, name, avatar, price, chance, outcome} = data;
 
     const _renderEventTrigger = useCallback(() => {
@@ -73,19 +74,25 @@ const EventListItem: React.FC<{ data: BetEvent }> = ({data}) => {
                         </div>
                     </div>
                 </div>
-                <div className={`font-bold`}>
+                <div className={`font-bold text-center place-content-center`}>
                     {chance}%
                 </div>
                 <div className={`flex gap-2`}>
-                    <Button variant={`successGhost`}>Bet Yes {outcome.yes}#</Button>
-                    <Button variant={`accentGhost`}>Bet No {outcome.no}#</Button>
+                    <Button
+                        variant={selectedEvent?.id === data.id && betOption === EBetOption.YES ? 'successSolid' : 'successGhost'}
+                        className="px-8 py-6"
+                        onClick={() => changeBetOption(EBetOption.YES)}>Bet Yes {outcome.yes}c</Button>
+                    <Button
+                        variant={selectedEvent?.id === data.id && betOption === EBetOption.NO ? 'accentSolid' : 'accentGhost'}
+                        className="px-8 py-6"
+                        onClick={() => changeBetOption(EBetOption.NO)}>Bet No {outcome.no}c</Button>
                 </div>
             </div>
         )
-    }, [avatar, name, price, chance, outcome]);
+    }, [avatar, name, price, chance, selectedEvent?.id, data.id, betOption, outcome.yes, outcome.no, changeBetOption]);
 
     return (
-        <Accordion.Item value={`item-${id}`}>
+        <Accordion.Item value={`item-${id}`} onClick={() => setSelectedEvent(data)}>
             <Accordion.Header className="flex">
                 <Accordion.Trigger asChild>
                     {_renderEventTrigger()}
