@@ -62,7 +62,8 @@ const useEventContext = () => {
     return context;
 }
 
-const EventProvider: React.FC<{ children: ReactNode }> = ({children}) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const EventProvider: React.FC<{ children: ReactNode, id: string | number | undefined }> = ({children}) => {
     const [events, setEvents] = useState<BetEvent[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<BetEvent | null>(null)
     const [formStatus, setFormStatus] = useState<EFormStatus>(EFormStatus.BUY)
