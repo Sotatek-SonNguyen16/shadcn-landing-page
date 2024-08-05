@@ -87,7 +87,7 @@ export class BaseWebSocketImpl<
             return;
         }
 
-        this.eventListeners[event] = this.eventListeners[event].filter(l => l !== listener);
+        this.eventListeners[event] = this.eventListeners[event]?.filter(l => l !== listener);
 
         if (this.socket) {
             this.socket.off(event as string, listener as never);

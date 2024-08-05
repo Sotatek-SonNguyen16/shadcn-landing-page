@@ -7,7 +7,7 @@ import {EBetOption} from "@/types";
 
 const EventOrderBook: React.FC = () => {
     const {betOption} = useEventContext()
-    const {priceChangeEvent, orderBookEvent, subscribe} = useEventWebSocket()
+    const {orderBookEvent, subscribe} = useEventWebSocket()
 
     useEffect(() => {
         console.log('subscribe for event order')
@@ -42,7 +42,7 @@ const EventOrderBook: React.FC = () => {
                 <div className="text-center">Total</div>
             </div>
             <div className={`max-h-[300px] overflow-y-scroll`}>
-                <EventTradeBar variant="accent" data={orderBookEvent?.asks} total={priceChangeEvent?.price || ""}/>
+                <EventTradeBar variant="accent" data={orderBookEvent?.asks} />
                 <div className={clsx(
                     "grid grid-cols-5",
                     "border-t-[1px] border-b-[1px] border-gray-200 py-2",
@@ -64,7 +64,7 @@ const EventOrderBook: React.FC = () => {
 
                     </div>
                 </div>
-                <EventTradeBar variant="success" data={orderBookEvent?.bids} total={priceChangeEvent?.price || ""}/>
+                <EventTradeBar variant="success" data={orderBookEvent?.bids} />
             </div>
         </div>
     );
