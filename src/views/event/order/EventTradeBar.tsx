@@ -6,11 +6,10 @@ import {Order} from "@/types";
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
     data: Order[] | undefined,
-    total: string,
 }
 
 const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
-    const {variant, data, total} = props
+    const {variant, data} = props
     const formatterEuro = new Intl.NumberFormat('default', {
         style: 'currency',
         currency: 'EUR',
@@ -63,7 +62,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                         {formatterUSD.format(+size)}
                     </div>
                     <div className="text-center font-semibold text-gray-600 py-2">
-                        {formatterUSD.format(+total)}
+                        {formatterUSD.format(+price * +size)}
                     </div>
                 </div>
             ))}

@@ -3,11 +3,23 @@ import EventHeader from "@/views/event/EventHeader.tsx";
 import PredictionCard from "@/views/event/PredictionCard.tsx";
 import EventListLayout from "@/views/event/EventListLayout.tsx";
 import {clsx} from "clsx";
-import {Button} from "@/components/ui/button.tsx";
 import {useEventWebSocket} from "@/contexts/WebSocketContext.tsx";
 
+const CheckWebSocketConnection: React.FC<{ isConnected: boolean }> = ({isConnected}) => {
+    return <div className={clsx(
+        "hidden",
+        "border-[1px] rounded-xl px-6 py-4 flex flex-col",
+        {
+            "border-green-500 bg-green-100": isConnected,
+            "border-red-500 bg-red-100": !isConnected,
+        }
+    )}>
+        <h1>Status: {isConnected ? 'Connected' : 'Disconnected'}</h1>
+    </div>
+}
+
 const EventPageLayout: React.FC = () => {
-    const {isConnected, subscribe} = useEventWebSocket();
+    const {isConnected} = useEventWebSocket();
 
     return (
         <div className={`h-screen w-full flex pt-5`}>
@@ -15,19 +27,7 @@ const EventPageLayout: React.FC = () => {
                 `w-full`,
                 'lg:w-[70%] lg:pt-3'
             )}>
-                <div className={clsx(
-                    "border-[1px] rounded-xl px-6 py-4 flex flex-col",
-                    {
-                        "border-green-500 bg-green-100": isConnected,
-                        "border-red-500 bg-red-100": !isConnected,
-                    }
-                )}>
-                    <h1>Status: {isConnected ? 'Connected' : 'Disconnected'}</h1>
-                    <div>
-                        <Button variant={`accentSolid`}
-                                onClick={() => subscribe(["48331043336612883890938759509493159234755048973500640148014422747788308965732"])}>Subscribe</Button>
-                    </div>
-                </div>
+                <CheckWebSocketConnection isConnected={isConnected}/>
                 <EventHeader/>
                 <EventListLayout/>
             </div>
