@@ -1,5 +1,5 @@
-import BaseRequest from "@/services/BaseRequest.ts";
-import {PolyMarket} from "@/types";
+import BaseRequest from '@/services/BaseRequest.ts'
+import { PolyMarket } from '@/types'
 
 export default class MarketRequest extends BaseRequest {
     async getTopEvents() {

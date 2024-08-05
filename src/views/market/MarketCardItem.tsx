@@ -1,21 +1,26 @@
-import React from 'react';
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+import React from 'react'
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle
+} from '@/components/ui/card.tsx'
 
 const MarketCardItem: React.FC = () => {
     return (
-        <Card className="w-[350px]">
+        <Card className='w-[350px]'>
             <CardHeader>
                 <CardTitle>Create project</CardTitle>
-                <CardDescription>Deploy your new project in one-click.</CardDescription>
+                <CardDescription>
+                    Deploy your new project in one-click.
+                </CardDescription>
             </CardHeader>
-            <CardContent>
-
-            </CardContent>
-            <CardFooter className="flex justify-between">
-
-            </CardFooter>
+            <CardContent></CardContent>
+            <CardFooter className='flex justify-between'></CardFooter>
         </Card>
-    );
-};
+    )
+}
 
-export default MarketCardItem;
+export default MarketCardItem

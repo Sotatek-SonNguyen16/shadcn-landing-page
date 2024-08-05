@@ -1,23 +1,33 @@
-import React, {createContext, ReactNode, useContext, useEffect, useState} from "react";
-import RequestFactory from "@/services/RequestFactory.ts";
-import {PolyMarket} from "@/types";
+import React, {
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState
+} from 'react'
+import RequestFactory from '@/services/RequestFactory.ts'
+import { PolyMarket } from '@/types'
 
 interface MarketContextReturnValue {
-    polyMarkets: PolyMarket[] | null,
+    polyMarkets: PolyMarket[] | null
 }
 
-const MarketContext = createContext<MarketContextReturnValue | undefined>(undefined)
+const MarketContext = createContext<MarketContextReturnValue | undefined>(
+    undefined
+)
 
 const useMarketsContext = () => {
-    const context = useContext(MarketContext);
+    const context = useContext(MarketContext)
     if (context === undefined) {
-        throw new Error('useMarketContext must be used within an MarketProvider');
+        throw new Error(
+            'useMarketContext must be used within an MarketProvider'
+        )
     }
-    return context;
+    return context
 }
 
-const MarketProvider: React.FC<{ children: ReactNode }> = ({children}) => {
-    const request = RequestFactory.getRequest("MarketRequest")
+const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const request = RequestFactory.getRequest('MarketRequest')
 
     const [polyMarkets, setPolyMarkets] = useState<PolyMarket[] | null>(null)
 
@@ -34,17 +44,18 @@ const MarketProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
     useEffect(() => {
         fetchMarkets()
-    }, []);
+    }, [])
 
     return (
         <MarketContext.Provider
             value={{
-                polyMarkets,
-            }}>
+                polyMarkets
+            }}
+        >
             {children}
         </MarketContext.Provider>
     )
 }
 
-export {useMarketsContext};
-export default MarketProvider;
+export { useMarketsContext }
+export default MarketProvider

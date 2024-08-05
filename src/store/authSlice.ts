@@ -1,13 +1,13 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
 import Storage from '@/lib/storage.ts'
 
 interface AuthState {
-    accessToken: string | null;
+    accessToken: string | null
 }
 
 const initialState: AuthState = {
     accessToken: null
-};
+}
 
 const authSlice = createSlice({
     name: 'auth',
@@ -16,9 +16,9 @@ const authSlice = createSlice({
         setAccessToken: (state, action) => {
             state.accessToken = action.payload.accessToken
             Storage.setAccessToken(action.payload.accessToken)
-        },
-    },
-});
+        }
+    }
+})
 
-export const {setAccessToken} = authSlice.actions;
-export default authSlice.reducer;
+export const { setAccessToken } = authSlice.actions
+export default authSlice.reducer

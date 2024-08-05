@@ -1,11 +1,7 @@
-import React from 'react';
+import React from 'react'
 
 const NotMatch: React.FC = () => {
-    return (
-        <div>
-            Not found this page
-        </div>
-    );
-};
+    return <div>Not found this page</div>
+}
 
-export default NotMatch;
+export default NotMatch
