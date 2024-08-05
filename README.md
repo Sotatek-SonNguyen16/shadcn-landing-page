@@ -52,7 +52,12 @@ cd shadcn-landing-page
 npm install
 ```
 
-4. Run project
+4. Create Environment
+```bash
+cp .env.example .env.local
+```
+
+5. Run project
 
 ```bash
 npm run dev

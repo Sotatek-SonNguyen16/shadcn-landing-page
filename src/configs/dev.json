@@ -1,0 +1,6 @@
+{
+  "app": {
+    "apiUrl": "https://dev-prediction-market.sotatek.works/",
+    "wws": "wss://dev-prediction-market.sotatek.works"
+  }
+}

@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
-import {BetEvent} from "@/contexts/EventContext.tsx";
 import EventListItem from "@/views/event/EventListItem.tsx";
 import * as Accordion from '@radix-ui/react-accordion';
+import {BetEvent} from "@/types";
 
 
 const OutcomeEventList: React.FC<{ events: BetEvent[] }> = ({events}) => {

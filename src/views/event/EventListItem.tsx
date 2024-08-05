@@ -1,5 +1,5 @@
-import React, {memo, useCallback, useEffect} from 'react';
-import {BetEvent, EBetOption, EMarketDepth, useEventContext} from "@/contexts/EventContext.tsx";
+import React, {memo, useCallback} from 'react';
+import {useEventContext} from "@/contexts/EventContext.tsx";
 import {clsx} from "clsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
 import {Code, Gift, Link2} from "lucide-react";
@@ -9,6 +9,7 @@ import {Tab, UnderlineTabs} from "@/components/ui/tabs.tsx";
 import EventGraph from "@/views/event/charts/EventGraph.tsx";
 import EventResolution from "@/views/event/resolution/EventResolution.tsx";
 import EventOrderBook from "@/views/event/order/EventOrderBook.tsx";
+import {BetEvent, EBetOption, EMarketDepth, ESide} from "@/types";
 
 const tabs: Tab<EMarketDepth>[] = [
     {
@@ -28,19 +29,16 @@ const tabs: Tab<EMarketDepth>[] = [
     },
 ];
 
-const Content = memo(({id}: { id: number }) => {
+const Content = memo(() => {
     const {changeMarketDepth} = useEventContext()
 
-    useEffect(() => {
-        console.log("render ", id)
-    }, [id]);
     return (
         <UnderlineTabs<EMarketDepth> tabs={tabs} onClick={changeMarketDepth}/>
     )
 })
 
 const EventListItem: React.FC<{ data: BetEvent }> = ({data}) => {
-    const {changeBetOption, betOption, selectedEvent, setSelectedEvent} = useEventContext()
+    const {changeBetOption, betOption, selectedEvent, setSelectedEvent, formStatus} = useEventContext()
     const {id, name, avatar, price, chance, outcome} = data;
 
     const _renderEventTrigger = useCallback(() => {
@@ -81,11 +79,11 @@ const EventListItem: React.FC<{ data: BetEvent }> = ({data}) => {
                     <Button
                         variant={selectedEvent?.id === data.id && betOption === EBetOption.YES ? 'successSolid' : 'successGhost'}
                         className="px-8 py-6"
-                        onClick={() => changeBetOption(EBetOption.YES)}>Bet Yes {outcome.yes}c</Button>
+                        onClick={() => changeBetOption(EBetOption.YES)}>{formStatus === ESide.BUY ? "Buy" : "Sell"} Yes {outcome.yes}c</Button>
                     <Button
                         variant={selectedEvent?.id === data.id && betOption === EBetOption.NO ? 'accentSolid' : 'accentGhost'}
                         className="px-8 py-6"
-                        onClick={() => changeBetOption(EBetOption.NO)}>Bet No {outcome.no}c</Button>
+                        onClick={() => changeBetOption(EBetOption.NO)}>{formStatus === ESide.BUY ? "Buy" : "Sell"} No {outcome.no}c</Button>
                 </div>
             </div>
         )
@@ -102,7 +100,7 @@ const EventListItem: React.FC<{ data: BetEvent }> = ({data}) => {
                 className={'text-mauve11 bg-mauve2 data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden text-[15px]'}
             >
                 <div className="py-[15px] px-5">
-                    <Content id={id}/>
+                    <Content/>
                 </div>
             </Accordion.Content>
         </Accordion.Item>

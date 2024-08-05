@@ -6,7 +6,7 @@ import {Link2Icon, LinkNone2Icon, RocketIcon, StarFilledIcon, StarIcon} from "@r
 type IconVariant = 'cup' | 'star' | 'starFilled' | 'linkNone' | 'link'
 
 type IconState = {
-    [key in IconVariant]: React.ReactElement;
+    [key in IconVariant]: JSX.Element;
 };
 
 const icons: IconState = {
