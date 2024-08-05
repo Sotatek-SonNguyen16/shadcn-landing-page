@@ -4,18 +4,19 @@ import {clsx} from "clsx";
 import {Tab, UnderlineTabs} from "@/components/ui/tabs.tsx";
 import BuyForm from "@/views/event/BuyForm.tsx";
 import SellForm from "@/views/event/SellForm.tsx";
-import {EFormStatus, EFormType, useEventContext} from "@/contexts/EventContext.tsx";
+import {useEventContext} from "@/contexts/EventContext.tsx";
 import HoverCardSelect from "@/components/HoverCardSelect.tsx";
+import {EFormType, ESide} from "@/types";
 
-const tabs: Tab<EFormStatus>[] = [
+const tabs: Tab<ESide>[] = [
     {
         title: "Buy",
-        value: EFormStatus.BUY,
+        value: ESide.BUY,
         content: <BuyForm/>
     },
     {
         title: "Sell",
-        value: EFormStatus.SELL,
+        value: ESide.SELL,
         content: <SellForm/>
     },
 ];
@@ -61,7 +62,7 @@ const PredictionCard: React.FC = () => {
                 <div className={`absolute top-3 right-0 flex justify-end px-6`}>
                     <HoverCardSelect<EFormType> selected={formType} options={formTypeList} onSelect={changeType}/>
                 </div>
-                <UnderlineTabs<EFormStatus> tabs={tabs} onClick={changeForm}/>
+                <UnderlineTabs<ESide> tabs={tabs} onClick={changeForm}/>
             </div>
         </div>
     );

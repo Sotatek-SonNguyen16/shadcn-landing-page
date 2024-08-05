@@ -1,44 +1,11 @@
 import React, {createContext, ReactNode, useContext, useEffect, useState} from "react";
 import placholder from "@/lib/placeholder-data.ts";
-
-type BetEvent = {
-    id: number;
-    avatar: string;
-    name: string;
-    price: number;
-    chance: number;
-    outcome: {
-        yes: number;
-        no: number;
-    }
-}
-
-enum EFormStatus {
-    BUY = 'buy',
-    SELL = 'sell',
-}
-
-enum EFormType {
-    MARKET = "Market",
-    LIMIT = "Limit",
-    AMM = "AMM"
-}
-
-enum EMarketDepth {
-    ORDER_BOOK = "OrderBook",
-    GRAPH = "Graph",
-    RESOLUTION = "Resolution",
-}
-
-enum EBetOption {
-    YES = "Yes",
-    NO = "No",
-}
+import {BetEvent, EBetOption, EFormType, EMarketDepth, ESide} from "@/types";
 
 interface EventContextType {
     events: BetEvent[];
-    formStatus: EFormStatus;
-    changeForm: (status: EFormStatus) => void;
+    formStatus: ESide;
+    changeForm: (status: ESide) => void;
     formType: EFormType;
     changeType: (type: EFormType) => void;
     marketDepth: EMarketDepth;
@@ -65,12 +32,12 @@ const useEventContext = () => {
 const EventProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [events, setEvents] = useState<BetEvent[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<BetEvent | null>(null)
-    const [formStatus, setFormStatus] = useState<EFormStatus>(EFormStatus.BUY)
+    const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
     const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(EMarketDepth.GRAPH)
     const [betOption, setBetOption] = useState<EBetOption>(EBetOption.YES)
 
-    const changeForm = (status: EFormStatus) => {
+    const changeForm = (status: ESide) => {
         setFormStatus(status);
     }
 
@@ -128,7 +95,5 @@ const EventProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     )
 }
 
-export {EFormStatus, EFormType, EMarketDepth, EBetOption};
-export type {BetEvent};
 export {useEventContext};
 export default EventProvider;

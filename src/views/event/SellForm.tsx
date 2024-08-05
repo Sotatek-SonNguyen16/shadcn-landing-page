@@ -3,7 +3,8 @@ import {clsx} from "clsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Info, Minus, Plus, RefreshCcw, Settings} from "lucide-react";
 import {Checkbox, DataList, IconButton} from "@radix-ui/themes";
-import {EBetOption, EFormType, useEventContext} from "@/contexts/EventContext.tsx";
+import {useEventContext} from "@/contexts/EventContext.tsx";
+import {EBetOption, EFormType} from "@/types";
 
 const SellForm: React.FC = () => {
     const {formType, betOption, changeBetOption, selectedEvent} = useEventContext()
