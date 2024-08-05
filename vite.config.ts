@@ -24,11 +24,5 @@ export default defineConfig(({ command }) => {
                 // Add proxy configuration if needed
             }
         },
-        server: {
-            port: 3000,
-            proxy: {
-                // https://vitejs.dev/config/server-options.html
-            },
-        },
     }
 })

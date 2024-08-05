@@ -1,18 +1,18 @@
 type BetEvent = {
-    id: number;
-    avatar: string;
-    name: string;
-    price: number;
-    chance: number;
+    id: number
+    avatar: string
+    name: string
+    price: number
+    chance: number
     outcome: {
-        yes: number;
-        no: number;
+        yes: number
+        no: number
     }
 }
 
 enum ESide {
     BUY = 'BUY',
-    SELL = 'SELL',
+    SELL = 'SELL'
 }
 
 enum EFormType {
@@ -24,12 +24,12 @@ enum EFormType {
 enum EMarketDepth {
     ORDER_BOOK = 'OrderBook',
     GRAPH = 'Graph',
-    RESOLUTION = 'Resolution',
+    RESOLUTION = 'Resolution'
 }
 
 enum EBetOption {
     YES = 'Yes',
-    NO = 'No',
+    NO = 'No'
 }
 
 enum EEventType {
@@ -38,28 +38,28 @@ enum EEventType {
 }
 
 type PriceChangeEvent = {
-    asset_id: string;
-    event_type: EEventType;
-    hash: string;
-    market: string;
-    price: string;
-    side: ESide;
-    size: string;
-    timestamp: string;
+    asset_id: string
+    event_type: EEventType
+    hash: string
+    market: string
+    price: string
+    side: ESide
+    size: string
+    timestamp: string
 }
 
 type Order = {
-    price: string;
-    size: string;
+    price: string
+    size: string
 }
 
 type OrderBookEvent = {
-    asset_id: string;
-    event_type: EEventType;
-    hash: string;
-    market: string;
-    asks: Order[];
-    bids: Order[];
+    asset_id: string
+    event_type: EEventType
+    hash: string
+    market: string
+    asks: Order[]
+    bids: Order[]
 }
 
 interface PolyMarket {
@@ -206,18 +206,6 @@ interface CLOBReward {
     endDate: string
 }
 
-export type {
-    BetEvent,
-    PriceChangeEvent,
-    Order,
-    OrderBookEvent,
-    PolyMarket
-}
+export type { BetEvent, PriceChangeEvent, Order, OrderBookEvent, PolyMarket }
 
-export {
-    EFormType,
-    EMarketDepth,
-    ESide,
-    EBetOption,
-    EEventType
-}
+export { EFormType, EMarketDepth, ESide, EBetOption, EEventType }
