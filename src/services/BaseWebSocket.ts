@@ -6,8 +6,8 @@ type DefaultServerEvents = {
 }
 
 export interface BaseWebSocket<
-    ServerEvents extends Record<string, (...args: string[]) => void>,
-    ClientEvents extends Record<string, (...args: string[]) => void>
+    ServerEvents extends Record<string, (...args: any[]) => void>,
+    ClientEvents extends Record<string, (...args: any[]) => void>
 > {
     connect(): void;
 
@@ -21,8 +21,8 @@ export interface BaseWebSocket<
 }
 
 export class BaseWebSocketImpl<
-    ServerEvents extends Record<string, (...args: unknown[]) => void> = DefaultServerEvents,
-    ClientEvents extends Record<string, (...args: unknown[]) => void> = Record<string, never>
+    ServerEvents extends Record<string, (...args: any[]) => void> = DefaultServerEvents,
+    ClientEvents extends Record<string, (...args: any[]) => void> = Record<string, any>
 > implements BaseWebSocket<ServerEvents, ClientEvents> {
     protected socket: Socket<ServerEvents, ClientEvents> | null = null;
     private readonly endpoint: string;

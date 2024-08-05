@@ -1,4 +1,4 @@
-import {BetEvent} from "@/contexts/EventContext.tsx";
+import {BetEvent} from "@/types";
 
 const events: BetEvent[] = [
     {
