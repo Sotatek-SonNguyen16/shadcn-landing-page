@@ -5,11 +5,17 @@ import React, {
     useEffect,
     useState
 } from 'react'
-import placholder from '@/lib/placeholder-data.ts'
-import { BetEvent, EBetOption, EFormType, EMarketDepth, ESide } from '@/types'
+import {
+    EBetOption,
+    EFormType,
+    EMarketDepth,
+    ESide,
+    Market,
+    PolyMarket
+} from '@/types'
+import RequestFactory from '@/services/RequestFactory.ts'
 
 interface EventContextType {
-    events: BetEvent[]
     formStatus: ESide
     changeForm: (status: ESide) => void
     formType: EFormType
@@ -18,11 +24,10 @@ interface EventContextType {
     changeMarketDepth: (type: EMarketDepth) => void
     betOption: EBetOption
     changeBetOption: (option: EBetOption) => void
-    selectedEvent: BetEvent | null
-    setSelectedEvent: (event: BetEvent) => void
-    addEvent: (event: BetEvent) => void
-    removeEvent: (id: number) => void
-    updateEvent: (updatedEvent: BetEvent) => void
+    selectedEvent: Market | null
+    setSelectedEvent: (event: Market) => void
+    market: PolyMarket | null
+    loading: boolean
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -35,9 +40,15 @@ const useEventContext = () => {
     return context
 }
 
-const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [events, setEvents] = useState<BetEvent[]>([])
-    const [selectedEvent, setSelectedEvent] = useState<BetEvent | null>(null)
+const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
+    children,
+    id
+}) => {
+    const request = RequestFactory.getRequest('MarketRequest')
+    const [market, setMarket] = useState<PolyMarket | null>(null)
+    const [loading, setLoading] = useState<boolean>(true)
+
+    const [selectedEvent, setSelectedEvent] = useState<Market | null>(null)
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
     const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(
@@ -61,31 +72,28 @@ const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         setBetOption(option)
     }
 
-    const addEvent = (event: BetEvent) => {
-        setEvents((prevEvents) => [...prevEvents, event])
-    }
-
-    const removeEvent = (id: number) => {
-        setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id))
-    }
-
-    const updateEvent = (updatedEvent: BetEvent) => {
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === updatedEvent.id ? updatedEvent : event
-            )
-        )
+    const fetchMarket = async () => {
+        setLoading(true)
+        try {
+            const response = await request.getTopEvents()
+            if (response) {
+                setMarket(response[0])
+                setSelectedEvent(response[0].markets[0])
+            }
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
-        setEvents(placholder.events)
-        setSelectedEvent(placholder.events[0] || null)
-    }, [])
+        fetchMarket()
+    }, [id])
 
     return (
         <EventContext.Provider
             value={{
-                events,
                 formStatus,
                 changeForm,
                 formType,
@@ -94,11 +102,10 @@ const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
                 changeBetOption,
                 selectedEvent,
                 setSelectedEvent,
-                addEvent,
-                removeEvent,
-                updateEvent,
                 marketDepth,
-                changeMarketDepth
+                changeMarketDepth,
+                market,
+                loading
             }}
         >
             {children}

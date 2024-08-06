@@ -1,4 +1,4 @@
-import React, { Fragment, Suspense } from 'react'
+import React, { Fragment } from 'react'
 import { clsx } from 'clsx'
 import { useMarketsContext } from '@/contexts/MarketsContext.tsx'
 import MarketCardGridItem from '@/views/market/MarketCardGridItem.tsx'
@@ -11,20 +11,38 @@ interface MarketListLayoutProps {
 const MarketListLayout: React.FC<MarketListLayoutProps> = ({ layout }) => {
     const { polyMarkets } = useMarketsContext()
 
+    if (!polyMarkets) {
+        return <MarketCardGridItemSkeleton />
+    }
+
     if (layout === 'grid')
         return (
-            <Suspense fallback={<MarketCardGridItemSkeleton />}>
-                <div className={clsx('grid grid-cols-4 gap-4')}>
-                    {polyMarkets?.map((polyMarket, index) => (
-                        <Fragment key={`market-${index}`}>
-                            <MarketCardGridItem data={polyMarket} />
-                        </Fragment>
-                    ))}
-                </div>
-            </Suspense>
+            <div
+                className={clsx(
+                    'grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4'
+                )}
+            >
+                {polyMarkets[0].markets.map((market, index) => (
+                    <Fragment key={`market-${index}`}>
+                        <MarketCardGridItem data={market} />
+                    </Fragment>
+                ))}
+            </div>
         )
 
-    return <div></div>
+    return (
+        <div
+            className={clsx(
+                'grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4'
+            )}
+        >
+            {polyMarkets[0].markets.map((market, index) => (
+                <Fragment key={`market-${index}`}>
+                    <MarketCardGridItem data={market} />
+                </Fragment>
+            ))}
+        </div>
+    )
 }
 
 export default MarketListLayout

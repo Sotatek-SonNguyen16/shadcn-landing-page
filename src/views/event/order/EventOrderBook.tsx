@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
@@ -6,25 +6,32 @@ import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption } from '@/types'
 
 const EventOrderBook: React.FC = () => {
-    const { betOption } = useEventContext()
+    const { betOption, selectedEvent, market } = useEventContext()
     const { orderBookEvent, subscribe } = useEventWebSocket()
 
-    useEffect(() => {
-        console.log('subscribe for event order')
-        subscribe([
-            // "21742633143463906290569050155826241533067272736897614950488156847949938836455",
-            '48331043336612883890938759509493159234755048973500640148014422747788308965732'
-        ])
-    }, [])
+    const subscribeToMarket = useCallback(() => {
+        if (selectedEvent?.clobTokenIds) {
+            subscribe([
+                betOption === EBetOption.YES
+                    ? selectedEvent.clobTokenIds[0]
+                    : selectedEvent.clobTokenIds[1]
+            ])
+        }
+    }, [betOption, selectedEvent?.clobTokenIds])
 
     useEffect(() => {
-        console.log(orderBookEvent)
-    }, [orderBookEvent])
+        subscribeToMarket()
+    }, [subscribeToMarket])
 
     const formatterEuro = new Intl.NumberFormat('default', {
         style: 'currency',
-        currency: 'EUR'
+        currency: 'EUR',
+        maximumFractionDigits: 5
     })
+
+    const lastPrice = orderBookEvent?.asks.length
+        ? +orderBookEvent.asks[orderBookEvent.asks.length - 1].price
+        : 0
 
     return (
         <div className='w-full'>
@@ -56,27 +63,10 @@ const EventOrderBook: React.FC = () => {
                             'font-semibold text-gray-500'
                         )}
                     >
-                        Last:{' '}
-                        {formatterEuro.format(
-                            orderBookEvent
-                                ? +orderBookEvent.asks[
-                                      orderBookEvent.asks.length - 1
-                                  ].price
-                                : 0
-                        )}
+                        Last: {formatterEuro.format(lastPrice)}
                     </div>
                     <div className='text-center font-semibold text-gray-500'>
-                        Spread:{' '}
-                        {formatterEuro.format(
-                            orderBookEvent
-                                ? +orderBookEvent.asks[
-                                      orderBookEvent.asks.length - 1
-                                  ].price -
-                                      +orderBookEvent.bids[
-                                          orderBookEvent.bids.length - 1
-                                      ].price
-                                : 0
-                        )}
+                        Spread: {formatterEuro.format(market?.spread || 0)}
                     </div>
                     <div className='text-center font-semibold text-gray-600'></div>
                     <div className='text-center font-semibold text-gray-600'></div>

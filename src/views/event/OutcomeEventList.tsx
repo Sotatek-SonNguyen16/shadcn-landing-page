@@ -1,9 +1,16 @@
 import React, { Fragment } from 'react'
 import EventListItem from '@/views/event/EventListItem.tsx'
 import * as Accordion from '@radix-ui/react-accordion'
-import { BetEvent } from '@/types'
+import { Market } from '@/types'
+import EventPageSkeleton from '@/components/skeleton/EventPageSkeleton.tsx'
 
-const OutcomeEventList: React.FC<{ events: BetEvent[] }> = ({ events }) => {
+const OutcomeEventList: React.FC<{ events: Market[] | undefined }> = ({
+    events
+}) => {
+    if (!events) {
+        return <EventPageSkeleton />
+    }
+
     return (
         <Accordion.Root
             className='bg-mauve6 rounded-md shadow-[0_2px_10px] shadow-black/5'

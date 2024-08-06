@@ -2,12 +2,15 @@ import React from 'react'
 import EventPageLayout from '@/views/event/EventPageLayout.tsx'
 import EventProvider from '@/contexts/EventContext.tsx'
 import { EventWebSocketProvider } from '@/contexts/WebSocketContext.tsx'
+import { useParams } from 'react-router-dom'
 
 const EventPage: React.FC = () => {
+    const { id } = useParams()
+
     return (
-        <div className={`container mx-auto px-20`}>
+        <div className={`container lg:px-20`}>
             <EventWebSocketProvider>
-                <EventProvider>
+                <EventProvider id={id || ''}>
                     <EventPageLayout />
                 </EventProvider>
             </EventWebSocketProvider>

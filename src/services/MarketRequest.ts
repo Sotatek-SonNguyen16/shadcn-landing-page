@@ -1,5 +1,5 @@
 import BaseRequest from '@/services/BaseRequest.ts'
-import { PolyMarket } from '@/types'
+import { MarketDetail, PolyMarket } from '@/types'
 
 export default class MarketRequest extends BaseRequest {
     async getTopEvents() {
@@ -9,6 +9,6 @@ export default class MarketRequest extends BaseRequest {
 
     async getMarketById(id: string | number) {
         const url = `/polymarket/markets/${id}`
-        return await this.get(url)
+        return await this.get<MarketDetail>(url)
     }
 }

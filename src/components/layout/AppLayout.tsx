@@ -7,13 +7,13 @@ const AppLayout: React.FC = () => {
     return (
         <>
             <Header />
-            <Suspense fallback={<PageSkeleton />}>
-                <div className='flex-grow flex flex-col'>
-                    <div className='container px-4 md:px-8 flex-grow flex flex-col'>
+            <div className='flex-grow flex flex-col'>
+                <div className='container px-4 md:px-8 flex-grow flex flex-col'>
+                    <Suspense fallback={<PageSkeleton />}>
                         <Outlet />
-                    </div>
+                    </Suspense>
                 </div>
-            </Suspense>
+            </div>
         </>
     )
 }

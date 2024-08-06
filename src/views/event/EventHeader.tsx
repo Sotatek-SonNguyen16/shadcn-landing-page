@@ -8,6 +8,9 @@ import {
     StarFilledIcon,
     StarIcon
 } from '@radix-ui/react-icons'
+import { useEventContext } from '@/contexts/EventContext.tsx'
+import { formatDate } from '@/lib/utils.ts'
+import EventHeaderSkeleton from '@/components/skeleton/EventHeaderSkeleton.tsx'
 
 type IconVariant = 'cup' | 'star' | 'starFilled' | 'linkNone' | 'link'
 
@@ -24,8 +27,13 @@ const icons: IconState = {
 }
 
 const EventHeader: React.FC = () => {
-    const src =
-        'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fpresidential-election-winner-2024-afdda358-219d-448a-abb5-ba4d14118d71.png&w=96&q=100'
+    const { market } = useEventContext()
+    const formatterUSD = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    })
+
+    if (!market) return <EventHeaderSkeleton />
 
     return (
         <div
@@ -33,7 +41,7 @@ const EventHeader: React.FC = () => {
         >
             <AvatarPrimitive.Root className='relative inline-flex h-[72px] w-[72px]'>
                 <AvatarPrimitive.Image
-                    src={src}
+                    src={market?.icon}
                     alt='Avatar'
                     className={clsx(
                         'h-full w-full object-cover',
@@ -48,7 +56,7 @@ const EventHeader: React.FC = () => {
                     delayMs={600}
                 >
                     <span className='text-sm font-medium uppercase text-gray-700 dark:text-gray-400'>
-                        Kamala Harris
+                        {market?.slug}
                     </span>
                 </AvatarPrimitive.Fallback>
             </AvatarPrimitive.Root>
@@ -56,8 +64,14 @@ const EventHeader: React.FC = () => {
                 <div className={`flex`}>
                     <div className={`flex-1 flex items-center gap-4`}>
                         <div>{icons['cup']}</div>
-                        <div className='text-gray-400'>$467,000,750 Bet</div>
-                        <div className='text-gray-400'>Nov 4, 2024</div>
+                        <div className='text-gray-400'>
+                            {formatterUSD.format(+(market?.volume || 0))} Bet
+                        </div>
+                        <div className='text-gray-400'>
+                            {formatDate(
+                                market?.endDate || '2024-01-01T00:00:00'
+                            )}
+                        </div>
                     </div>
                     <div className={'flex gap-2 items-center'}>
                         {icons['star']}
@@ -66,7 +80,7 @@ const EventHeader: React.FC = () => {
                 </div>
                 <div className={`flex items-center`}>
                     <div className={`flex-1 text-2xl font-bold`}>
-                        Presidential Election Winner 2024
+                        {market?.title}
                     </div>
                     <div>Logo</div>
                 </div>

@@ -22,9 +22,7 @@ const tabs: Tab<ESide>[] = [
 ]
 
 const PredictionCard: React.FC = () => {
-    const src =
-        'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fwill-kamala-harris-win-the-2024-us-presidential-election-21483ac3-94a5-4efd-b89e-05cdca69753f.png&w=96&q=100'
-    const { changeForm, changeType, formType } = useEventContext()
+    const { market, changeForm, changeType, formType } = useEventContext()
     const formTypeList: EFormType[] = Object.values(EFormType)
 
     return (
@@ -34,8 +32,8 @@ const PredictionCard: React.FC = () => {
             <div className={`flex gap-2 items-center py-4 px-6`}>
                 <AvatarPrimitive.Root className='relative inline-flex h-10 w-10'>
                     <AvatarPrimitive.Image
-                        src={src}
-                        alt='Avatar'
+                        src={market?.icon}
+                        alt={market?.slug}
                         className={clsx(
                             'h-full w-full object-cover',
                             'rounded-full'
@@ -49,7 +47,7 @@ const PredictionCard: React.FC = () => {
                         delayMs={600}
                     >
                         <span className='text-sm font-bold uppercase text-gray-700 dark:text-gray-400'>
-                            Kamala Harris
+                            {market?.slug}
                         </span>
                     </AvatarPrimitive.Fallback>
                 </AvatarPrimitive.Root>
@@ -57,7 +55,7 @@ const PredictionCard: React.FC = () => {
                 <div
                     className={`font-semibold text-gray-700 dark:text-gray-400`}
                 >
-                    Kamala Harris
+                    {market?.title}
                 </div>
             </div>
             <div className={`w-full relative`}>

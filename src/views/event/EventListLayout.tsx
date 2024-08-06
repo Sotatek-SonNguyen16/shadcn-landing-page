@@ -7,8 +7,19 @@ import { useEventContext } from '@/contexts/EventContext.tsx'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 
+const MarketDescription: React.FC<{ content: string }> = ({ content }) => {
+    const lines = content.split('\n').map((_line, index) => (
+        <React.Fragment key={index}>
+            {_line}
+            <br />
+        </React.Fragment>
+    ))
+
+    return <div>{lines}</div>
+}
+
 const EventListLayout: React.FC = () => {
-    const { events } = useEventContext()
+    const { market } = useEventContext()
     const [viewMore, setViewMore] = useState<boolean>(false)
 
     const onClickViewMore = () => {
@@ -18,9 +29,9 @@ const EventListLayout: React.FC = () => {
     return (
         <div className={`flex flex-col gap-3`}>
             <div
-                className={`grid grid-cols-3 border-b-[1px] border-grey-200 p-1`}
+                className={`grid grid-cols-7 border-b-[1px] border-grey-200 p-1`}
             >
-                <div>Outcome</div>
+                <div className='col-span-3'>Outcome</div>
                 <div className={`flex justify-center items-center gap-2`}>
                     % Chance
                     <Tooltip
@@ -33,7 +44,7 @@ const EventListLayout: React.FC = () => {
                     />
                 </div>
             </div>
-            <OutcomeEventList events={events} />
+            <OutcomeEventList events={market?.markets.slice(0, 5)} />
             <div className={`flex`}>
                 <Button
                     variant={`secondary`}
@@ -49,7 +60,13 @@ const EventListLayout: React.FC = () => {
                     )}
                 </Button>
             </div>
-            {viewMore && <OutcomeEventList events={events} />}
+            {viewMore && <OutcomeEventList events={market?.markets.slice(5)} />}
+            <div>
+                <div className='text-xl font-semibold border-b-[1px] border-gray-100'>
+                    Rules
+                </div>
+                <MarketDescription content={market?.description || ''} />
+            </div>
         </div>
     )
 }

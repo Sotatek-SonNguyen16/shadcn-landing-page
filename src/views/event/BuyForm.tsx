@@ -10,6 +10,15 @@ const BuyForm: React.FC = () => {
     const { formType, betOption, selectedEvent, changeBetOption } =
         useEventContext()
 
+    const arrayOutcomes = JSON.parse(selectedEvent?.outcomes || '[]')
+    const arrayOutcomePrices = JSON.parse(selectedEvent?.outcomePrices || '[]')
+
+    const formatterEuro = new Intl.NumberFormat('default', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 5
+    })
+
     const formFields = {
         [EFormType.MARKET]: (
             <>
@@ -223,7 +232,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    Yes {selectedEvent?.outcome.yes}c
+                    {`${arrayOutcomes[0]} ${formatterEuro.format(0.005)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -234,7 +243,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    No {selectedEvent?.outcome.no}c
+                    {`${arrayOutcomes[1]} ${formatterEuro.format(+arrayOutcomePrices[1])}`}
                 </Button>
             </div>
             {_renderFormField()}
