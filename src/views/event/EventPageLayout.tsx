@@ -28,7 +28,7 @@ const EventPageLayout: React.FC = () => {
     const { isConnected } = useEventWebSocket()
 
     return (
-        <div className={`h-screen w-full flex pt-5`}>
+        <div className={`h-screen w-full lg:flex pt-5`}>
             <div className={clsx(`w-full`, 'lg:w-[70%] lg:pt-3')}>
                 <CheckWebSocketConnection isConnected={isConnected} />
                 <EventHeader />

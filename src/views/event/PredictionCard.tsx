@@ -7,6 +7,7 @@ import SellForm from '@/views/event/SellForm.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import HoverCardSelect from '@/components/HoverCardSelect.tsx'
 import { EFormType, ESide } from '@/types'
+import PredictionCardSkeleton from '@/components/skeleton/PredictionCardSkeleton.tsx'
 
 const tabs: Tab<ESide>[] = [
     {
@@ -24,6 +25,10 @@ const tabs: Tab<ESide>[] = [
 const PredictionCard: React.FC = () => {
     const { market, changeForm, changeType, formType } = useEventContext()
     const formTypeList: EFormType[] = Object.values(EFormType)
+
+    if (!market) {
+        return <PredictionCardSkeleton />
+    }
 
     return (
         <div

@@ -85,7 +85,9 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                         </div>
                     </div>
                 </div>
-                <div className='font-bold text-center'>{`%`}</div>
+                <div className='font-bold text-center'>
+                    {Math.floor(arrayOutcomePrices[0])} %
+                </div>
                 <div className='grid grid-cols-2 gap-2 items-center col-span-3'>
                     <Button
                         variant={
@@ -119,14 +121,14 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         groupItemTitle,
         formatterUSD,
         volume,
+        arrayOutcomePrices,
         selectedEvent?.id,
-        data.id,
+        id,
         betOption,
         formStatus,
         arrayOutcomes,
         formatterEuro,
-        arrayOutcomePrices,
-        changeBetOption
+        handleBetOptionChange
     ])
 
     return (
