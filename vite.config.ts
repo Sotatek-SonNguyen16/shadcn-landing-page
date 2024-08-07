@@ -7,7 +7,7 @@ const basenameProd = '/polymarket-research-ui'
 export default defineConfig(({ command }) => {
     return {
         plugins: [react()],
-        base: './',
+        base: '/',
         build: {
             outDir: 'dist',
             assetsDir: 'assets'
@@ -23,6 +23,6 @@ export default defineConfig(({ command }) => {
             proxy: {
                 // Add proxy configuration if needed
             }
-        },
+        }
     }
 })
