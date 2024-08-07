@@ -40,6 +40,10 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         return data.event_type === EEventType.BOOK
     }
 
+    const handleSubscribe = (assetsIds: string[]) => {
+        connector.send('subscribe', { assetsIds })
+    }
+
     useEffect(() => {
         connector.connect()
 
@@ -72,8 +76,7 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         <EventWebSocketContext.Provider
             value={{
                 isConnected,
-                subscribe: (assetsIds: string[]) =>
-                    connector.send('subscribe', { assetsIds }),
+                subscribe: handleSubscribe,
                 orderBookEvent,
                 priceChangeEvent
             }}

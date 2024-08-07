@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
@@ -25,22 +25,30 @@ const EventOrderBook: React.FC = () => {
         subscribeToMarket()
     }, [subscribeToMarket])
 
-    const formatterEuro = new Intl.NumberFormat('default', {
-        style: 'currency',
-        currency: 'EUR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    })
+    const formatterEuro = useMemo(
+        () =>
+            new Intl.NumberFormat('default', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }),
+        []
+    )
 
     const lastPrice = orderBookEvent?.asks.length
         ? +orderBookEvent.asks[orderBookEvent.asks.length - 1].price
         : 0
 
-    const lastBid = orderBookEvent?.bids.length
-        ? +orderBookEvent.bids[orderBookEvent.bids.length - 1].price
-        : 0
+    const lastBid = useMemo(
+        () =>
+            orderBookEvent?.bids.length
+                ? +orderBookEvent.bids[orderBookEvent.bids.length - 1].price
+                : 0,
+        [orderBookEvent?.bids]
+    )
 
-    const spread = lastPrice - lastBid
+    const spread = useMemo(() => lastPrice - lastBid, [lastPrice, lastBid])
 
     useEffect(() => {
         if (containerRef.current && centerRef.current) {
@@ -54,7 +62,7 @@ const EventOrderBook: React.FC = () => {
             const scrollTop =
                 elementOffsetTop - containerHeight / 2 + elementHeight / 2
 
-            container.scrollTo({ top: scrollTop, behavior: 'smooth' })
+            container.scrollTo({ top: scrollTop, behavior: 'instant' })
         }
     }, [orderBookEvent])
 
