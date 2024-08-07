@@ -8,6 +8,10 @@ interface EventTradeBarProps {
     data: Order[] | undefined
 }
 
+interface OrderWithTotal extends Order {
+    total: number
+}
+
 const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
     const { variant, data } = props
     const formatterEuro = new Intl.NumberFormat('default', {
@@ -27,6 +31,21 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
             const price = Number(order.price)
             return price > max ? price : max
         }, -Infinity)
+    }
+
+    const calculateTotals = (orders: Order[]): OrderWithTotal[] => {
+        let previousTotal = 0
+
+        return orders.map((order) => {
+            const currentTotal =
+                Number(order.price) * Number(order.size) + previousTotal
+            previousTotal = currentTotal
+
+            return {
+                ...order,
+                total: currentTotal
+            }
+        })
     }
 
     const maxPrice = findMaxPrice(data || [])
@@ -85,13 +104,15 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                                         }
                                     )}
                                 >
-                                    {formatterEuro.format(+price * 100)}
+                                    {formatterEuro.format(Number(price) * 100)}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
-                                    {formatterUSD.format(+size)}
+                                    {formatterUSD.format(Number(size))}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
-                                    {formatterUSD.format(+price * +size)}
+                                    {formatterUSD.format(
+                                        Number(price) * Number(size)
+                                    )}
                                 </div>
                             </div>
                         )
