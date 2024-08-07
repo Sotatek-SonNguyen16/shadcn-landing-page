@@ -1,29 +1,28 @@
-import path from "path";
-import react from "@vitejs/plugin-react";
-import {defineConfig} from "vite";
+import path from 'path'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
 
 const basenameProd = '/polymarket-research-ui'
 
-export default defineConfig(({command}) => {
-    const isProd = command === 'build'
-
+export default defineConfig(({ command }) => {
     return {
         plugins: [react()],
+        base: '/',
+        build: {
+            outDir: 'dist',
+            assetsDir: 'assets'
+        },
         resolve: {
             alias: {
-                "@": path.resolve(__dirname, "./src"),
+                '@': path.resolve(__dirname, './src')
             },
-        },
-        define: {
-            global: {
-                basename: isProd ? basenameProd : '',
-            },
+            extensions: ['.js', '.ts', '.jsx', '.tsx', '.json']
         },
         server: {
             port: 3000,
             proxy: {
-                // https://vitejs.dev/config/server-options.html
-            },
-        },
+                // Add proxy configuration if needed
+            }
+        }
     }
-});
+})
