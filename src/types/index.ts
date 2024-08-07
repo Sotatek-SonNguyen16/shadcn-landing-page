@@ -89,6 +89,7 @@ interface PredictionMarket {
     updatedBy: string
     createdAt: string
     updatedAt: string
+    commentCount: string
     commentsEnabled: boolean
     competitive: number
     volume24hr: number
