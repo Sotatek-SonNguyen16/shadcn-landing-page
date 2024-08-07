@@ -1,13 +1,16 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption } from '@/types'
+import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton.tsx'
 
 const EventOrderBook: React.FC = () => {
-    const { betOption, currentMarket } = useEventContext()
+    const { betOption, currentMarket, selectedMarketId } = useEventContext()
     const { orderBookEvent, subscribe } = useEventWebSocket()
+    const containerRef = useRef<HTMLDivElement>(null)
+    const centerRef = useRef<HTMLDivElement>(null)
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
@@ -23,22 +26,49 @@ const EventOrderBook: React.FC = () => {
         subscribeToMarket()
     }, [subscribeToMarket])
 
-    const formatterEuro = new Intl.NumberFormat('default', {
-        style: 'currency',
-        currency: 'EUR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    })
+    const formatterEuro = useMemo(
+        () =>
+            new Intl.NumberFormat('default', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }),
+        []
+    )
 
     const lastPrice = orderBookEvent?.asks.length
         ? +orderBookEvent.asks[orderBookEvent.asks.length - 1].price
         : 0
 
-    const lastBid = orderBookEvent?.bids.length
-        ? +orderBookEvent.bids[orderBookEvent.bids.length - 1].price
-        : 0
+    const lastBid = useMemo(
+        () =>
+            orderBookEvent?.bids.length
+                ? +orderBookEvent.bids[orderBookEvent.bids.length - 1].price
+                : 0,
+        [orderBookEvent?.bids]
+    )
 
-    const spread = lastPrice - lastBid
+    const spread = useMemo(() => lastPrice - lastBid, [lastPrice, lastBid])
+
+    useEffect(() => {
+        if (containerRef.current && centerRef.current) {
+            const container = containerRef.current
+            const centerElement = centerRef.current
+
+            const containerHeight = container.clientHeight
+            const elementHeight = centerElement.clientHeight
+
+            const elementOffsetTop = centerElement.offsetTop
+            const scrollTop =
+                elementOffsetTop - containerHeight / 2 + elementHeight / 2
+
+            container.scrollTo({ top: scrollTop, behavior: 'instant' })
+        }
+    }, [orderBookEvent])
+
+    if (currentMarket?.id !== selectedMarketId)
+        return <EventOrderBookSkeleton />
 
     return (
         <div className='w-full'>
@@ -55,9 +85,13 @@ const EventOrderBook: React.FC = () => {
                 <div className='text-center'>Shares</div>
                 <div className='text-center'>Total</div>
             </div>
-            <div className={`max-h-[300px] overflow-y-scroll scrollbar-hidden`}>
+            <div
+                ref={containerRef}
+                className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
+            >
                 <EventTradeBar variant='accent' data={orderBookEvent?.asks} />
                 <div
+                    ref={centerRef}
                     className={clsx(
                         'grid grid-cols-5',
                         'border-t-[1px] border-b-[1px] border-gray-200 py-2',

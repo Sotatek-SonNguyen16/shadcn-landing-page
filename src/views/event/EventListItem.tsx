@@ -37,7 +37,8 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         betOption,
         currentMarket,
         handleSelectMarket,
-        formStatus
+        formStatus,
+        selectedMarketId
     } = useEventContext()
     const { id, outcomePrices, outcomes, groupItemTitle, volume, icon } = data
 
@@ -70,9 +71,13 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         [changeBetOption]
     )
 
-    const _renderEventTrigger = useCallback(() => {
-        const chance = Math.floor(+outcomePrices[0] * 100)
-        return (
+    const chance = useMemo(
+        () => Math.round(+outcomePrices[0] * 100),
+        [outcomePrices]
+    )
+
+    const _renderEventTrigger = useCallback(
+        () => (
             <div className='w-full grid grid-cols-7 cursor-pointer p-3 border-b border-gray-100 hover:bg-gray-100'>
                 <div className='w-full flex items-center gap-2 col-span-3'>
                     <Avatar className='relative inline-flex h-10 w-10'>
@@ -102,7 +107,7 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                 <div className='grid grid-cols-2 gap-2 items-center col-span-3'>
                     <Button
                         variant={
-                            currentMarket?.id === id &&
+                            selectedMarketId === id &&
                             betOption === EBetOption.YES
                                 ? 'successSolid'
                                 : 'successGhost'
@@ -111,12 +116,12 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                         onClick={() => handleBetOptionChange(EBetOption.YES)}
                     >
                         <p className='text-wrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
                         </p>
                     </Button>
                     <Button
                         variant={
-                            currentMarket?.id === id &&
+                            selectedMarketId === id &&
                             betOption === EBetOption.NO
                                 ? 'accentSolid'
                                 : 'accentGhost'
@@ -125,26 +130,28 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                         onClick={() => handleBetOptionChange(EBetOption.NO)}
                     >
                         <p className='text-wrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
                         </p>
                     </Button>
                 </div>
             </div>
-        )
-    }, [
-        outcomePrices,
-        icon,
-        groupItemTitle,
-        formatterUSD,
-        volume,
-        currentMarket?.id,
-        id,
-        betOption,
-        formStatus,
-        outcomes,
-        formatterEuro,
-        handleBetOptionChange
-    ])
+        ),
+        [
+            icon,
+            groupItemTitle,
+            formatterUSD,
+            volume,
+            chance,
+            currentMarket?.id,
+            id,
+            betOption,
+            formStatus,
+            outcomes,
+            formatterEuro,
+            outcomePrices,
+            handleBetOptionChange
+        ]
+    )
 
     return (
         <Accordion.Item

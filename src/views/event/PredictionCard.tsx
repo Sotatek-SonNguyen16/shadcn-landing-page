@@ -33,7 +33,7 @@ const PredictionCard: React.FC = () => {
 
     return (
         <div
-            className={`w-[338px] h-fit bg-card rounded-xl border-[1px] border-gray-200 shadow-lg`}
+            className={`w-[338px] h-fit bg-card rounded-xl border-[1px] border-gray-200 shadow-lg transition-opacity duration-300 animate-fadeIn`}
         >
             <div className={`flex gap-3 items-center py-4 px-6`}>
                 <AvatarPrimitive.Root className='relative h-10 w-10'>
@@ -50,11 +50,7 @@ const PredictionCard: React.FC = () => {
                             'rounded-full'
                         )}
                         delayMs={600}
-                    >
-                        <span className='text-sm font-bold uppercase text-gray-700 dark:text-gray-400'>
-                            {currentMarket?.slug}
-                        </span>
-                    </AvatarPrimitive.Fallback>
+                    ></AvatarPrimitive.Fallback>
                 </AvatarPrimitive.Root>
 
                 <div

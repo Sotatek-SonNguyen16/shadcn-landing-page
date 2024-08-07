@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
 import { Order } from '@/types'
@@ -6,6 +6,10 @@ import { Order } from '@/types'
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
     data: Order[] | undefined
+}
+
+interface OrderWithTotal extends Order {
+    total: number
 }
 
 const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
@@ -22,14 +26,41 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
         currency: 'USD'
     })
 
-    const findMaxPrice = (orders: Order[]): number => {
+    const findMaxTotal = (orders: OrderWithTotal[]): number => {
         return orders.reduce((max, order) => {
-            const price = Number(order.price)
-            return price > max ? price : max
+            const total = order.total
+            return total > max ? total : max
         }, -Infinity)
     }
 
-    const maxPrice = findMaxPrice(data || [])
+    const calculateTotals = (orders: Order[]): OrderWithTotal[] => {
+        let previousTotal = 0
+        const result: OrderWithTotal[] = []
+
+        for (let i = orders.length - 1; i >= 0; i--) {
+            const order = orders[i]
+            const currentTotal =
+                Number(order.price) * Number(order.size) + previousTotal
+            previousTotal = currentTotal
+            result[i] = {
+                ...order,
+                total: currentTotal
+            }
+        }
+
+        return result
+    }
+
+    const calculatedOrders = useMemo(() => {
+        if (data) return calculateTotals(data)
+
+        return []
+    }, [data])
+
+    const maxTotal = useMemo(
+        () => findMaxTotal(calculatedOrders),
+        [calculatedOrders]
+    )
 
     return (
         <div
@@ -38,12 +69,12 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                 'flex-col-reverse': variant === 'success'
             })}
         >
-            {data &&
-                data
-                    .filter((_, index) => index >= data.length - 10)
-                    .map(({ size, price }, index) => {
+            {calculatedOrders &&
+                calculatedOrders
+                    // .filter((_, index) => index >= calculatedOrders.length - 10)
+                    .map(({ size, price, total }, index) => {
                         const width = Math.floor(
-                            (Number(price) / maxPrice) * 100
+                            (Number(total) / maxTotal) * 100
                         )
                         return (
                             <div
@@ -66,7 +97,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                                         }
                                     )}
                                 >
-                                    {index === data.length - 1 && (
+                                    {index === calculatedOrders.length - 1 && (
                                         <Badge variant={`${variant}Solid`}>
                                             {variant === 'accent'
                                                 ? 'Asks'
@@ -85,13 +116,13 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                                         }
                                     )}
                                 >
-                                    {formatterEuro.format(+price * 100)}
+                                    {formatterEuro.format(Number(price) * 100)}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
-                                    {formatterUSD.format(+size)}
+                                    {formatterUSD.format(Number(size))}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
-                                    {formatterUSD.format(+price * +size)}
+                                    {formatterUSD.format(total)}
                                 </div>
                             </div>
                         )

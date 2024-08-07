@@ -56,7 +56,7 @@ const EventHeader: React.FC = () => {
                     delayMs={600}
                 >
                     <span className='text-sm font-medium uppercase text-gray-700 dark:text-gray-400'>
-                        {market?.slug}
+                        Icon
                     </span>
                 </AvatarPrimitive.Fallback>
             </AvatarPrimitive.Root>

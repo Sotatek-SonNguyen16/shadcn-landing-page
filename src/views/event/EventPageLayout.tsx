@@ -29,7 +29,12 @@ const EventPageLayout: React.FC = () => {
 
     return (
         <div className={`h-screen w-full lg:flex pt-5`}>
-            <div className={clsx(`w-full`, 'lg:w-[70%] lg:pt-3')}>
+            <div
+                className={clsx(
+                    `w-full transition-opacity duration-300 animate-fadeIn`,
+                    'lg:w-[70%] lg:pt-3'
+                )}
+            >
                 <CheckWebSocketConnection isConnected={isConnected} />
                 <EventHeader />
                 <EventListLayout />

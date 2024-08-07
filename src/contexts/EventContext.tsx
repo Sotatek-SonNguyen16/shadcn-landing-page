@@ -31,6 +31,7 @@ interface EventContextType {
     loading: boolean
     handleSelectMarket: (id: string) => void
     currentMarket: MarketDetail | null
+    selectedMarketId: string
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -134,7 +135,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 market,
                 loading,
                 handleSelectMarket,
-                currentMarket
+                currentMarket,
+                selectedMarketId
             }}
         >
             {children}

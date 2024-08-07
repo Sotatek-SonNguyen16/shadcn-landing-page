@@ -255,7 +255,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
+                    {`${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -266,7 +266,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
+                    {`${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
                 </Button>
             </div>
             {_renderFormField()}

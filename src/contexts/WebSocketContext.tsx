@@ -15,6 +15,7 @@ interface EventWebSocketContextProps {
     subscribe: (assetsIds: string[]) => void
     priceChangeEvent: PriceChangeEvent | null
     orderBookEvent: OrderBookEvent | null
+    clearOrderBookEvent: () => void
 }
 
 const EventWebSocketContext = createContext<
@@ -38,6 +39,14 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
 
     function isOrderBookEvent(data: OrderBookEvent | PriceChangeEvent) {
         return data.event_type === EEventType.BOOK
+    }
+
+    const handleSubscribe = (assetsIds: string[]) => {
+        connector.send('subscribe', { assetsIds })
+    }
+
+    const clearOrderBookEvent = () => {
+        setOrderBookEvent(null)
     }
 
     useEffect(() => {
@@ -72,10 +81,10 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         <EventWebSocketContext.Provider
             value={{
                 isConnected,
-                subscribe: (assetsIds: string[]) =>
-                    connector.send('subscribe', { assetsIds }),
+                subscribe: handleSubscribe,
                 orderBookEvent,
-                priceChangeEvent
+                priceChangeEvent,
+                clearOrderBookEvent
             }}
         >
             {children}

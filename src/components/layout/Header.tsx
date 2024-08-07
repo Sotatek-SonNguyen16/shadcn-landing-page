@@ -57,10 +57,10 @@ export const Header = () => {
                         <a
                             rel='noreferrer noopener'
                             href='/'
-                            className='ml-2 font-bold text-xl flex'
+                            className='ml-2 font-bold text-lg flex text-nowrap'
                         >
                             <LogoIcon />
-                            Polymarket
+                            Prediction Market
                         </a>
                     </NavigationMenuItem>
 
@@ -80,8 +80,8 @@ export const Header = () => {
 
                             <SheetContent side={'left'}>
                                 <SheetHeader>
-                                    <SheetTitle className='font-bold text-xl'>
-                                        Polymarket
+                                    <SheetTitle className='font-bold text-lg'>
+                                        Prediction Market
                                     </SheetTitle>
                                 </SheetHeader>
                                 <nav className='flex flex-col justify-center items-center gap-2 mt-4'>

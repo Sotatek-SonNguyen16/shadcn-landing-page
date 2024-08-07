@@ -19,6 +19,7 @@ const MarketListLayout: React.FC<MarketListLayoutProps> = ({ layout }) => {
         return (
             <div
                 className={clsx(
+                    'transition-opacity duration-300 animate-fadeIn',
                     'grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4'
                 )}
             >
@@ -33,6 +34,7 @@ const MarketListLayout: React.FC<MarketListLayoutProps> = ({ layout }) => {
     return (
         <div
             className={clsx(
+                'transition-opacity duration-300 animate-fadeIn',
                 'grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4'
             )}
         >
