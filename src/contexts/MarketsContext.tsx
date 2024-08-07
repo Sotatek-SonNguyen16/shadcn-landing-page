@@ -6,10 +6,10 @@ import React, {
     useState
 } from 'react'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { PolyMarket } from '@/types'
+import { PredictionMarket } from '@/types'
 
 interface MarketContextReturnValue {
-    polyMarkets: PolyMarket[] | null
+    polyMarkets: PredictionMarket[] | null
     totalItems: number
     totalPages: number
 }
@@ -37,7 +37,9 @@ const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [totalPages, setTotalPages] = useState<number>(
         Number.MAX_SAFE_INTEGER
     )
-    const [polyMarkets, setPolyMarkets] = useState<PolyMarket[] | null>(null)
+    const [polyMarkets, setPolyMarkets] = useState<PredictionMarket[] | null>(
+        null
+    )
 
     const fetchMarkets = async (params: { page: number; limit: number }) => {
         try {

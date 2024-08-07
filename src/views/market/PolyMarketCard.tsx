@@ -8,9 +8,9 @@ import {
     CardHeader,
     CardTitle
 } from '@/components/ui/card.tsx'
-import { PolyMarket } from '@/types'
+import { PredictionMarket } from '@/types'
 
-const PolyMarketCard: React.FC<{ poly: PolyMarket }> = ({ poly }) => {
+const PolyMarketCard: React.FC<{ poly: PredictionMarket }> = ({ poly }) => {
     return (
         <Card className={clsx('w-full shadow-sm', 'hover:shadow-lg')}>
             <CardHeader>

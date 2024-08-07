@@ -62,7 +62,7 @@ type OrderBookEvent = {
     bids: Order[]
 }
 
-interface PolyMarket {
+interface PredictionMarket {
     id: string
     ticker: string
     slug: string
@@ -112,6 +112,8 @@ interface Market {
     groupItemTitle: string
     groupItemThreshold: string
     clobTokenIds: string[]
+    icon: string
+    volume: string
 }
 
 interface MarketDetail {
@@ -248,7 +250,7 @@ export type {
     PriceChangeEvent,
     Order,
     OrderBookEvent,
-    PolyMarket,
+    PredictionMarket,
     MarketDetail,
     Market,
     PolyMarketDetail
