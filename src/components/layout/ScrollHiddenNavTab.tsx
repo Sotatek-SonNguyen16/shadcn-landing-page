@@ -23,6 +23,7 @@ const ScrollHiddenNavTab: React.FC = () => {
     return (
         <div
             className={clsx(
+                'block lg:hidden',
                 'fixed bottom-0 left-0 w-full transition-transform',
                 {
                     'transform translate-y-full': !isVisible,

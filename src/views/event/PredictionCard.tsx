@@ -23,10 +23,11 @@ const tabs: Tab<ESide>[] = [
 ]
 
 const PredictionCard: React.FC = () => {
-    const { market, changeForm, changeType, formType } = useEventContext()
+    const { currentMarket, changeForm, changeType, formType } =
+        useEventContext()
     const formTypeList: EFormType[] = Object.values(EFormType)
 
-    if (!market) {
+    if (!currentMarket) {
         return <PredictionCardSkeleton />
     }
 
@@ -34,14 +35,13 @@ const PredictionCard: React.FC = () => {
         <div
             className={`w-[338px] h-fit bg-card rounded-xl border-[1px] border-gray-200 shadow-lg`}
         >
-            <div className={`flex gap-2 items-center py-4 px-6`}>
-                <AvatarPrimitive.Root className='relative inline-flex h-10 w-10'>
+            <div className={`flex gap-3 items-center py-4 px-6`}>
+                <AvatarPrimitive.Root className='relative h-10 w-10'>
                     <AvatarPrimitive.Image
-                        src={market?.icon}
-                        alt={market?.slug}
+                        src={currentMarket?.image}
+                        alt={currentMarket?.slug}
                         className={clsx(
-                            'h-full w-full object-cover',
-                            'rounded-full'
+                            'h-full w-full object-cover rounded-full'
                         )}
                     />
                     <AvatarPrimitive.Fallback
@@ -52,15 +52,15 @@ const PredictionCard: React.FC = () => {
                         delayMs={600}
                     >
                         <span className='text-sm font-bold uppercase text-gray-700 dark:text-gray-400'>
-                            {market?.slug}
+                            {currentMarket?.slug}
                         </span>
                     </AvatarPrimitive.Fallback>
                 </AvatarPrimitive.Root>
 
                 <div
-                    className={`font-semibold text-gray-700 dark:text-gray-400`}
+                    className={`text-xl font-semibold text-gray-700 dark:text-gray-400 flex-1`}
                 >
-                    {market?.title}
+                    {currentMarket?.groupItemTitle}
                 </div>
             </div>
             <div className={`w-full relative`}>

@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -14,7 +12,7 @@ import {
 } from '@/components/ui/navigation-menu'
 import { Activity, Flag, Grip, Trophy } from 'lucide-react'
 
-export function NavigateMenuDemo() {
+export function MarketsNavigateMenu() {
     return (
         <NavigationMenu>
             <NavigationMenuList>

@@ -29,13 +29,21 @@ const useMarketsContext = () => {
 const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const request = RequestFactory.getRequest('MarketRequest')
 
+    const [page, setPage] = useState<number>(1)
+    const [limit, setLimit] = useState<number>(9)
+    const [totalItems, setTotalItems] = useState<number>(-1)
+    const [totalPages, setTotalPages] = useState<number>(
+        Number.MAX_SAFE_INTEGER
+    )
     const [polyMarkets, setPolyMarkets] = useState<PolyMarket[] | null>(null)
 
-    const fetchMarkets = async () => {
+    const fetchMarkets = async (params: { page: number; limit: number }) => {
         try {
-            const response = await request.getTopEvents()
+            const response = await request.getTopEvents(params)
             if (response) {
-                setPolyMarkets(response)
+                setTotalItems(response.totalDocs)
+                setTotalPages(response.totalPages)
+                setPolyMarkets(response.docs)
             }
         } catch (err) {
             console.error(err)
@@ -43,8 +51,13 @@ const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
 
     useEffect(() => {
-        fetchMarkets()
-    }, [])
+        const params = {
+            page: page,
+            limit: limit
+        }
+
+        fetchMarkets(params)
+    }, [page, limit])
 
     return (
         <MarketContext.Provider

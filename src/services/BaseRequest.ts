@@ -7,11 +7,11 @@ import {
 import Storage from '@/lib/storage'
 
 interface RequestParams {
-    [key: string]: never
+    [key: string]: number | string
 }
 
 interface RequestData {
-    [key: string]: never
+    [key: string]: number | string
 }
 
 interface ErrorResponse {

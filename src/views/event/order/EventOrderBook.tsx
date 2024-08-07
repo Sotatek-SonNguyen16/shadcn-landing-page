@@ -6,18 +6,18 @@ import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption } from '@/types'
 
 const EventOrderBook: React.FC = () => {
-    const { betOption, selectedEvent, market } = useEventContext()
+    const { betOption, currentMarket } = useEventContext()
     const { orderBookEvent, subscribe } = useEventWebSocket()
 
     const subscribeToMarket = useCallback(() => {
-        if (selectedEvent?.clobTokenIds) {
+        if (currentMarket?.clobTokenIds) {
             subscribe([
                 betOption === EBetOption.YES
-                    ? selectedEvent.clobTokenIds[0]
-                    : selectedEvent.clobTokenIds[1]
+                    ? currentMarket.clobTokenIds[0]
+                    : currentMarket.clobTokenIds[1]
             ])
         }
-    }, [betOption, selectedEvent?.clobTokenIds])
+    }, [betOption, currentMarket?.clobTokenIds])
 
     useEffect(() => {
         subscribeToMarket()
@@ -26,12 +26,19 @@ const EventOrderBook: React.FC = () => {
     const formatterEuro = new Intl.NumberFormat('default', {
         style: 'currency',
         currency: 'EUR',
-        maximumFractionDigits: 5
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
     })
 
     const lastPrice = orderBookEvent?.asks.length
         ? +orderBookEvent.asks[orderBookEvent.asks.length - 1].price
         : 0
+
+    const lastBid = orderBookEvent?.bids.length
+        ? +orderBookEvent.bids[orderBookEvent.bids.length - 1].price
+        : 0
+
+    const spread = lastPrice - lastBid
 
     return (
         <div className='w-full'>
@@ -63,10 +70,10 @@ const EventOrderBook: React.FC = () => {
                             'font-semibold text-gray-500'
                         )}
                     >
-                        Last: {formatterEuro.format(lastPrice)}
+                        Last: {formatterEuro.format(lastPrice * 100)}
                     </div>
                     <div className='text-center font-semibold text-gray-500'>
-                        Spread: {formatterEuro.format(market?.spread || 0)}
+                        Spread: {formatterEuro.format(spread * 100)}
                     </div>
                     <div className='text-center font-semibold text-gray-600'></div>
                     <div className='text-center font-semibold text-gray-600'></div>

@@ -15,7 +15,7 @@ import { Activity, Flag, Grip, Menu, Trophy } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button.tsx'
 import { ModeToggle } from '@/components/mode-toggle.tsx'
 import { LogoIcon } from '@/components/Icons.tsx'
-import { NavigateMenuDemo } from '@/components/layout/NavigateMenu.tsx'
+import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
 import SearchBar from '@/components/layout/SearchBar.tsx'
 
 interface RouteProps {
@@ -134,7 +134,7 @@ export const Header = () => {
                         <SearchBar />
                     </div>
                     <div className='hidden lg:block px-4'>
-                        <NavigateMenuDemo />
+                        <MarketsNavigateMenu />
                     </div>
 
                     <div className='hidden lg:flex gap-2'>

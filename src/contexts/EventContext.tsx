@@ -11,7 +11,8 @@ import {
     EMarketDepth,
     ESide,
     Market,
-    PolyMarket
+    MarketDetail,
+    PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
 
@@ -26,8 +27,10 @@ interface EventContextType {
     changeBetOption: (option: EBetOption) => void
     selectedEvent: Market | null
     setSelectedEvent: (event: Market) => void
-    market: PolyMarket | null
+    market: PolyMarketDetail | null
     loading: boolean
+    handleSelectMarket: (id: string) => void
+    currentMarket: MarketDetail | null
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -45,9 +48,13 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     id
 }) => {
     const request = RequestFactory.getRequest('MarketRequest')
-    const [market, setMarket] = useState<PolyMarket | null>(null)
+    const [market, setMarket] = useState<PolyMarketDetail | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
 
+    const [currentMarket, setCurrentMarket] = useState<MarketDetail | null>(
+        null
+    )
+    const [selectedMarketId, setSelectedMarketId] = useState<string>('')
     const [selectedEvent, setSelectedEvent] = useState<Market | null>(null)
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
     const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
@@ -72,24 +79,44 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         setBetOption(option)
     }
 
-    const fetchMarket = async () => {
-        setLoading(true)
-        try {
-            const response = await request.getTopEvents()
-            if (response) {
-                setMarket(response[0])
-                setSelectedEvent(response[0].markets[0])
-            }
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
-        }
+    const handleSelectMarket = (id: string) => {
+        if (id === '') return
+        setSelectedMarketId(id)
     }
 
     useEffect(() => {
-        fetchMarket()
+        const fetchPolyMarket = async (eId: string) => {
+            setLoading(true)
+            try {
+                const response = await request.getEventsById(eId)
+                if (response) {
+                    setMarket(response)
+                    setSelectedMarketId(response.markets[0].id)
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        if (id) fetchPolyMarket(id)
     }, [id])
+
+    useEffect(() => {
+        const fetchMarket = async (mId: string) => {
+            setCurrentMarket(null)
+            try {
+                const response = await request.getMarketById(mId)
+                if (response) {
+                    setCurrentMarket(response)
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        if (selectedMarketId) fetchMarket(selectedMarketId)
+    }, [selectedMarketId])
 
     return (
         <EventContext.Provider
@@ -105,7 +132,9 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 marketDepth,
                 changeMarketDepth,
                 market,
-                loading
+                loading,
+                handleSelectMarket,
+                currentMarket
             }}
         >
             {children}

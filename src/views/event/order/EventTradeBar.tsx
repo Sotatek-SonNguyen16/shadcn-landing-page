@@ -12,7 +12,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
     const { variant, data } = props
     const formatterEuro = new Intl.NumberFormat('default', {
         style: 'currency',
-        currency: 'EUR'
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 5
     })
 
     const formatterUSD = new Intl.NumberFormat('en-US', {
@@ -22,7 +24,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
 
     const findMaxPrice = (orders: Order[]): number => {
         return orders.reduce((max, order) => {
-            const price = parseFloat(order.price)
+            const price = Number(order.price)
             return price > max ? price : max
         }, -Infinity)
     }
@@ -40,7 +42,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                 data
                     .filter((_, index) => index >= data.length - 10)
                     .map(({ size, price }, index) => {
-                        const width = Math.floor((+price / maxPrice) * 100)
+                        const width = Math.floor(
+                            (Number(price) / maxPrice) * 100
+                        )
                         return (
                             <div
                                 key={`${price}-${index}`}
@@ -81,7 +85,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                                         }
                                     )}
                                 >
-                                    {formatterEuro.format(+price)}
+                                    {formatterEuro.format(+price * 100)}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
                                     {formatterUSD.format(+size)}

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Tooltip } from '@/components/ui/tooltip.tsx'
-import { IconButton } from '@radix-ui/themes'
 import { UpdateIcon } from '@radix-ui/react-icons'
 import OutcomeEventList from '@/views/event/OutcomeEventList.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
@@ -29,16 +28,18 @@ const EventListLayout: React.FC = () => {
     return (
         <div className={`flex flex-col gap-3`}>
             <div
-                className={`grid grid-cols-7 border-b-[1px] border-grey-200 p-1`}
+                className={`grid grid-cols-7 border-b-[1px] border-grey-200 p-1 items-center`}
             >
                 <div className='col-span-3'>Outcome</div>
-                <div className={`flex justify-center items-center gap-2`}>
-                    % Chance
+                <div
+                    className={`inline-flex justify-center items-center gap-2`}
+                >
+                    <p className='text-nowrap'>% Chance</p>
                     <Tooltip
                         trigger={
-                            <IconButton>
+                            <Button size={`sm`} variant={`outline`}>
                                 <UpdateIcon width='15' height='15' />
-                            </IconButton>
+                            </Button>
                         }
                         content={`Refresh`}
                     />

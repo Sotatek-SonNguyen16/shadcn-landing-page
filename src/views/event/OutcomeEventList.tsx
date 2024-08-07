@@ -17,11 +17,16 @@ const OutcomeEventList: React.FC<{ events: Market[] | undefined }> = ({
             type='single'
             collapsible
         >
-            {events.map((data, index) => (
-                <Fragment key={`event-${index}`}>
-                    <EventListItem data={data} />
-                </Fragment>
-            ))}
+            {events
+                .sort(
+                    (a, b) =>
+                        Number(b.outcomePrices[0]) - Number(a.outcomePrices[0])
+                )
+                .map((data, index) => (
+                    <Fragment key={`event-${index}`}>
+                        <EventListItem data={data} />
+                    </Fragment>
+                ))}
         </Accordion.Root>
     )
 }

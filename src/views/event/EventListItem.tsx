@@ -1,6 +1,5 @@
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 import { Code, Gift, Link2 } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 import * as Accordion from '@radix-ui/react-accordion'
@@ -35,25 +34,31 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
     const {
         changeBetOption,
         betOption,
-        selectedEvent,
-        setSelectedEvent,
+        currentMarket,
+        handleSelectMarket,
         formStatus
     } = useEventContext()
-    const { id, image, outcomePrices, outcomes, groupItemTitle, volume } = data
-    const arrayOutcomes = JSON.parse(outcomes || '[]')
-    const arrayOutcomePrices = JSON.parse(outcomePrices || '[]')
+    const { id, outcomePrices, outcomes, groupItemTitle } = data
 
-    const formatterEuro = new Intl.NumberFormat('default', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 5
-    })
+    const formatterEuro = useMemo(
+        () =>
+            new Intl.NumberFormat('default', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }),
+        []
+    )
 
-    const formatterUSD = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 5
-    })
+    const formatterUSD = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }),
+        []
+    )
 
     const handleBetOptionChange = useCallback(
         (option: EBetOption) => {
@@ -65,45 +70,51 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
     const _renderEventTrigger = useCallback(() => {
         return (
             <div className='w-full grid grid-cols-7 cursor-pointer p-3 border-b border-gray-100 hover:bg-gray-100'>
-                <div className='flex items-center gap-2 col-span-3'>
-                    <Avatar className='relative inline-flex h-10 w-10'>
-                        <AvatarImage
-                            src={image}
-                            className='h-full w-full object-cover rounded-full'
-                        />
-                        <AvatarFallback className='flex h-full w-full items-center justify-center bg-white dark:bg-gray-800 rounded-full' />
-                    </Avatar>
-                    <div>
-                        <div className='flex items-center gap-2 font-semibold text-xl'>
-                            {groupItemTitle}
+                <div className='w-full flex items-center gap-2 col-span-3'>
+                    {/*<Avatar className='relative inline-flex h-10 w-10'>*/}
+                    {/*    <AvatarImage*/}
+                    {/*        src={image}*/}
+                    {/*        className='h-full w-full object-cover rounded-full'*/}
+                    {/*    />*/}
+                    {/*    <AvatarFallback className='flex h-full w-full items-center justify-center bg-white dark:bg-gray-800 rounded-full' />*/}
+                    {/*</Avatar>*/}
+                    <div className='w-full'>
+                        <div className='flex items-center gap-2'>
+                            <p className='font-semibold text-xl flex-1'>
+                                {groupItemTitle}
+                            </p>
                             <Link2 color='gray' width={15} height={15} />
                             <Code color='gray' width={15} height={15} />
                         </div>
                         <div className='text-gray-500 flex items-center gap-2'>
-                            {formatterUSD.format(+volume)} Bet{' '}
+                            {formatterUSD.format(0)} Bet{' '}
                             <Gift width={15} height={15} />
                         </div>
                     </div>
                 </div>
-                <div className='font-bold text-center'>
-                    {Math.floor(arrayOutcomePrices[0])} %
+                <div className='text-center my-auto'>
+                    <p className='font-bold'>
+                        {Math.floor(+outcomePrices[0] * 100)} %
+                    </p>
                 </div>
                 <div className='grid grid-cols-2 gap-2 items-center col-span-3'>
                     <Button
                         variant={
-                            selectedEvent?.id === id &&
+                            currentMarket?.id === id &&
                             betOption === EBetOption.YES
                                 ? 'successSolid'
                                 : 'successGhost'
                         }
-                        className='px-8 py-6 w-full'
+                        className='px-8 py-6'
                         onClick={() => handleBetOptionChange(EBetOption.YES)}
                     >
-                        {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${arrayOutcomes[0]} ${formatterEuro.format(arrayOutcomePrices[0])}`}
+                        <p className='text-wrap'>
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
+                        </p>
                     </Button>
                     <Button
                         variant={
-                            selectedEvent?.id === id &&
+                            currentMarket?.id === id &&
                             betOption === EBetOption.NO
                                 ? 'accentSolid'
                                 : 'accentGhost'
@@ -111,22 +122,22 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                         className='px-8 py-6'
                         onClick={() => handleBetOptionChange(EBetOption.NO)}
                     >
-                        {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${arrayOutcomes[1]} ${formatterEuro.format(arrayOutcomePrices[1])}`}
+                        <p className='text-wrap'>
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
+                        </p>
                     </Button>
                 </div>
             </div>
         )
     }, [
-        image,
         groupItemTitle,
         formatterUSD,
-        volume,
-        arrayOutcomePrices,
-        selectedEvent?.id,
+        outcomePrices,
+        currentMarket?.id,
         id,
         betOption,
         formStatus,
-        arrayOutcomes,
+        outcomes,
         formatterEuro,
         handleBetOptionChange
     ])
@@ -134,7 +145,7 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
     return (
         <Accordion.Item
             value={`item-${id}`}
-            onClick={() => setSelectedEvent(data)}
+            onClick={() => handleSelectMarket(id)}
         >
             <Accordion.Header className='flex'>
                 <Accordion.Trigger asChild>

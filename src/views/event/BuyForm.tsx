@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
@@ -7,17 +7,33 @@ import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, EFormType } from '@/types'
 
 const BuyForm: React.FC = () => {
-    const { formType, betOption, selectedEvent, changeBetOption } =
+    const { formType, betOption, currentMarket, changeBetOption } =
         useEventContext()
 
-    const arrayOutcomes = JSON.parse(selectedEvent?.outcomes || '[]')
-    const arrayOutcomePrices = JSON.parse(selectedEvent?.outcomePrices || '[]')
+    const outcomes: string[2] = useMemo(() => {
+        if (typeof currentMarket?.outcomes === 'string') {
+            return JSON.parse(currentMarket.outcomes)
+        }
+        return currentMarket?.outcomes
+    }, [currentMarket?.outcomes])
 
-    const formatterEuro = new Intl.NumberFormat('default', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 5
-    })
+    const outcomePrices: string[2] = useMemo(() => {
+        if (typeof currentMarket?.outcomePrices === 'string') {
+            return JSON.parse(currentMarket.outcomePrices)
+        }
+        return currentMarket?.outcomePrices
+    }, [currentMarket?.outcomePrices])
+
+    const formatterEuro = useMemo(
+        () =>
+            new Intl.NumberFormat('default', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }),
+        []
+    )
 
     const formFields = {
         [EFormType.MARKET]: (
@@ -34,7 +50,8 @@ const BuyForm: React.FC = () => {
                             <input
                                 className={clsx(
                                     'text-center',
-                                    'focus:border-none'
+                                    'border-none outline-none',
+                                    'focus:outline-none'
                                 )}
                                 placeholder={`$0`}
                             />
@@ -105,7 +122,8 @@ const BuyForm: React.FC = () => {
                             <input
                                 className={clsx(
                                     'text-center',
-                                    'focus:border-none'
+                                    'border-none outline-none',
+                                    'focus:outline-none'
                                 )}
                                 placeholder={`$0`}
                             />
@@ -125,7 +143,8 @@ const BuyForm: React.FC = () => {
                             <input
                                 className={clsx(
                                     'text-center',
-                                    'focus:border-none'
+                                    'border-none outline-none',
+                                    'focus:outline-none'
                                 )}
                                 placeholder={`$0`}
                             />
@@ -189,7 +208,11 @@ const BuyForm: React.FC = () => {
                             <Minus width={15} height={15} />
                         </IconButton>
                         <input
-                            className={clsx('text-center', 'focus:border-none')}
+                            className={clsx(
+                                'text-center',
+                                'border-none outline-none',
+                                'focus:outline-none'
+                            )}
                             placeholder={`$0`}
                         />
                         <IconButton>
@@ -232,7 +255,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${arrayOutcomes[0]} ${formatterEuro.format(0.005)}`}
+                    {`${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -243,7 +266,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${arrayOutcomes[1]} ${formatterEuro.format(+arrayOutcomePrices[1])}`}
+                    {`${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
                 </Button>
             </div>
             {_renderFormField()}
