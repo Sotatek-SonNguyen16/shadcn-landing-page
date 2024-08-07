@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Tooltip } from '@/components/ui/tooltip.tsx'
 import { UpdateIcon } from '@radix-ui/react-icons'
 import OutcomeEventList from '@/views/event/OutcomeEventList.tsx'
@@ -25,6 +25,15 @@ const EventListLayout: React.FC = () => {
         setViewMore((prevState) => !prevState)
     }
 
+    const sortedMarkets = useMemo(
+        () =>
+            market?.markets.sort(
+                (a, b) =>
+                    Number(b.outcomePrices[0]) - Number(a.outcomePrices[0])
+            ) || [],
+        [market?.markets]
+    )
+
     return (
         <div className={`flex flex-col gap-3`}>
             <div
@@ -45,7 +54,7 @@ const EventListLayout: React.FC = () => {
                     />
                 </div>
             </div>
-            <OutcomeEventList events={market?.markets.slice(0, 5)} />
+            <OutcomeEventList events={sortedMarkets.slice(0, 3)} />
             <div className={`flex`}>
                 <Button
                     variant={`secondary`}
@@ -61,7 +70,7 @@ const EventListLayout: React.FC = () => {
                     )}
                 </Button>
             </div>
-            {viewMore && <OutcomeEventList events={market?.markets.slice(5)} />}
+            {viewMore && <OutcomeEventList events={sortedMarkets.slice(3)} />}
             <div>
                 <div className='text-xl font-semibold border-b-[1px] border-gray-100'>
                     Rules

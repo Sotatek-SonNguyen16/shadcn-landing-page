@@ -8,6 +8,7 @@ import EventGraph from '@/views/event/charts/EventGraph.tsx'
 import EventResolution from '@/views/event/resolution/EventResolution.tsx'
 import EventOrderBook from '@/views/event/order/EventOrderBook.tsx'
 import { EBetOption, EMarketDepth, ESide, Market } from '@/types'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 
 const tabs: Tab<EMarketDepth>[] = [
     {
@@ -38,7 +39,7 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         handleSelectMarket,
         formStatus
     } = useEventContext()
-    const { id, outcomePrices, outcomes, groupItemTitle } = data
+    const { id, outcomePrices, outcomes, groupItemTitle, volume, icon } = data
 
     const formatterEuro = useMemo(
         () =>
@@ -55,7 +56,9 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         () =>
             new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'USD'
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             }),
         []
     )
@@ -68,16 +71,17 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
     )
 
     const _renderEventTrigger = useCallback(() => {
+        const chance = Math.floor(+outcomePrices[0] * 100)
         return (
             <div className='w-full grid grid-cols-7 cursor-pointer p-3 border-b border-gray-100 hover:bg-gray-100'>
                 <div className='w-full flex items-center gap-2 col-span-3'>
-                    {/*<Avatar className='relative inline-flex h-10 w-10'>*/}
-                    {/*    <AvatarImage*/}
-                    {/*        src={image}*/}
-                    {/*        className='h-full w-full object-cover rounded-full'*/}
-                    {/*    />*/}
-                    {/*    <AvatarFallback className='flex h-full w-full items-center justify-center bg-white dark:bg-gray-800 rounded-full' />*/}
-                    {/*</Avatar>*/}
+                    <Avatar className='relative inline-flex h-10 w-10'>
+                        <AvatarImage
+                            src={icon}
+                            className='h-full w-full object-cover rounded-full'
+                        />
+                        <AvatarFallback className='flex h-full w-full items-center justify-center bg-white dark:bg-gray-800 rounded-full' />
+                    </Avatar>
                     <div className='w-full'>
                         <div className='flex items-center gap-2'>
                             <p className='font-semibold text-xl flex-1'>
@@ -87,15 +91,13 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                             <Code color='gray' width={15} height={15} />
                         </div>
                         <div className='text-gray-500 flex items-center gap-2'>
-                            {formatterUSD.format(0)} Bet{' '}
+                            {formatterUSD.format(Number(volume))} Bet{' '}
                             <Gift width={15} height={15} />
                         </div>
                     </div>
                 </div>
-                <div className='text-center my-auto'>
-                    <p className='font-bold'>
-                        {Math.floor(+outcomePrices[0] * 100)} %
-                    </p>
+                <div className='text-center my-auto text-2xl'>
+                    <p className='font-bold'>{chance < 1 ? '<1' : chance} %</p>
                 </div>
                 <div className='grid grid-cols-2 gap-2 items-center col-span-3'>
                     <Button
@@ -130,9 +132,11 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
             </div>
         )
     }, [
+        outcomePrices,
+        icon,
         groupItemTitle,
         formatterUSD,
-        outcomePrices,
+        volume,
         currentMarket?.id,
         id,
         betOption,
