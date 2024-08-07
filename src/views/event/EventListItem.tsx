@@ -136,17 +136,18 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
             </div>
         ),
         [
-            outcomePrices,
             icon,
             groupItemTitle,
             formatterUSD,
             volume,
+            chance,
             currentMarket?.id,
             id,
             betOption,
             formStatus,
             outcomes,
             formatterEuro,
+            outcomePrices,
             handleBetOptionChange
         ]
     )

@@ -60,7 +60,7 @@ export const Header = () => {
                             className='ml-2 font-bold text-xl flex'
                         >
                             <LogoIcon />
-                            Polymarket
+                            PredictionMarket
                         </a>
                     </NavigationMenuItem>
 
@@ -81,7 +81,7 @@ export const Header = () => {
                             <SheetContent side={'left'}>
                                 <SheetHeader>
                                     <SheetTitle className='font-bold text-xl'>
-                                        Polymarket
+                                        PredictionMarket
                                     </SheetTitle>
                                 </SheetHeader>
                                 <nav className='flex flex-col justify-center items-center gap-2 mt-4'>

@@ -50,11 +50,7 @@ const PredictionCard: React.FC = () => {
                             'rounded-full'
                         )}
                         delayMs={600}
-                    >
-                        <span className='text-sm font-bold uppercase text-gray-700 dark:text-gray-400'>
-                            {currentMarket?.slug}
-                        </span>
-                    </AvatarPrimitive.Fallback>
+                    ></AvatarPrimitive.Fallback>
                 </AvatarPrimitive.Root>
 
                 <div
