@@ -37,7 +37,8 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         betOption,
         currentMarket,
         handleSelectMarket,
-        formStatus
+        formStatus,
+        selectedMarketId
     } = useEventContext()
     const { id, outcomePrices, outcomes, groupItemTitle, volume, icon } = data
 
@@ -106,7 +107,7 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                 <div className='grid grid-cols-2 gap-2 items-center col-span-3'>
                     <Button
                         variant={
-                            currentMarket?.id === id &&
+                            selectedMarketId === id &&
                             betOption === EBetOption.YES
                                 ? 'successSolid'
                                 : 'successGhost'
@@ -120,7 +121,7 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                     </Button>
                     <Button
                         variant={
-                            currentMarket?.id === id &&
+                            selectedMarketId === id &&
                             betOption === EBetOption.NO
                                 ? 'accentSolid'
                                 : 'accentGhost'

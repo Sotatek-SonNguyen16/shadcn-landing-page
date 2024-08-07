@@ -4,9 +4,10 @@ import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption } from '@/types'
+import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton.tsx'
 
 const EventOrderBook: React.FC = () => {
-    const { betOption, currentMarket } = useEventContext()
+    const { betOption, currentMarket, selectedMarketId } = useEventContext()
     const { orderBookEvent, subscribe } = useEventWebSocket()
     const containerRef = useRef<HTMLDivElement>(null)
     const centerRef = useRef<HTMLDivElement>(null)
@@ -66,6 +67,9 @@ const EventOrderBook: React.FC = () => {
         }
     }, [orderBookEvent])
 
+    if (currentMarket?.id !== selectedMarketId)
+        return <EventOrderBookSkeleton />
+
     return (
         <div className='w-full'>
             <div
@@ -83,7 +87,7 @@ const EventOrderBook: React.FC = () => {
             </div>
             <div
                 ref={containerRef}
-                className={`max-h-[300px] overflow-y-scroll scrollbar-hidden`}
+                className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
             >
                 <EventTradeBar variant='accent' data={orderBookEvent?.asks} />
                 <div

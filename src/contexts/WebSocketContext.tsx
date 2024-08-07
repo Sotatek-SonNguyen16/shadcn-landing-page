@@ -15,6 +15,7 @@ interface EventWebSocketContextProps {
     subscribe: (assetsIds: string[]) => void
     priceChangeEvent: PriceChangeEvent | null
     orderBookEvent: OrderBookEvent | null
+    clearOrderBookEvent: () => void
 }
 
 const EventWebSocketContext = createContext<
@@ -42,6 +43,10 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
 
     const handleSubscribe = (assetsIds: string[]) => {
         connector.send('subscribe', { assetsIds })
+    }
+
+    const clearOrderBookEvent = () => {
+        setOrderBookEvent(null)
     }
 
     useEffect(() => {
@@ -78,7 +83,8 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
                 isConnected,
                 subscribe: handleSubscribe,
                 orderBookEvent,
-                priceChangeEvent
+                priceChangeEvent,
+                clearOrderBookEvent
             }}
         >
             {children}
