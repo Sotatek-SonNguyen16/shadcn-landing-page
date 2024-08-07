@@ -64,83 +64,42 @@ type OrderBookEvent = {
 
 interface PolyMarket {
     id: string
-    question: string
-    conditionId: string
+    ticker: string
     slug: string
+    title: string
+    description: string
     resolutionSource: string
-    endDate: string
-    liquidity: number
     startDate: string
-    fee: number
+    creationDate: string
+    endDate: string
     image: string
     icon: string
-    description: string
-    outcomes: string[]
-    outcomePrices: string[]
-    volume: number
     active: boolean
-    marketType: string
     closed: boolean
-    marketMakerAddress: string
+    archived: boolean
+    new: boolean
+    featured: boolean
+    restricted: boolean
+    liquidity: number
+    volume: number
+    openInterest: number
+    sortBy: string
+    reviewStatus: string
+    published_at: string
     updatedBy: string
     createdAt: string
     updatedAt: string
-    wideFormat: boolean
-    new: boolean
-    featured: boolean
-    submitted_by: string
-    archived: boolean
-    resolvedBy: string
-    restricted: boolean
-    groupItemTitle: string
-    groupItemThreshold: number
-    questionID: string
-    enableOrderBook: boolean
-    orderPriceMinTickSize: number
-    orderMinSize: number
-    volumeNum: number
-    liquidityNum: number
-    endDateIso: string
-    startDateIso: string
-    hasReviewedDates: boolean
     commentsEnabled: boolean
+    competitive: number
     volume24hr: number
-    secondsDelay: number
-    clobTokenIds: string[]
-    umaBond: number
-    umaReward: number
-    fpmmLive: boolean
-    volume24hrClob: number
-    volumeClob: number
+    featuredImage: string
+    enableOrderBook: boolean
     liquidityClob: number
-    makerBaseFee: number
-    takerBaseFee: number
-    customLiveness: boolean
-    acceptingOrders: boolean
-    negRisk: boolean
-    negRiskMarketID: string
-    negRiskRequestID: string
-    commentCount: number
-    notificationsEnabled: boolean
     _sync: boolean
-    creator: string
-    ready: boolean
-    deployed: boolean
-    funded: boolean
-    tags: string[]
-    cyom: boolean
-    competitive: boolean
-    pagerDutyNotificationEnabled: boolean
-    reviewStatus: string
-    approved: boolean
-    clobRewards: number
-    rewardsMinSize: number
-    rewardsMaxSpread: number
-    spread: number
-    oneDayPriceChange: number
-    lastTradePrice: number
-    bestBid: number
-    bestAsk: number
+    negRisk: boolean
+    negRiskFeeBips: number
+    negRiskMarketID: string
+    markets: Market[]
 }
 
 interface Market {

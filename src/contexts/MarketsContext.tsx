@@ -10,6 +10,8 @@ import { PolyMarket } from '@/types'
 
 interface MarketContextReturnValue {
     polyMarkets: PolyMarket[] | null
+    totalItems: number
+    totalPages: number
 }
 
 const MarketContext = createContext<MarketContextReturnValue | undefined>(
@@ -29,8 +31,8 @@ const useMarketsContext = () => {
 const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const request = RequestFactory.getRequest('MarketRequest')
 
-    const [page, setPage] = useState<number>(1)
-    const [limit, setLimit] = useState<number>(9)
+    const [page] = useState<number>(1)
+    const [limit] = useState<number>(9)
     const [totalItems, setTotalItems] = useState<number>(-1)
     const [totalPages, setTotalPages] = useState<number>(
         Number.MAX_SAFE_INTEGER
@@ -62,7 +64,9 @@ const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     return (
         <MarketContext.Provider
             value={{
-                polyMarkets
+                polyMarkets,
+                totalItems,
+                totalPages
             }}
         >
             {children}
