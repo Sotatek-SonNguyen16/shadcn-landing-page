@@ -8,12 +8,12 @@ import {
     CardTitle
 } from '@/components/ui/card.tsx'
 import { clsx } from 'clsx'
-import { PolyMarket } from '@/types'
+import { PredictionMarket } from '@/types'
 import { Button } from '@/components/ui/button.tsx'
 import { Gift, MessageCircle, Pin, Star } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils.ts'
 
-const MarketCardGridItem: React.FC<{ data: PolyMarket }> = ({ data }) => {
+const MarketCardGridItem: React.FC<{ data: PredictionMarket }> = ({ data }) => {
     const { id, icon, title, markets, volume, commentCount } = data
 
     return (
@@ -64,11 +64,9 @@ const MarketCardGridItem: React.FC<{ data: PolyMarket }> = ({ data }) => {
                                     {market.groupItemTitle}
                                 </div>
                                 <div className='font-semibold text-gray-500'>
-                                    {Math.floor(
-                                        Number(market.outcomePrices[0]) * 100
-                                    ) < 1
+                                    {Number(market.outcomePrices[0]) * 100 < 1
                                         ? '<1'
-                                        : Math.floor(
+                                        : Math.round(
                                               Number(market.outcomePrices[0]) *
                                                   100
                                           )}

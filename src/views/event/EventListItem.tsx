@@ -70,9 +70,13 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
         [changeBetOption]
     )
 
-    const _renderEventTrigger = useCallback(() => {
-        const chance = Math.floor(+outcomePrices[0] * 100)
-        return (
+    const chance = useMemo(
+        () => Math.round(+outcomePrices[0] * 100),
+        [outcomePrices]
+    )
+
+    const _renderEventTrigger = useCallback(
+        () => (
             <div className='w-full grid grid-cols-7 cursor-pointer p-3 border-b border-gray-100 hover:bg-gray-100'>
                 <div className='w-full flex items-center gap-2 col-span-3'>
                     <Avatar className='relative inline-flex h-10 w-10'>
@@ -111,7 +115,7 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                         onClick={() => handleBetOptionChange(EBetOption.YES)}
                     >
                         <p className='text-wrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
                         </p>
                     </Button>
                     <Button
@@ -125,26 +129,27 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                         onClick={() => handleBetOptionChange(EBetOption.NO)}
                     >
                         <p className='text-wrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
                         </p>
                     </Button>
                 </div>
             </div>
-        )
-    }, [
-        outcomePrices,
-        icon,
-        groupItemTitle,
-        formatterUSD,
-        volume,
-        currentMarket?.id,
-        id,
-        betOption,
-        formStatus,
-        outcomes,
-        formatterEuro,
-        handleBetOptionChange
-    ])
+        ),
+        [
+            outcomePrices,
+            icon,
+            groupItemTitle,
+            formatterUSD,
+            volume,
+            currentMarket?.id,
+            id,
+            betOption,
+            formStatus,
+            outcomes,
+            formatterEuro,
+            handleBetOptionChange
+        ]
+    )
 
     return (
         <Accordion.Item

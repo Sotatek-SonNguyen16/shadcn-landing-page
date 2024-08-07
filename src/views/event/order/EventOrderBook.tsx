@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
@@ -8,6 +8,8 @@ import { EBetOption } from '@/types'
 const EventOrderBook: React.FC = () => {
     const { betOption, currentMarket } = useEventContext()
     const { orderBookEvent, subscribe } = useEventWebSocket()
+    const containerRef = useRef<HTMLDivElement>(null)
+    const centerRef = useRef<HTMLDivElement>(null)
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
@@ -40,6 +42,22 @@ const EventOrderBook: React.FC = () => {
 
     const spread = lastPrice - lastBid
 
+    useEffect(() => {
+        if (containerRef.current && centerRef.current) {
+            const container = containerRef.current
+            const centerElement = centerRef.current
+
+            const containerHeight = container.clientHeight
+            const elementHeight = centerElement.clientHeight
+
+            const elementOffsetTop = centerElement.offsetTop
+            const scrollTop =
+                elementOffsetTop - containerHeight / 2 + elementHeight / 2
+
+            container.scrollTo({ top: scrollTop, behavior: 'smooth' })
+        }
+    }, [orderBookEvent])
+
     return (
         <div className='w-full'>
             <div
@@ -55,9 +73,13 @@ const EventOrderBook: React.FC = () => {
                 <div className='text-center'>Shares</div>
                 <div className='text-center'>Total</div>
             </div>
-            <div className={`max-h-[300px] overflow-y-scroll scrollbar-hidden`}>
+            <div
+                ref={containerRef}
+                className={`max-h-[300px] overflow-y-scroll scrollbar-hidden`}
+            >
                 <EventTradeBar variant='accent' data={orderBookEvent?.asks} />
                 <div
+                    ref={centerRef}
                     className={clsx(
                         'grid grid-cols-5',
                         'border-t-[1px] border-b-[1px] border-gray-200 py-2',
