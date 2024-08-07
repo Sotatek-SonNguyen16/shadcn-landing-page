@@ -26,6 +26,12 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
         currency: 'USD'
     })
 
+    const formatterDecimal = new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })
+
     const findMaxTotal = (orders: OrderWithTotal[]): number => {
         return orders.reduce((max, order) => {
             const total = order.total
@@ -119,7 +125,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = (props) => {
                                     {formatterEuro.format(Number(price) * 100)}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
-                                    {formatterUSD.format(Number(size))}
+                                    {formatterDecimal.format(Number(size))}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 py-2'>
                                     {formatterUSD.format(total)}
