@@ -20,7 +20,7 @@ export function MarketsNavigateMenu() {
                     <NavigationMenuTrigger>
                         <NavigationMenuLink
                             className={`flex flex-col items-center gap-1`}
-                            href='/docs'
+                            href='/markets'
                         >
                             <div>
                                 <Grip width={15} height={15} />
