@@ -55,7 +55,7 @@ const EventOrderBook: React.FC = () => {
                 <div className='text-center'>Shares</div>
                 <div className='text-center'>Total</div>
             </div>
-            <div className={`max-h-[300px] overflow-y-scroll`}>
+            <div className={`max-h-[300px] overflow-y-scroll scrollbar-hidden`}>
                 <EventTradeBar variant='accent' data={orderBookEvent?.asks} />
                 <div
                     className={clsx(

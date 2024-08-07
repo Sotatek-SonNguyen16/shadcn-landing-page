@@ -19,3 +19,19 @@ export function formatDate(isoDate: string): string {
         year: 'numeric'
     }).format(date)
 }
+
+export function formatCurrency(value: number): string {
+    if (value >= 1_000_000_000) {
+        // Format billions
+        return `$${(value / 1_000_000_000).toFixed(1)}b`
+    } else if (value >= 1_000_000) {
+        // Format millions
+        return `$${(value / 1_000_000).toFixed(1)}m`
+    } else if (value >= 1_000) {
+        // Format thousands
+        return `$${(value / 1_000).toFixed(1)}k`
+    } else {
+        // Format small numbers
+        return `$${value.toFixed(0)}`
+    }
+}

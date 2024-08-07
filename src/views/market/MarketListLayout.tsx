@@ -22,7 +22,7 @@ const MarketListLayout: React.FC<MarketListLayoutProps> = ({ layout }) => {
                     'grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4'
                 )}
             >
-                {polyMarkets[0].markets.map((market, index) => (
+                {polyMarkets.map((market, index) => (
                     <Fragment key={`market-${index}`}>
                         <MarketCardGridItem data={market} />
                     </Fragment>
@@ -36,7 +36,7 @@ const MarketListLayout: React.FC<MarketListLayoutProps> = ({ layout }) => {
                 'grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4'
             )}
         >
-            {polyMarkets[0].markets.map((market, index) => (
+            {polyMarkets.map((market, index) => (
                 <Fragment key={`market-${index}`}>
                     <MarketCardGridItem data={market} />
                 </Fragment>
