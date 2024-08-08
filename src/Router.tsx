@@ -5,6 +5,7 @@ import { lazy } from 'react'
 const DashboardPage = lazy(() => import('@/views/dashboard/DashboardPage.tsx'))
 const EventPage = lazy(() => import('@/views/event/EventPage.tsx'))
 const MarketPage = lazy(() => import('@/views/market/MarketPage.tsx'))
+const TelegramPage = lazy(() => import('@/views/telegram/TelegramPage.tsx'))
 const NotMatch = lazy(() => import('@/views/404/NotMatch.tsx'))
 
 export const router = createBrowserRouter([
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
             {
                 path: 'markets',
                 element: <MarketPage />
+            },
+            {
+                path: 'telegram',
+                element: <TelegramPage />
             }
         ]
     },

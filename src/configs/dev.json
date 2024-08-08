@@ -2,5 +2,8 @@
   "app": {
     "apiUrl": "https://dev-prediction-market.sotatek.works/api/v1",
     "wws": "wss://dev-prediction-market.sotatek.works"
+  },
+  "telegram": {
+    "apiUrl": "https://api.telegram.org/"
   }
 }

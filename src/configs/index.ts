@@ -6,6 +6,9 @@ export interface Config {
         apiUrl: string
         wws: string
     }
+    telegram: {
+        apiUrl: string
+    }
 }
 
 const env = import.meta.env.VITE_NODE_ENV as 'dev' | 'prod'
