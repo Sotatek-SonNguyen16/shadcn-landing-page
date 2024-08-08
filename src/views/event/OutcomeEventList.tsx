@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import EventListItem from '@/views/event/EventListItem.tsx'
 import * as Accordion from '@radix-ui/react-accordion'
 import { Market } from '@/types'
@@ -18,9 +18,7 @@ const OutcomeEventList: React.FC<{ events: Market[] | undefined }> = ({
             collapsible
         >
             {events.map((data, index) => (
-                <Fragment key={`event-${index}`}>
-                    <EventListItem data={data} />
-                </Fragment>
+                <EventListItem key={`event-${index}`} data={data} />
             ))}
         </Accordion.Root>
     )

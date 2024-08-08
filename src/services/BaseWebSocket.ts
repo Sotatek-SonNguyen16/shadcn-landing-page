@@ -1,4 +1,16 @@
 import { io, Socket } from 'socket.io-client'
+import { EventsMap } from '@socket.io/component-emitter'
+
+export type EventNames<Map extends EventsMap> = keyof Map & (string | symbol)
+
+export type EventParams<
+    Map extends EventsMap,
+    Ev extends EventNames<Map>
+> = Parameters<Map[Ev]>
+
+type EventHandlerArgs<T> = T extends (string | null)[]
+    ? (data: string) => void
+    : (data: T) => void
 
 type DefaultServerEvents = {
     connect: () => void
@@ -6,24 +18,28 @@ type DefaultServerEvents = {
 }
 
 export interface BaseWebSocket<
-    ServerEvents extends Record<string, (...args: any[]) => void>,
-    ClientEvents extends Record<string, (...args: any[]) => void>
+    ServerEvents extends Record<string, (...args: never[]) => void>,
+    ClientEvents extends Record<string, (...args: never[]) => void>
 > {
     connect(): void
 
-    send<T extends keyof ClientEvents>(
+    send<T extends EventNames<ClientEvents>>(
         event: T,
-        ...args: Parameters<ClientEvents[T]>
+        ...args: EventParams<ClientEvents, T>
     ): void
 
-    on<T extends keyof (ServerEvents & DefaultServerEvents)>(
+    on<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (data: Parameters<ServerEvents[T]>[0]) => void
+        listener: (
+            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
+        ) => void
     ): void
 
-    off<T extends keyof (ServerEvents & DefaultServerEvents)>(
+    off<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (data: Parameters<ServerEvents[T]>[0]) => void
+        listener: (
+            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
+        ) => void
     ): void
 
     close(): void
@@ -32,11 +48,11 @@ export interface BaseWebSocket<
 export class BaseWebSocketImpl<
     ServerEvents extends Record<
         string,
-        (...args: any[]) => void
+        (...args: never[]) => void
     > = DefaultServerEvents,
-    ClientEvents extends Record<string, (...args: any[]) => void> = Record<
+    ClientEvents extends Record<string, (...args: never[]) => void> = Record<
         string,
-        any
+        () => void
     >
 > implements BaseWebSocket<ServerEvents, ClientEvents>
 {
@@ -44,8 +60,8 @@ export class BaseWebSocketImpl<
     private readonly endpoint: string
     private readonly token: string
     private readonly eventListeners: {
-        [key in keyof ServerEvents]?: ((
-            data: Parameters<ServerEvents[key]>
+        [key in EventNames<DefaultServerEvents & ServerEvents>]?: ((
+            data: EventParams<DefaultServerEvents & ServerEvents, key>[0]
         ) => void)[]
     } = {}
 
@@ -67,13 +83,13 @@ export class BaseWebSocketImpl<
         })
 
         this.socket.on('connect', () => {
-            this.emit('connect', {} as Parameters<ServerEvents['connect']>[0])
+            this.emit('connect', {} as EventParams<ServerEvents, 'connect'>[0])
         })
 
         this.socket.on('disconnect', () => {
             this.emit(
                 'disconnect',
-                {} as Parameters<ServerEvents['disconnect']>[0]
+                {} as EventParams<ServerEvents, 'disconnect'>[0]
             )
             this.socket = null
         })
@@ -87,21 +103,22 @@ export class BaseWebSocketImpl<
         }
     }
 
-    public send<T extends keyof ClientEvents>(
+    public send<T extends EventNames<ClientEvents>>(
         event: T,
-        ...args: Parameters<ClientEvents[T]>
+        ...args: EventParams<ClientEvents, T>
     ): void {
         if (this.socket && this.socket.connected) {
-            // @ts-ignore
-            this.socket.emit(event as string, ...args)
+            this.socket.emit(event, ...args)
         } else {
             console.warn('WebSocket is not connected.')
         }
     }
 
-    public on<T extends keyof (DefaultServerEvents & ServerEvents)>(
+    public on<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (data: Parameters<ServerEvents[T]>[0]) => void
+        listener: (
+            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
+        ) => void
     ): void {
         if (!this.eventListeners[event]) {
             this.eventListeners[event] = []
@@ -111,9 +128,11 @@ export class BaseWebSocketImpl<
         }
     }
 
-    public off<T extends keyof (DefaultServerEvents & ServerEvents)>(
+    public off<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (data: Parameters<ServerEvents[T]>[0]) => void
+        listener: (
+            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
+        ) => void
     ): void {
         if (!this.eventListeners[event]) {
             return
@@ -135,13 +154,14 @@ export class BaseWebSocketImpl<
         }
     }
 
-    private emit<T extends keyof (DefaultServerEvents & ServerEvents)>(
+    private emit<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        data: Parameters<ServerEvents[T]>[0]
+        data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
     ): void {
         if (this.eventListeners[event]) {
-            // @ts-ignore
-            this.eventListeners[event].forEach((listener) => listener(data))
+            this.eventListeners[event]?.forEach((listener) => listener(data))
         }
     }
 }
+
+export type { EventHandlerArgs }

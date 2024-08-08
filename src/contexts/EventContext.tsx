@@ -92,7 +92,16 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 const response = await request.getEventsById(eId)
                 if (response) {
                     setMarket(response)
-                    setSelectedMarketId(response.markets[0].id)
+                    const maxPriceItem = response.markets.reduce(
+                        (max, item) => {
+                            return Number(item.outcomePrices[0]) >
+                                Number(max.outcomePrices[0])
+                                ? item
+                                : max
+                        },
+                        response.markets[0]
+                    )
+                    setSelectedMarketId(maxPriceItem.id)
                 }
             } catch (err) {
                 console.error(err)
@@ -101,7 +110,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             }
         }
         if (id) fetchPolyMarket(id)
-    }, [id])
+    }, [id, request])
 
     useEffect(() => {
         const fetchMarket = async (mId: string) => {
@@ -117,7 +126,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
 
         if (selectedMarketId) fetchMarket(selectedMarketId)
-    }, [selectedMarketId])
+    }, [request, selectedMarketId])
 
     return (
         <EventContext.Provider

@@ -26,10 +26,7 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
     children
 }) => {
     const [isConnected, setIsConnected] = useState(false)
-    const connector = useMemo(
-        () => new EventsWebSocket(config.app.wws, ''),
-        [config.app.wws]
-    )
+    const connector = useMemo(() => new EventsWebSocket(config.app.wws, ''), [])
 
     const [priceChangeEvent, setPriceChangeEvent] =
         useState<PriceChangeEvent | null>(null)
