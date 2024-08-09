@@ -37,9 +37,13 @@ const EventOrderBook: React.FC = () => {
         []
     )
 
-    const lastPrice = orderBookEvent?.asks.length
-        ? +orderBookEvent.asks[orderBookEvent.asks.length - 1].price
-        : 0
+    const lastPrice = useMemo(
+        () =>
+            orderBookEvent?.asks.length
+                ? +orderBookEvent.asks[orderBookEvent.asks.length - 1].price
+                : 0,
+        [orderBookEvent?.asks]
+    )
 
     const lastBid = useMemo(
         () =>
@@ -67,6 +71,9 @@ const EventOrderBook: React.FC = () => {
         }
     }, [orderBookEvent])
 
+    const asks = useMemo(() => orderBookEvent?.asks, [orderBookEvent?.asks])
+    const bids = useMemo(() => orderBookEvent?.bids, [orderBookEvent?.bids])
+
     if (currentMarket?.id !== selectedMarketId)
         return <EventOrderBookSkeleton />
 
@@ -89,7 +96,7 @@ const EventOrderBook: React.FC = () => {
                 ref={containerRef}
                 className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
             >
-                <EventTradeBar variant='accent' data={orderBookEvent?.asks} />
+                <EventTradeBar variant='accent' data={asks} />
                 <div
                     ref={centerRef}
                     className={clsx(
@@ -112,7 +119,7 @@ const EventOrderBook: React.FC = () => {
                     <div className='text-center font-semibold text-gray-600'></div>
                     <div className='text-center font-semibold text-gray-600'></div>
                 </div>
-                <EventTradeBar variant='success' data={orderBookEvent?.bids} />
+                <EventTradeBar variant='success' data={bids} />
             </div>
         </div>
     )

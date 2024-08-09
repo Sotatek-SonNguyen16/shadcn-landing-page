@@ -1,12 +1,15 @@
-import { BaseWebSocketImpl } from '@/services/BaseWebSocket.ts'
+import {
+    BaseWebSocketImpl,
+    EventHandlerArgs
+} from '@/services/BaseWebSocket.ts'
 import { OrderBookEvent, PriceChangeEvent } from '@/types'
 
 type EventsServerToClientEvents = {
-    market: (data: PriceChangeEvent | OrderBookEvent) => void
+    market: EventHandlerArgs<PriceChangeEvent | OrderBookEvent>
 }
 
 type EventsClientToServerEvents = {
-    subscribe: (payload: { assetsIds: string[] }) => void
+    subscribe: EventHandlerArgs<{ assetsIds: string[] }>
 }
 
 export class EventsWebSocket extends BaseWebSocketImpl<

@@ -1,6 +1,7 @@
 import React, {
     createContext,
     ReactNode,
+    useCallback,
     useContext,
     useEffect,
     useState
@@ -41,18 +42,21 @@ const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         null
     )
 
-    const fetchMarkets = async (params: { page: number; limit: number }) => {
-        try {
-            const response = await request.getTopEvents(params)
-            if (response) {
-                setTotalItems(response.totalDocs)
-                setTotalPages(response.totalPages)
-                setPolyMarkets(response.docs)
+    const fetchMarkets = useCallback(
+        async (params: { page: number; limit: number }) => {
+            try {
+                const response = await request.getTopEvents(params)
+                if (response) {
+                    setTotalItems(response.totalDocs)
+                    setTotalPages(response.totalPages)
+                    setPolyMarkets(response.docs)
+                }
+            } catch (err) {
+                console.error(err)
             }
-        } catch (err) {
-            console.error(err)
-        }
-    }
+        },
+        [request]
+    )
 
     useEffect(() => {
         const params = {
@@ -61,7 +65,7 @@ const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         }
 
         fetchMarkets(params)
-    }, [page, limit])
+    }, [page, limit, fetchMarkets])
 
     return (
         <MarketContext.Provider

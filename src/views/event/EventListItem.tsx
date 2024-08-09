@@ -9,6 +9,7 @@ import EventResolution from '@/views/event/resolution/EventResolution.tsx'
 import EventOrderBook from '@/views/event/order/EventOrderBook.tsx'
 import { EBetOption, EMarketDepth, ESide, Market } from '@/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
+import { clsx } from 'clsx'
 
 const tabs: Tab<EMarketDepth>[] = [
     {
@@ -31,11 +32,10 @@ const Content = memo(() => {
     )
 })
 
-const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
+const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
     const {
         changeBetOption,
         betOption,
-        currentMarket,
         handleSelectMarket,
         formStatus,
         selectedMarketId
@@ -113,7 +113,11 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                                 : 'successGhost'
                         }
                         className='px-8 py-6'
-                        onClick={() => handleBetOptionChange(EBetOption.YES)}
+                        onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation()
+                            handleSelectMarket(id)
+                            handleBetOptionChange(EBetOption.YES)
+                        }}
                     >
                         <p className='text-wrap'>
                             {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
@@ -127,7 +131,11 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                                 : 'accentGhost'
                         }
                         className='px-8 py-6'
-                        onClick={() => handleBetOptionChange(EBetOption.NO)}
+                        onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation()
+                            handleSelectMarket(id)
+                            handleBetOptionChange(EBetOption.NO)
+                        }}
                     >
                         <p className='text-wrap'>
                             {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
@@ -142,13 +150,14 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
             formatterUSD,
             volume,
             chance,
-            currentMarket?.id,
+            selectedMarketId,
             id,
             betOption,
             formStatus,
             outcomes,
             formatterEuro,
             outcomePrices,
+            handleSelectMarket,
             handleBetOptionChange
         ]
     )
@@ -164,9 +173,9 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
                 </Accordion.Trigger>
             </Accordion.Header>
             <Accordion.Content
-                className={
+                className={clsx(
                     'text-mauve11 bg-mauve2 data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden text-[15px]'
-                }
+                )}
             >
                 <div className='py-4 px-5'>
                     <Content />
@@ -174,6 +183,6 @@ const EventListItem: React.FC<{ data: Market }> = ({ data }) => {
             </Accordion.Content>
         </Accordion.Item>
     )
-}
+})
 
 export default EventListItem

@@ -46,7 +46,7 @@ const EventListLayout: React.FC = () => {
                     <p className='text-nowrap'>% Chance</p>
                     <Tooltip
                         trigger={
-                            <Button size={`sm`} variant={`outline`}>
+                            <Button size={`icon`} variant={`outline`}>
                                 <UpdateIcon width='15' height='15' />
                             </Button>
                         }
