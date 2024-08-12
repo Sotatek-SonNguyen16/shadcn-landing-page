@@ -151,7 +151,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
 
     const _renderEventTrigger = useCallback(
         (isLargeScreen: boolean) => (
-            <div className='w-full grid grid-cols-5 lg:grid-cols-8 gap-2 cursor-pointer px-2 py-6 border-b border-gray-100 rounded hover:bg-gray-100'>
+            <div className='w-full grid grid-cols-5 lg:grid-cols-8 gap-2 cursor-pointer px-2 py-6 border-b border-gray-100 rounded bg-background hover:bg-gray-100 dark:border-b-slate-700hover:dark:bg-gray-800'>
                 <div className='w-full flex items-center gap-2 col-span-3 lg:col-span-3'>
                     <Avatar className='relative inline-flex h-10 w-10'>
                         <AvatarImage

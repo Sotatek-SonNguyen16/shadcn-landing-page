@@ -38,7 +38,7 @@ const EventListLayout: React.FC = () => {
     return (
         <div className={`flex flex-col gap-3 pb-3`}>
             <div
-                className={`grid grid-cols-4 lg:grid-cols-7 border-b-[1px] border-grey-200 p-1 items-center text-[10px] uppercase text-gray-500`}
+                className={`grid grid-cols-4 lg:grid-cols-7 border-b-[1px] border-grey-200 dark:border-slate-700 p-1 items-center text-[10px] uppercase text-gray-500`}
             >
                 <div className='col-span-3'>Outcome</div>
                 <div
@@ -73,13 +73,13 @@ const EventListLayout: React.FC = () => {
             </div>
             {viewMore && <OutcomeEventList events={sortedMarkets.slice(3)} />}
             <div>
-                <div className='text-xl font-semibold border-b-[1px] border-gray-100'>
+                <div className='text-xl font-semibold border-b-[1px] border-gray-100 dark:border-b-slate-700'>
                     Rules
                 </div>
                 <MarketDescription content={market?.description || ''} />
             </div>
             <div className='flex flex-col gap-2'>
-                <div className='text-xl font-semibold border-b-[1px] border-gray-100'>
+                <div className='text-xl font-semibold border-b-[1px] border-gray-100 dark:border-b-slate-700'>
                     About
                 </div>
                 <div className='flex justify-between items-center py-1'>
@@ -117,9 +117,13 @@ const EventListLayout: React.FC = () => {
                         {formatDate(market?.endDate || '2024-01-01T00:00:00')}
                     </div>
                 </div>
-                <div className='flex items-center gap-4 border-[1px] border-gray-200 rounded-xl py-2 px-4'>
+                <div className='flex items-center gap-4 border-[1px] border-gray-200 dark:border-slate-700 rounded-xl py-2 px-4'>
                     <Button variant={`secondary`} className='rounded-full p-3'>
-                        <Gavel width={20} height={20} />
+                        <Gavel
+                            width={20}
+                            height={20}
+                            className='dark:text-white'
+                        />
                     </Button>
                     <div>
                         <div className='text-[16px] text-gray-500'>

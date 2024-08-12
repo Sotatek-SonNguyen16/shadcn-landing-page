@@ -103,8 +103,10 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                             <div
                                 key={`${price}-${index}`}
                                 className={clsx('group grid grid-cols-5', {
-                                    'hover:bg-green-100': variant === 'success',
-                                    'hover:bg-red-100': variant === 'accent'
+                                    'hover:bg-green-100 hover:dark:bg-green-500/30':
+                                        variant === 'success',
+                                    'hover:bg-red-100 hover:dark:bg-red-500/30':
+                                        variant === 'accent'
                                 })}
                             >
                                 <div
@@ -121,9 +123,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                                 calculatedOrders.length - 1
                                         },
                                         {
-                                            'bg-green-100 group-hover:bg-green-200':
+                                            'bg-green-100 group-hover:bg-green-200 dark:bg-green-500/30 group-hover:dark:bg-green-500/30':
                                                 variant === 'success',
-                                            'bg-red-100 group-hover:bg-red-200':
+                                            'bg-red-100 group-hover:bg-red-200 dark:bg-red-500/30 group-hover:dark:bg-red-500/30':
                                                 variant === 'accent'
                                         }
                                     )}
@@ -149,10 +151,10 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 >
                                     {formatterEuro.format(Number(price) * 100)}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]'>
+                                <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
                                     {formatterDecimal.format(Number(size))}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]'>
+                                <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
                                     {formatterUSD.format(total)}
                                 </div>
                             </div>

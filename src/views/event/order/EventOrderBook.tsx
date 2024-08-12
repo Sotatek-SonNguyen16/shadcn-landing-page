@@ -114,7 +114,7 @@ const EventOrderBook: React.FC = () => {
                     className={clsx(
                         'grid grid-cols-5',
                         'border-t-[1px] border-b-[1px] border-gray-200 py-2',
-                        'hover:bg-gray-200'
+                        'hover:bg-gray-200 hover:dark:bg-gray-800'
                     )}
                 >
                     <div

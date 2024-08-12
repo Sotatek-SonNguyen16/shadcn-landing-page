@@ -51,7 +51,7 @@ const SellForm: React.FC = () => {
                             </IconButton>
                             <input
                                 className={clsx(
-                                    'text-center',
+                                    'text-center bg-background text-primary placeholder-gray-400',
                                     'border-none outline-none',
                                     'focus:outline-none'
                                 )}
@@ -111,7 +111,7 @@ const SellForm: React.FC = () => {
                             </IconButton>
                             <input
                                 className={clsx(
-                                    'text-center',
+                                    'text-center bg-background text-primary placeholder-gray-400',
                                     'border-none outline-none',
                                     'focus:outline-none'
                                 )}
@@ -132,7 +132,7 @@ const SellForm: React.FC = () => {
                             </IconButton>
                             <input
                                 className={clsx(
-                                    'text-center',
+                                    'text-center bg-background text-primary placeholder-gray-400',
                                     'border-none outline-none',
                                     'focus:outline-none'
                                 )}
@@ -187,7 +187,7 @@ const SellForm: React.FC = () => {
                         </IconButton>
                         <input
                             className={clsx(
-                                'text-center',
+                                'text-center bg-background text-primary placeholder-gray-400',
                                 'border-none outline-none',
                                 'focus:outline-none'
                             )}

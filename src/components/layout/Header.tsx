@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import {
     NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuList
+    NavigationMenuItem
 } from '@/components/ui/navigation-menu'
 import {
     Sheet,
@@ -17,6 +16,7 @@ import { ModeToggle } from '@/components/mode-toggle.tsx'
 import { LogoIcon } from '@/components/Icons.tsx'
 import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
 import SearchBar from '@/components/layout/SearchBar.tsx'
+import { clsx } from 'clsx'
 
 interface RouteProps {
     icon: JSX.Element
@@ -50,14 +50,19 @@ const routeList: RouteProps[] = [
 export const Header = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     return (
-        <header className='sticky border-b-[1px] top-0 z-40 w-full bg-white dark:border-b-slate-700 dark:bg-background h-auto lg:h-[117px]'>
-            <NavigationMenu className='mx-auto'>
-                <NavigationMenuList className='container h-14 w-screen flex justify-between '>
-                    <NavigationMenuItem className='font-bold flex'>
+        <header
+            className={clsx(
+                'sticky border-b-[1px] top-0 z-40 bg-white h-auto lg:h-[117px]',
+                'dark:border-b-slate-700 dark:bg-background'
+            )}
+        >
+            <NavigationMenu>
+                <div className='h-14 w-full mx-4 md:mx-6 group flex list-none items-center justify-between space-x-1 lg:my-2'>
+                    <NavigationMenuItem>
                         <a
                             rel='noreferrer noopener'
                             href='/'
-                            className='ml-2 font-bold text-lg flex text-nowrap'
+                            className='font-bold text-lg flex gap-1 text-nowrap items-center'
                         >
                             <LogoIcon />
                             Prediction Market
@@ -137,7 +142,7 @@ export const Header = () => {
                         <MarketsNavigateMenu />
                     </div>
 
-                    <div className='hidden lg:flex gap-2'>
+                    <div className='hidden lg:flex gap-2 items-center'>
                         <a
                             rel='noreferrer noopener'
                             href='#'
@@ -156,7 +161,7 @@ export const Header = () => {
                         </a>
                         <ModeToggle />
                     </div>
-                </NavigationMenuList>
+                </div>
             </NavigationMenu>
         </header>
     )

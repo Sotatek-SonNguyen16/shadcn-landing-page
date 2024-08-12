@@ -36,7 +36,7 @@ const EventHeader: React.FC = () => {
     if (!market) return <EventHeaderSkeleton />
 
     return (
-        <div className='flex flex-col border-b-[1px] border-gray-200 pb-3'>
+        <div className='flex flex-col border-b-[1px] border-gray-200 dark:border-b-slate-700 pb-3'>
             <div className={`flex gap-4 items-start`}>
                 <AvatarPrimitive.Root className='relative inline-flex h-[48px] w-[48px] lg:h-[72px] lg:w-[72px]'>
                     <AvatarPrimitive.Image
