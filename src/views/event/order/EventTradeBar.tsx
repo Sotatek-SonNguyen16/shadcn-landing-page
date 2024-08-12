@@ -97,27 +97,23 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                     // .filter((_, index) => index >= calculatedOrders.length - 10)
                     .map(({ size, price, total }, index) => {
                         const width = Math.round(
-                            (Number(total) / maxTotal) * 100
+                            (Number(total) / maxTotal) * 100 * 3
                         )
                         return (
                             <div
                                 key={`${price}-${index}`}
-                                className={clsx(
-                                    'group grid grid-cols-5 gap-6 lg:gap-2',
-                                    {
-                                        'hover:bg-green-100':
-                                            variant === 'success',
-                                        'hover:bg-red-100': variant === 'accent'
-                                    }
-                                )}
+                                className={clsx('group grid grid-cols-5', {
+                                    'hover:bg-green-100': variant === 'success',
+                                    'hover:bg-red-100': variant === 'accent'
+                                })}
                             >
                                 <div
                                     style={{
-                                        minWidth: '1px',
-                                        width: `${width}%`
+                                        width: `${width}%`,
+                                        maxWidth: `100%`
                                     }}
                                     className={clsx(
-                                        'col-span-2',
+                                        'col-span-2 ps-[2px]',
                                         `flex items-center`,
                                         {
                                             'duration-300 animate-fadeIn':
@@ -142,7 +138,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 </div>
                                 <div
                                     className={clsx(
-                                        'text-center font-semibold py-2 text-[14px] lg:text-[16px]  overflow-hidden text-ellipsis text-nowrap',
+                                        'text-center font-semibold py-2 text-[14px] lg:text-[16px]',
                                         {
                                             'text-green-500':
                                                 variant === 'success',
@@ -153,10 +149,10 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 >
                                     {formatterEuro.format(Number(price) * 100)}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px] overflow-hidden text-ellipsis text-nowrap'>
+                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]'>
                                     {formatterDecimal.format(Number(size))}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]  overflow-hidden text-ellipsis text-nowrap'>
+                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]'>
                                     {formatterUSD.format(total)}
                                 </div>
                             </div>

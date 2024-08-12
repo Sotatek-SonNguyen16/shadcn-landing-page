@@ -87,11 +87,11 @@ const EventOrderBook: React.FC = () => {
         <div className='w-full'>
             <div
                 className={clsx(
-                    'grid grid-cols-5 gap-6 lg:gap-2',
+                    'grid grid-cols-5',
                     'text-gray-500 uppercase text-[12px] font-semibold my-3'
                 )}
             >
-                <div className={clsx('col-span-2')}>
+                <div className={clsx('px-4 col-span-2')}>
                     Trade {betOption === EBetOption.YES ? 'Yes' : 'No'}
                 </div>
                 <div className='text-center'>Price</div>
@@ -119,7 +119,7 @@ const EventOrderBook: React.FC = () => {
                 >
                     <div
                         className={clsx(
-                            'col-span-2',
+                            'col-span-2 px-4',
                             'font-semibold text-gray-500'
                         )}
                     >

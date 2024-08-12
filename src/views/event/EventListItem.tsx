@@ -38,7 +38,7 @@ const Content = memo(() => {
 const ResizeComponent: React.FC<{
     id: string
     handleSelectMarket: (id: string) => void
-    _renderEventTrigger: () => JSX.Element
+    _renderEventTrigger: (isLargeScreen: boolean) => JSX.Element
 }> = ({ id, handleSelectMarket, _renderEventTrigger }) => {
     const [isLargeScreen, setIsLargeScreen] = useState<boolean>(
         window.innerWidth >= 1024
@@ -67,7 +67,7 @@ const ResizeComponent: React.FC<{
                 >
                     <Accordion.Header className='flex'>
                         <Accordion.Trigger asChild>
-                            {_renderEventTrigger()}
+                            {_renderEventTrigger(true)}
                         </Accordion.Trigger>
                     </Accordion.Header>
                     <Accordion.Content
@@ -90,7 +90,7 @@ const ResizeComponent: React.FC<{
                             })
                         }}
                     >
-                        {_renderEventTrigger()}
+                        {_renderEventTrigger(false)}
                     </div>
                 </div>
             )}
@@ -150,7 +150,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
     }
 
     const _renderEventTrigger = useCallback(
-        () => (
+        (isLargeScreen: boolean) => (
             <div className='w-full grid grid-cols-5 lg:grid-cols-8 gap-2 cursor-pointer px-2 py-6 border-b border-gray-100 rounded hover:bg-gray-100'>
                 <div className='w-full flex items-center gap-2 col-span-3 lg:col-span-3'>
                     <Avatar className='relative inline-flex h-10 w-10'>
@@ -204,7 +204,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                             e.stopPropagation()
                             handleSelectMarket(id)
                             handleBetOptionChange(EBetOption.YES)
-                            onClickBetButton()
+                            if (!isLargeScreen) onClickBetButton()
                         }}
                     >
                         <p className='text-nowrap'>
@@ -223,7 +223,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                             e.stopPropagation()
                             handleSelectMarket(id)
                             handleBetOptionChange(EBetOption.NO)
-                            onClickBetButton()
+                            if (!isLargeScreen) onClickBetButton()
                         }}
                     >
                         <p className='text-nowrap'>
@@ -247,7 +247,8 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
             formatterEuro,
             outcomePrices,
             handleSelectMarket,
-            handleBetOptionChange
+            handleBetOptionChange,
+            onClickBetButton
         ]
     )
 

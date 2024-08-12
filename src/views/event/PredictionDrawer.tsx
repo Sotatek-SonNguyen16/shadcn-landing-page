@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import EventOrderBook from '@/views/event/order/EventOrderBook.tsx'
-import EventGraph from '@/views/event/charts/EventGraph.tsx'
 import { DrawerClose } from '@/components/ui/drawer.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import BetGroupButton from '@/views/BetGroupButton.tsx'
@@ -116,16 +115,20 @@ const PredictionDrawer: React.FC = () => {
                 >
                     {currentMarket?.groupItemTitle || 'Michelle Obama'}
                 </div>
-                <div className='hidden'>
-                    <EventGraph />
-                </div>
+                {/*<div className=''>*/}
+                {/*    <EventGraph />*/}
+                {/*</div>*/}
                 <div
                     className={clsx(
-                        'w-full border-[1px] border-gray-200 rounded-2xl p-4'
+                        'w-full border-[1px] border-gray-200 rounded-2xl overflow-hidden'
                     )}
                     onClick={onClickOrderBook}
                 >
-                    <div className={clsx('flex justify-between items-center')}>
+                    <div
+                        className={clsx(
+                            'flex justify-between items-center p-4'
+                        )}
+                    >
                         <span className='text-xl font-medium inline-flex items-center gap-2'>
                             Order Book <CircleHelp width={18} height={18} />
                         </span>{' '}
