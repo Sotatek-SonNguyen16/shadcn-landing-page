@@ -87,7 +87,7 @@ const EventOrderBook: React.FC = () => {
         <div className='w-full'>
             <div
                 className={clsx(
-                    'grid grid-cols-5',
+                    'grid grid-cols-5 gap-6 lg:gap-2',
                     'text-gray-500 uppercase text-[12px] font-semibold my-3'
                 )}
             >
@@ -102,7 +102,13 @@ const EventOrderBook: React.FC = () => {
                 ref={containerRef}
                 className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
             >
-                <EventTradeBar variant='accent' data={asks} />
+                {asks && asks?.length > 0 ? (
+                    <EventTradeBar variant='accent' data={asks} />
+                ) : (
+                    <div className='text-center p-2'>
+                        <span className='text-gray-300'>No asks</span>
+                    </div>
+                )}
                 <div
                     ref={centerRef}
                     className={clsx(
@@ -125,7 +131,13 @@ const EventOrderBook: React.FC = () => {
                     <div className='text-center font-semibold text-gray-600'></div>
                     <div className='text-center font-semibold text-gray-600'></div>
                 </div>
-                <EventTradeBar variant='success' data={bids} />
+                {bids && bids?.length > 0 ? (
+                    <EventTradeBar variant='success' data={bids} />
+                ) : (
+                    <div className='text-center p-2'>
+                        <span className='text-gray-300'>No bids</span>
+                    </div>
+                )}
             </div>
         </div>
     )
