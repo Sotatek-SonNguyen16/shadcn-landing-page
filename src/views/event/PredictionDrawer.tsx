@@ -116,7 +116,7 @@ const PredictionDrawer: React.FC = () => {
                 >
                     {currentMarket?.groupItemTitle || 'Michelle Obama'}
                 </div>
-                <div>
+                <div className='hidden'>
                     <EventGraph />
                 </div>
                 <div
