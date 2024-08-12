@@ -127,7 +127,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 </div>
                                 <div
                                     className={clsx(
-                                        'text-center font-semibold py-2',
+                                        'text-center font-semibold py-2 text-[14px] lg:text-[16px]',
                                         {
                                             'text-green-500':
                                                 variant === 'success',
@@ -138,10 +138,10 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 >
                                     {formatterEuro.format(Number(price) * 100)}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2'>
+                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]'>
                                     {formatterDecimal.format(Number(size))}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2'>
+                                <div className='text-center font-semibold text-gray-600 py-2 text-[12px] lg:text-[16px]'>
                                     {formatterUSD.format(total)}
                                 </div>
                             </div>

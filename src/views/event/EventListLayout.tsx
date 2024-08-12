@@ -5,22 +5,11 @@ import OutcomeEventList from '@/views/event/OutcomeEventList.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
-
-const MarketDescription: React.FC<{ content: string }> = ({ content }) => {
-    const lines = content.split('\n').map((_line, index) => (
-        <React.Fragment key={index}>
-            {_line}
-            <br />
-        </React.Fragment>
-    ))
-
-    return <div>{lines}</div>
-}
+import MarketDescription from '@/views/event/MarketDescription.tsx'
 
 const EventListLayout: React.FC = () => {
     const { market } = useEventContext()
     const [viewMore, setViewMore] = useState<boolean>(false)
-
     const onClickViewMore = () => {
         setViewMore((prevState) => !prevState)
     }
@@ -37,7 +26,7 @@ const EventListLayout: React.FC = () => {
     return (
         <div className={`flex flex-col gap-3`}>
             <div
-                className={`grid grid-cols-7 border-b-[1px] border-grey-200 p-1 items-center`}
+                className={`grid grid-cols-4 lg:grid-cols-7 border-b-[1px] border-grey-200 p-1 items-center text-[10px] uppercase text-gray-500`}
             >
                 <div className='col-span-3'>Outcome</div>
                 <div
@@ -47,7 +36,7 @@ const EventListLayout: React.FC = () => {
                     <Tooltip
                         trigger={
                             <Button size={`icon`} variant={`outline`}>
-                                <UpdateIcon width='15' height='15' />
+                                <UpdateIcon width='10' height='10' />
                             </Button>
                         }
                         content={`Refresh`}

@@ -69,7 +69,7 @@ export const Header = () => {
                         <ModeToggle />
 
                         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                            <SheetTrigger className='px-2'>
+                            <SheetTrigger>
                                 <Menu
                                     className='flex lg:hidden h-5 w-5'
                                     onClick={() => setIsOpen(true)}

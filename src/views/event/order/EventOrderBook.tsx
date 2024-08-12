@@ -62,12 +62,18 @@ const EventOrderBook: React.FC = () => {
 
             const containerHeight = container.clientHeight
             const elementHeight = centerElement.clientHeight
-
+            const containerOffsetTop = container.offsetTop
             const elementOffsetTop = centerElement.offsetTop
             const scrollTop =
-                elementOffsetTop - containerHeight / 2 + elementHeight / 2
+                elementOffsetTop -
+                containerOffsetTop -
+                containerHeight / 2 +
+                elementHeight / 2
 
-            container.scrollTo({ top: scrollTop, behavior: 'instant' })
+            container.scrollTo({
+                top: scrollTop,
+                behavior: 'instant'
+            })
         }
     }, [orderBookEvent])
 
@@ -113,7 +119,7 @@ const EventOrderBook: React.FC = () => {
                     >
                         Last: {formatterEuro.format(lastPrice * 100)}
                     </div>
-                    <div className='text-center font-semibold text-gray-500'>
+                    <div className='text-center font-semibold text-gray-500 text-nowrap'>
                         Spread: {formatterEuro.format(spread * 100)}
                     </div>
                     <div className='text-center font-semibold text-gray-600'></div>

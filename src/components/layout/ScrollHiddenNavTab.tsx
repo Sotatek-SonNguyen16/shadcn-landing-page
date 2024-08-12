@@ -26,7 +26,7 @@ const ScrollHiddenNavTab: React.FC = () => {
     }, 100)
 
     useEffect(() => {
-        window.addEventListener('scroll', handleScroll, { passive: true })
+        window.addEventListener('scroll', handleScroll, { passive: false })
 
         return () => {
             window.removeEventListener('scroll', handleScroll)

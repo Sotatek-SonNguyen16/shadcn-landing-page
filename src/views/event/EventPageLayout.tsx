@@ -4,6 +4,7 @@ import PredictionCard from '@/views/event/PredictionCard.tsx'
 import EventListLayout from '@/views/event/EventListLayout.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
+import DrawerProvider from '@/contexts/DrawerContext.tsx'
 
 const CheckWebSocketConnection: React.FC<{ isConnected: boolean }> = ({
     isConnected
@@ -28,20 +29,22 @@ const EventPageLayout: React.FC = () => {
     const { isConnected } = useEventWebSocket()
 
     return (
-        <div className={`h-screen w-full lg:flex pt-5`}>
+        <div className={`h-screen w-full lg:flex pt-3 lg:pt-5`}>
             <div
                 className={clsx(
                     `w-full transition-opacity duration-300 animate-fadeIn`,
-                    'lg:w-[70%] lg:pt-3'
+                    'lg:w-[70%]'
                 )}
             >
                 <CheckWebSocketConnection isConnected={isConnected} />
                 <EventHeader />
-                <EventListLayout />
+                <DrawerProvider>
+                    <EventListLayout />
+                </DrawerProvider>
             </div>
             <div className={`relative`}>
                 <aside
-                    className={`hidden lg:block sticky top-[140px] right-0 p-3 w-fit`}
+                    className={`hidden lg:block sticky top-[140px] right-0 px-3 w-fit`}
                 >
                     <PredictionCard />
                 </aside>
