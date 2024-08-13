@@ -10,6 +10,10 @@ import EventOrderBook from '@/views/event/order/EventOrderBook.tsx'
 import { EBetOption, EMarketDepth, ESide, Market } from '@/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { clsx } from 'clsx'
+import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
+import PredictionDrawer from '@/views/event/PredictionDrawer.tsx'
+import SaleDrawer from '@/views/event/SaleDrawer.tsx'
+import useScreenSize from '@/hooks/useScreenSize.ts'
 
 const tabs: Tab<EMarketDepth>[] = [
     {
@@ -32,6 +36,56 @@ const Content = memo(() => {
     )
 })
 
+const ResizeComponent: React.FC<{
+    id: string
+    handleSelectMarket: (id: string) => void
+    _renderEventTrigger: (isLargeScreen: boolean) => JSX.Element
+}> = ({ id, handleSelectMarket, _renderEventTrigger }) => {
+    const { openDrawer } = useDrawerContext()
+    const { isLargerThan } = useScreenSize()
+
+    return (
+        <>
+            {isLargerThan('lg') ? (
+                <Accordion.Item
+                    value={`item-${id}`}
+                    onClick={() => {
+                        handleSelectMarket(id)
+                    }}
+                >
+                    <Accordion.Header className='flex'>
+                        <Accordion.Trigger asChild>
+                            {_renderEventTrigger(true)}
+                        </Accordion.Trigger>
+                    </Accordion.Header>
+                    <Accordion.Content
+                        className={clsx(
+                            'text-mauve11 bg-mauve2 data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden text-[15px]'
+                        )}
+                    >
+                        <div className='py-4 px-5'>
+                            <Content />
+                        </div>
+                    </Accordion.Content>
+                </Accordion.Item>
+            ) : (
+                <div>
+                    <div
+                        onClick={() => {
+                            handleSelectMarket(id)
+                            openDrawer({
+                                content: <PredictionDrawer />
+                            })
+                        }}
+                    >
+                        {_renderEventTrigger(false)}
+                    </div>
+                </div>
+            )}
+        </>
+    )
+}
+
 const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
     const {
         changeBetOption,
@@ -41,6 +95,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
         selectedMarketId
     } = useEventContext()
     const { id, outcomePrices, outcomes, groupItemTitle, volume, icon } = data
+    const { openDrawer } = useDrawerContext()
 
     const formatterEuro = useMemo(
         () =>
@@ -76,10 +131,16 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
         [outcomePrices]
     )
 
+    const onClickBetButton = () => {
+        openDrawer({
+            content: <SaleDrawer />
+        })
+    }
+
     const _renderEventTrigger = useCallback(
-        () => (
-            <div className='w-full grid grid-cols-7 cursor-pointer p-3 border-b border-gray-100 hover:bg-gray-100'>
-                <div className='w-full flex items-center gap-2 col-span-3'>
+        (isLargeScreen: boolean) => (
+            <div className='w-full grid grid-cols-5 lg:grid-cols-8 gap-2 cursor-pointer px-2 py-6 border-b border-gray-100 rounded bg-background hover:bg-gray-100 dark:border-b-slate-700hover:dark:bg-gray-800'>
+                <div className='w-full flex items-center gap-2 col-span-3 lg:col-span-3'>
                     <Avatar className='relative inline-flex h-10 w-10'>
                         <AvatarImage
                             src={icon}
@@ -92,19 +153,33 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                             <p className='font-semibold text-xl flex-1'>
                                 {groupItemTitle}
                             </p>
-                            <Link2 color='gray' width={15} height={15} />
-                            <Code color='gray' width={15} height={15} />
+                            <Link2
+                                color='gray'
+                                className='hidden lg:block'
+                                width={15}
+                                height={15}
+                            />
+                            <Code
+                                color='gray'
+                                className='hidden lg:block'
+                                width={15}
+                                height={15}
+                            />
                         </div>
-                        <div className='text-gray-500 flex items-center gap-2'>
+                        <div className='text-gray-500 text-[12px] flex items-center gap-2'>
                             {formatterUSD.format(Number(volume))} Bet{' '}
-                            <Gift width={15} height={15} />
+                            <Gift
+                                className='hidden lg:block'
+                                width={15}
+                                height={15}
+                            />
                         </div>
                     </div>
                 </div>
-                <div className='text-center my-auto text-2xl'>
+                <div className='text-end lg:text-center my-auto text-3xl col-span-2 lg:col-span-2'>
                     <p className='font-bold'>{chance < 1 ? '<1' : chance} %</p>
                 </div>
-                <div className='grid grid-cols-2 gap-2 items-center col-span-3'>
+                <div className='grid grid-cols-2 gap-2 items-center col-span-5 lg:col-span-3'>
                     <Button
                         variant={
                             selectedMarketId === id &&
@@ -112,14 +187,15 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                                 ? 'successSolid'
                                 : 'successGhost'
                         }
-                        className='px-8 py-6'
+                        className='px-8 py-5 lg:py-6 overflow-hidden whitespace-nowrap text-ellipsis'
                         onClick={(e: React.MouseEvent) => {
                             e.stopPropagation()
                             handleSelectMarket(id)
                             handleBetOptionChange(EBetOption.YES)
+                            if (!isLargeScreen) onClickBetButton()
                         }}
                     >
-                        <p className='text-wrap'>
+                        <p className='text-nowrap'>
                             {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
                         </p>
                     </Button>
@@ -130,14 +206,15 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                                 ? 'accentSolid'
                                 : 'accentGhost'
                         }
-                        className='px-8 py-6'
+                        className='px-8 py-5 lg:py-6 overflow-hidden whitespace-nowrap text-ellipsis'
                         onClick={(e: React.MouseEvent) => {
                             e.stopPropagation()
                             handleSelectMarket(id)
                             handleBetOptionChange(EBetOption.NO)
+                            if (!isLargeScreen) onClickBetButton()
                         }}
                     >
-                        <p className='text-wrap'>
+                        <p className='text-nowrap'>
                             {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
                         </p>
                     </Button>
@@ -158,30 +235,17 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
             formatterEuro,
             outcomePrices,
             handleSelectMarket,
-            handleBetOptionChange
+            handleBetOptionChange,
+            onClickBetButton
         ]
     )
 
     return (
-        <Accordion.Item
-            value={`item-${id}`}
-            onClick={() => handleSelectMarket(id)}
-        >
-            <Accordion.Header className='flex'>
-                <Accordion.Trigger asChild>
-                    {_renderEventTrigger()}
-                </Accordion.Trigger>
-            </Accordion.Header>
-            <Accordion.Content
-                className={clsx(
-                    'text-mauve11 bg-mauve2 data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden text-[15px]'
-                )}
-            >
-                <div className='py-4 px-5'>
-                    <Content />
-                </div>
-            </Accordion.Content>
-        </Accordion.Item>
+        <ResizeComponent
+            id={id}
+            _renderEventTrigger={_renderEventTrigger}
+            handleSelectMarket={handleSelectMarket}
+        />
     )
 })
 

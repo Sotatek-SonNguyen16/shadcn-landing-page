@@ -16,24 +16,25 @@ const buttonVariants = cva(
                 outline:
                     'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
                 secondary:
-                    'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+                    'bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:text-gray-400',
                 ghost: 'hover:bg-accent hover:text-accent-foreground',
                 link: 'text-primary underline-offset-4 hover:underline',
                 primary:
-                    'bg-blue-600 text-primary-foreground hover:bg-blue-600/90',
-                accentGhost: 'bg-red-100 text-red-500 hover:bg-red-200/90',
+                    'bg-blue-600 text-primary-foreground hover:bg-blue-600/90 dark:text-primary',
+                accentGhost:
+                    'bg-red-100 text-red-500 hover:bg-red-200/90 dark:bg-red-900/40 dark:hover:bg-red-500/40',
                 accentSolid:
-                    'bg-orange-600 text-primary-foreground hover:bg-orange-600/90',
+                    'bg-orange-600 text-primary-foreground hover:bg-orange-600/90 dark:border-[1px] dark:border-orange-400 dark:text-secondary-foreground',
                 successGhost:
-                    'bg-green-100 text-green-600 hover:bg-green-200/90',
+                    'bg-green-100 text-green-600 hover:bg-green-200/90 dark:bg-green-600/30 dark:hover:bg-green-500/40',
                 successSolid:
-                    'bg-green-600 text-primary-foreground hover:bg-green-600/90'
+                    'bg-green-600 text-primary-foreground hover:bg-green-600/90 dark:border-[1px] dark:border-green-400 dark:text-secondary-foreground'
             },
             size: {
                 default: 'h-10 px-4 py-2',
                 sm: 'h-9 rounded-md px-3',
                 lg: 'h-11 rounded-md px-8',
-                icon: 'h-6 w-6',
+                icon: 'h-6 w-6 px-1',
                 iconGroup: 'h-6 w-fit px-2'
             }
         },

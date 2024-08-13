@@ -1,5 +1,4 @@
 import * as React from 'react'
-
 import { clsx } from 'clsx'
 import { ChevronDown } from 'lucide-react'
 import {
@@ -14,11 +13,11 @@ interface HoverCardSelectProps<T extends string> {
     onSelect: (option: T) => void
 }
 
-const HoverCardSelect = <T extends string>(
-    props: HoverCardSelectProps<T>
-): React.ReactElement => {
-    const { options, onSelect, selected } = props
-
+const HoverCardSelect = <T extends string>({
+    options,
+    onSelect,
+    selected
+}: HoverCardSelectProps<T>): React.ReactElement => {
     return (
         <HoverCard openDelay={10} closeDelay={10}>
             <HoverCardTrigger asChild>
@@ -38,7 +37,11 @@ const HoverCardSelect = <T extends string>(
                         <div
                             key={option}
                             className='font-semibold cursor-pointer'
-                            onClick={() => onSelect(option)}
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                onSelect(option)
+                            }}
                         >
                             {option}
                         </div>

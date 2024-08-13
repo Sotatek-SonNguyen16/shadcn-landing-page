@@ -91,8 +91,8 @@ const MarketCardGridItem: React.FC<{ data: PredictionMarket }> = ({ data }) => {
                 </div>
             </CardContent>
             <CardFooter>
-                <div className='w-full flex justify-between items-center'>
-                    <div className='flex gap-1 items-center'>
+                <div className='w-full flex justify-between gap-2 items-center overflow-hidden'>
+                    <div className='w-auto text-nowrap flex gap-1 items-center'>
                         <div className='bg-blue-100 p-1 rounded'>
                             <Pin width={15} height={15} color={`#1652f0`} />
                         </div>

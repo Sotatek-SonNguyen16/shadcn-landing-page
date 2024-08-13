@@ -62,12 +62,18 @@ const EventOrderBook: React.FC = () => {
 
             const containerHeight = container.clientHeight
             const elementHeight = centerElement.clientHeight
-
+            const containerOffsetTop = container.offsetTop
             const elementOffsetTop = centerElement.offsetTop
             const scrollTop =
-                elementOffsetTop - containerHeight / 2 + elementHeight / 2
+                elementOffsetTop -
+                containerOffsetTop -
+                containerHeight / 2 +
+                elementHeight / 2
 
-            container.scrollTo({ top: scrollTop, behavior: 'instant' })
+            container.scrollTo({
+                top: scrollTop,
+                behavior: 'instant'
+            })
         }
     }, [orderBookEvent])
 
@@ -85,7 +91,7 @@ const EventOrderBook: React.FC = () => {
                     'text-gray-500 uppercase text-[12px] font-semibold my-3'
                 )}
             >
-                <div className={clsx('col-span-2')}>
+                <div className={clsx('px-4 col-span-2')}>
                     Trade {betOption === EBetOption.YES ? 'Yes' : 'No'}
                 </div>
                 <div className='text-center'>Price</div>
@@ -96,30 +102,42 @@ const EventOrderBook: React.FC = () => {
                 ref={containerRef}
                 className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
             >
-                <EventTradeBar variant='accent' data={asks} />
+                {asks && asks?.length > 0 ? (
+                    <EventTradeBar variant='accent' data={asks} />
+                ) : (
+                    <div className='text-center p-2'>
+                        <span className='text-gray-300'>No asks</span>
+                    </div>
+                )}
                 <div
                     ref={centerRef}
                     className={clsx(
                         'grid grid-cols-5',
                         'border-t-[1px] border-b-[1px] border-gray-200 py-2',
-                        'hover:bg-gray-200'
+                        'hover:bg-gray-200 hover:dark:bg-gray-800'
                     )}
                 >
                     <div
                         className={clsx(
-                            'col-span-2',
+                            'col-span-2 px-4',
                             'font-semibold text-gray-500'
                         )}
                     >
                         Last: {formatterEuro.format(lastPrice * 100)}
                     </div>
-                    <div className='text-center font-semibold text-gray-500'>
+                    <div className='text-center font-semibold text-gray-500 text-nowrap'>
                         Spread: {formatterEuro.format(spread * 100)}
                     </div>
                     <div className='text-center font-semibold text-gray-600'></div>
                     <div className='text-center font-semibold text-gray-600'></div>
                 </div>
-                <EventTradeBar variant='success' data={bids} />
+                {bids && bids?.length > 0 ? (
+                    <EventTradeBar variant='success' data={bids} />
+                ) : (
+                    <div className='text-center p-2'>
+                        <span className='text-gray-300'>No bids</span>
+                    </div>
+                )}
             </div>
         </div>
     )

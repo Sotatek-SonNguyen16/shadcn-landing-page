@@ -2,6 +2,9 @@ import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
 import { Order } from '@/types'
+import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
+import SaleDrawer from '@/views/event/SaleDrawer.tsx'
+import useScreenSize from '@/hooks/useScreenSize.ts'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
@@ -14,6 +17,9 @@ interface OrderWithTotal extends Order {
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     const { variant, data } = props
+    const { openDrawer } = useDrawerContext()
+    const { isLargerThan } = useScreenSize()
+
     const formatterEuro = useMemo(
         () =>
             new Intl.NumberFormat('default', {
@@ -74,35 +80,46 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
         )
     }, [calculatedOrders])
 
+    const handleClickEventTradeBar = () => {
+        if (!isLargerThan('lg')) {
+            openDrawer({
+                content: <SaleDrawer />
+            })
+        }
+    }
+
     return (
         <div
             className={clsx('flex', {
                 'flex-col': variant === 'accent',
                 'flex-col-reverse': variant === 'success'
             })}
+            onClick={() => handleClickEventTradeBar()}
         >
             {calculatedOrders &&
                 calculatedOrders
                     // .filter((_, index) => index >= calculatedOrders.length - 10)
                     .map(({ size, price, total }, index) => {
                         const width = Math.round(
-                            (Number(total) / maxTotal) * 100
+                            (Number(total) / maxTotal) * 100 * 3
                         )
                         return (
                             <div
                                 key={`${price}-${index}`}
                                 className={clsx('group grid grid-cols-5', {
-                                    'hover:bg-green-100': variant === 'success',
-                                    'hover:bg-red-100': variant === 'accent'
+                                    'hover:bg-green-100 hover:dark:bg-green-500/30':
+                                        variant === 'success',
+                                    'hover:bg-red-100 hover:dark:bg-red-500/30':
+                                        variant === 'accent'
                                 })}
                             >
                                 <div
                                     style={{
-                                        minWidth: '1px',
-                                        width: `${width}%`
+                                        width: `${width}%`,
+                                        maxWidth: `100%`
                                     }}
                                     className={clsx(
-                                        'col-span-2',
+                                        'col-span-2 ps-[2px]',
                                         `flex items-center`,
                                         {
                                             'duration-300 animate-fadeIn':
@@ -110,9 +127,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                                 calculatedOrders.length - 1
                                         },
                                         {
-                                            'bg-green-100 group-hover:bg-green-200':
+                                            'bg-green-100 group-hover:bg-green-200 dark:bg-green-500/30 group-hover:dark:bg-green-500/30':
                                                 variant === 'success',
-                                            'bg-red-100 group-hover:bg-red-200':
+                                            'bg-red-100 group-hover:bg-red-200 dark:bg-red-500/30 group-hover:dark:bg-red-500/30':
                                                 variant === 'accent'
                                         }
                                     )}
@@ -127,7 +144,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 </div>
                                 <div
                                     className={clsx(
-                                        'text-center font-semibold py-2',
+                                        'text-center font-semibold py-2 text-[14px] lg:text-[16px]',
                                         {
                                             'text-green-500':
                                                 variant === 'success',
@@ -138,10 +155,10 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 >
                                     {formatterEuro.format(Number(price) * 100)}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2'>
+                                <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
                                     {formatterDecimal.format(Number(size))}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 py-2'>
+                                <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
                                     {formatterUSD.format(total)}
                                 </div>
                             </div>
