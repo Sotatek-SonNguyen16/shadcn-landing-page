@@ -14,16 +14,14 @@ const BuyForm: React.FC = () => {
         if (typeof currentMarket?.outcomes === 'string') {
             return JSON.parse(currentMarket.outcomes)
         }
-        return ['Yes', 'No']
-        // return currentMarket?.outcomes
+        return currentMarket?.outcomes
     }, [currentMarket?.outcomes])
 
     const outcomePrices: string[2] = useMemo(() => {
         if (typeof currentMarket?.outcomePrices === 'string') {
             return JSON.parse(currentMarket.outcomePrices)
         }
-        return ['0.45', '0.33']
-        // return currentMarket?.outcomePrices
+        return currentMarket?.outcomePrices
     }, [currentMarket?.outcomePrices])
 
     const formatterEuro = useMemo(
@@ -51,7 +49,7 @@ const BuyForm: React.FC = () => {
                             </IconButton>
                             <input
                                 className={clsx(
-                                    'text-center bg-background text-primary placeholder-gray-400 bg-background text-primary placeholder-gray-400',
+                                    'text-center bg-background text-primary placeholder-gray-400',
                                     'border-none outline-none',
                                     'focus:outline-none'
                                 )}

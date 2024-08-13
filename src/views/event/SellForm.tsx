@@ -14,16 +14,14 @@ const SellForm: React.FC = () => {
         if (typeof currentMarket?.outcomes === 'string') {
             return JSON.parse(currentMarket.outcomes)
         }
-        return ['Yes', 'No']
-        // return currentMarket?.outcomes
+        return currentMarket?.outcomes
     }, [currentMarket?.outcomes])
 
     const outcomePrices: string[2] = useMemo(() => {
         if (typeof currentMarket?.outcomePrices === 'string') {
             return JSON.parse(currentMarket.outcomePrices)
         }
-        return ['0.44', '0.55']
-        // return currentMarket?.outcomePrices
+        return currentMarket?.outcomePrices
     }, [currentMarket?.outcomePrices])
 
     const formatterEuro = useMemo(
