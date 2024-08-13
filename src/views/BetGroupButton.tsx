@@ -38,20 +38,6 @@ const BetGroupButton: React.FC = () => {
     const { currentMarket, changeBetOption } = useEventContext()
     const { openDrawer } = useDrawerContext()
 
-    const outcomes: string[2] = useMemo(() => {
-        if (typeof currentMarket?.outcomes === 'string') {
-            return JSON.parse(currentMarket.outcomes)
-        }
-        return currentMarket?.outcomes
-    }, [currentMarket?.outcomes])
-
-    const outcomePrices: string[2] = useMemo(() => {
-        if (typeof currentMarket?.outcomePrices === 'string') {
-            return JSON.parse(currentMarket.outcomePrices)
-        }
-        return currentMarket?.outcomePrices
-    }, [currentMarket?.outcomePrices])
-
     const formatterEuro = useMemo(
         () =>
             new Intl.NumberFormat('default', {
@@ -85,7 +71,7 @@ const BetGroupButton: React.FC = () => {
                     onClick={() => onClickBetButton(EBetOption.YES)}
                 >
                     Bet{' '}
-                    {`${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
+                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[0]) * 100))}`}
                 </Button>
                 <Button
                     variant='accentSolid'
@@ -93,7 +79,7 @@ const BetGroupButton: React.FC = () => {
                     onClick={() => onClickBetButton(EBetOption.NO)}
                 >
                     Bet{' '}
-                    {`${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
+                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[1]) * 100))}`}
                 </Button>
                 <OptionModalToggle />
             </div>

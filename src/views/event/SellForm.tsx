@@ -10,20 +10,6 @@ const SellForm: React.FC = () => {
     const { formType, betOption, changeBetOption, currentMarket } =
         useEventContext()
 
-    const outcomes: string[2] = useMemo(() => {
-        if (typeof currentMarket?.outcomes === 'string') {
-            return JSON.parse(currentMarket.outcomes)
-        }
-        return currentMarket?.outcomes
-    }, [currentMarket?.outcomes])
-
-    const outcomePrices: string[2] = useMemo(() => {
-        if (typeof currentMarket?.outcomePrices === 'string') {
-            return JSON.parse(currentMarket.outcomePrices)
-        }
-        return currentMarket?.outcomePrices
-    }, [currentMarket?.outcomePrices])
-
     const formatterEuro = useMemo(
         () =>
             new Intl.NumberFormat('default', {
@@ -231,7 +217,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
+                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[0]) * 100))}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -242,7 +228,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
+                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[1]) * 100))}`}
                 </Button>
             </div>
             {_renderFormField()}
