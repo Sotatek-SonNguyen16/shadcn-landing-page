@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge.tsx'
 import { Order } from '@/types'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
+import useScreenSize from '@/hooks/useScreenSize.ts'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
@@ -17,6 +18,7 @@ interface OrderWithTotal extends Order {
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     const { variant, data } = props
     const { openDrawer } = useDrawerContext()
+    const { isLargerThan } = useScreenSize()
 
     const formatterEuro = useMemo(
         () =>
@@ -79,9 +81,11 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     }, [calculatedOrders])
 
     const handleClickEventTradeBar = () => {
-        openDrawer({
-            content: <SaleDrawer />
-        })
+        if (!isLargerThan('lg')) {
+            openDrawer({
+                content: <SaleDrawer />
+            })
+        }
     }
 
     return (

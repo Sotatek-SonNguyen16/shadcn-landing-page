@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { Code, Gift, Link2 } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
@@ -13,6 +13,7 @@ import { clsx } from 'clsx'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import PredictionDrawer from '@/views/event/PredictionDrawer.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
+import useScreenSize from '@/hooks/useScreenSize.ts'
 
 const tabs: Tab<EMarketDepth>[] = [
     {
@@ -40,25 +41,12 @@ const ResizeComponent: React.FC<{
     handleSelectMarket: (id: string) => void
     _renderEventTrigger: (isLargeScreen: boolean) => JSX.Element
 }> = ({ id, handleSelectMarket, _renderEventTrigger }) => {
-    const [isLargeScreen, setIsLargeScreen] = useState<boolean>(
-        window.innerWidth >= 1024
-    )
     const { openDrawer } = useDrawerContext()
-
-    useEffect(() => {
-        const handleResize = () => {
-            setIsLargeScreen(window.innerWidth >= 1024)
-        }
-
-        window.addEventListener('resize', handleResize)
-        return () => {
-            window.removeEventListener('resize', handleResize)
-        }
-    }, [])
+    const { isLargerThan } = useScreenSize()
 
     return (
         <>
-            {isLargeScreen ? (
+            {isLargerThan('lg') ? (
                 <Accordion.Item
                     value={`item-${id}`}
                     onClick={() => {
