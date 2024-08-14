@@ -6,7 +6,7 @@ import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, EFormType, ESide } from '@/types'
 import { Tooltip } from '@/components/ui/tooltip.tsx'
-import { Resolver, useForm } from 'react-hook-form'
+import { FieldErrors, Resolver, useForm } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
 type FormValues = {
@@ -15,7 +15,7 @@ type FormValues = {
 }
 
 const resolver: Resolver<FormValues> = async (values) => {
-    const errors: any = {}
+    const errors: FieldErrors = {}
 
     if (
         values.amount === undefined ||
@@ -100,8 +100,8 @@ const BuyForm: React.FC = () => {
         []
     )
 
-    const amount = watch('amount')
-    const size = watch('size')
+    const amount = Number(watch('amount'))
+    const size = Number(watch('size'))
 
     useEffect(() => {
         setValue(
@@ -186,7 +186,7 @@ const BuyForm: React.FC = () => {
                             </Button>
                         </div>
                         {errors?.amount && (
-                            <p className='text-red-600'>
+                            <p className='text-red-600 text-[12px]'>
                                 {errors.amount.message}
                             </p>
                         )}
@@ -321,7 +321,7 @@ const BuyForm: React.FC = () => {
                             </Button>
                         </div>
                         {errors?.amount && (
-                            <p className='text-red-600'>
+                            <p className='text-red-600 text-[12px]'>
                                 {errors.amount.message}
                             </p>
                         )}
@@ -368,12 +368,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() =>
-                                    setValue(
-                                        'size',
-                                        Number((size + 10).toFixed(1))
-                                    )
-                                }
+                                onClick={() => setValue('size', size + 10)}
                             >
                                 <Tooltip
                                     trigger={<Plus width={15} height={15} />}
@@ -382,7 +377,7 @@ const BuyForm: React.FC = () => {
                             </Button>
                         </div>
                         {errors?.size && (
-                            <p className='text-red-600'>
+                            <p className='text-red-600 text-[12px]'>
                                 {errors.size.message}
                             </p>
                         )}
