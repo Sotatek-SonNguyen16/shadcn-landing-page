@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
-import { EFormType, Order } from '@/types'
+import { EBetOption, EFormType, Order } from '@/types'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
@@ -19,7 +19,13 @@ interface OrderWithTotal extends Order {
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     const { variant, data } = props
-    const { handleSelectOrder, changeType, activeOrders } = useEventContext()
+    const {
+        handleSelectOrder,
+        changeType,
+        activeOrders,
+        betOption,
+        currentMarket
+    } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
 
@@ -109,8 +115,14 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                         )
 
                         const activeOrder =
-                            activeOrders?.find((ac) => ac.price === price) ??
-                            null
+                            activeOrders?.find(
+                                (ac) =>
+                                    Number(ac.price) === Number(price) &&
+                                    ac.assetId ===
+                                        (betOption === EBetOption.YES
+                                            ? currentMarket?.clobTokenIds[0]
+                                            : currentMarket?.clobTokenIds[1])
+                            ) ?? null
 
                         return (
                             <div

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ActiveOrder } from '@/types'
 import { Clock3, X } from 'lucide-react'
@@ -25,18 +25,25 @@ const ActiveOrderTooltip: React.FC<{
     activeOrder: ActiveOrder | null
     variant: 'success' | 'accent'
 }> = ({ activeOrder, variant }) => {
+    const [open, setOpen] = useState<boolean>(false)
+
     if (!activeOrder) return <></>
 
     return (
         <Tooltip.Provider>
-            <Tooltip.Root>
+            <Tooltip.Root open={open} onOpenChange={setOpen}>
                 <Tooltip.Trigger asChild>
-                    <Clock3
-                        className='cursor-pointer'
-                        color={variant === 'accent' ? '#ea580c' : '#16a34a'}
-                        width={16}
-                        height={16}
-                    />
+                    <div
+                        className='h-full flex items-center my-1'
+                        onClick={() => setOpen(true)}
+                    >
+                        <Clock3
+                            className='cursor-pointer'
+                            color={variant === 'accent' ? '#ea580c' : '#16a34a'}
+                            width={16}
+                            height={16}
+                        />
+                    </div>
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
                     <Tooltip.Content
