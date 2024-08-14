@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Header } from '@/components/layout/Header.tsx'
 import PageSkeleton from '@/components/skeleton/PageSkeleton.tsx'
 import ScrollHiddenNavTab from '@/components/layout/ScrollHiddenNavTab.tsx'
+import { Toaster } from '@/components/ui/toaster.tsx'
 
 const AppLayout: React.FC = () => {
     return (
@@ -16,6 +17,7 @@ const AppLayout: React.FC = () => {
                 </div>
             </div>
             <ScrollHiddenNavTab />
+            <Toaster />
         </>
     )
 }

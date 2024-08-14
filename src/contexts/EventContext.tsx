@@ -24,6 +24,7 @@ import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { setAddressToRequest } from '@/lib/authenticate.ts'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import { useToast } from '@/components/ui/use-toast.ts'
 
 interface EventContextType {
     formStatus: ESide
@@ -83,6 +84,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     const { orderBookEvent, subscribe } = useEventWebSocket()
     const { userAddress } = useAuthContext()
+    const { toast } = useToast()
+
     const changeForm = (status: ESide) => {
         setFormStatus(status)
     }
@@ -235,10 +238,17 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             setAddressToRequest(userAddress)
             const response = await request.order(payload)
             if (response) {
-                console.log(response)
+                toast({
+                    variant: 'success',
+                    title: 'Successful purchase!'
+                })
             }
-        } catch (err) {
-            console.log(err)
+        } catch (err: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Purchase failed!',
+                description: JSON.parse(err.message)[0] ?? ''
+            })
         }
     }
 
