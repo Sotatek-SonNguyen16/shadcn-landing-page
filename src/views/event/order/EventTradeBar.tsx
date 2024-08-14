@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
-import { Order } from '@/types'
+import { EFormType, Order } from '@/types'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
+import { useEventContext } from '@/contexts/EventContext.tsx'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
-    data: Order[] | undefined
+    data: Order[] | null
 }
 
 interface OrderWithTotal extends Order {
@@ -17,6 +18,7 @@ interface OrderWithTotal extends Order {
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     const { variant, data } = props
+    const { handleSelectOrder, changeType } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
 
@@ -80,7 +82,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
         )
     }, [calculatedOrders])
 
-    const handleClickEventTradeBar = () => {
+    const handleClickEventTradeBar = (order: Order) => {
+        handleSelectOrder(order)
+        changeType(EFormType.LIMIT)
         if (!isLargerThan('lg')) {
             openDrawer({
                 content: <SaleDrawer />
@@ -94,7 +98,6 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                 'flex-col': variant === 'accent',
                 'flex-col-reverse': variant === 'success'
             })}
-            onClick={() => handleClickEventTradeBar()}
         >
             {calculatedOrders &&
                 calculatedOrders
@@ -112,6 +115,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                     'hover:bg-red-100 hover:dark:bg-red-500/30':
                                         variant === 'accent'
                                 })}
+                                onClick={() =>
+                                    handleClickEventTradeBar({ size, price })
+                                }
                             >
                                 <div
                                     style={{

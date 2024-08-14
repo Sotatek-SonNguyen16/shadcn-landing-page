@@ -148,7 +148,7 @@ export class BaseWebSocketImpl<
     }
 
     public close(): void {
-        if (this.socket) {
+        if (this.socket?.connected) {
             this.socket.disconnect()
             this.socket = null
         }

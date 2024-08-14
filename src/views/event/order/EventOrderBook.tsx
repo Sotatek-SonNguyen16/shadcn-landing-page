@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
@@ -8,23 +8,9 @@ import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton
 
 const EventOrderBook: React.FC = () => {
     const { betOption, currentMarket, selectedMarketId } = useEventContext()
-    const { orderBookEvent, subscribe } = useEventWebSocket()
+    const { orderBookEvent } = useEventWebSocket()
     const containerRef = useRef<HTMLDivElement>(null)
     const centerRef = useRef<HTMLDivElement>(null)
-
-    const subscribeToMarket = useCallback(() => {
-        if (currentMarket?.clobTokenIds) {
-            subscribe([
-                betOption === EBetOption.YES
-                    ? currentMarket.clobTokenIds[0]
-                    : currentMarket.clobTokenIds[1]
-            ])
-        }
-    }, [betOption, currentMarket?.clobTokenIds])
-
-    useEffect(() => {
-        subscribeToMarket()
-    }, [subscribeToMarket])
 
     const formatterEuro = useMemo(
         () =>

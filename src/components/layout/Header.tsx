@@ -17,6 +17,7 @@ import { LogoIcon } from '@/components/Icons.tsx'
 import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
 import SearchBar from '@/components/layout/SearchBar.tsx'
 import { clsx } from 'clsx'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
 interface RouteProps {
     icon: JSX.Element
@@ -48,6 +49,7 @@ const routeList: RouteProps[] = [
 ]
 
 export const Header = () => {
+    const { isLogin, handleLogin, handleLogout } = useAuthContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     return (
         <header
@@ -105,30 +107,45 @@ export const Header = () => {
                                             </a>
                                         )
                                     )}
-                                    <a
-                                        rel='noreferrer noopener'
-                                        href='#'
-                                        target='_blank'
-                                        className={`w-[110px] border ${buttonVariants(
-                                            {
-                                                variant: 'secondary'
-                                            }
-                                        )}`}
-                                    >
-                                        Login
-                                    </a>
-                                    <a
-                                        rel='noreferrer noopener'
-                                        href='#'
-                                        target='_blank'
-                                        className={`w-[110px] border ${buttonVariants(
-                                            {
-                                                variant: 'primary'
-                                            }
-                                        )}`}
-                                    >
-                                        Sign Up
-                                    </a>
+                                    {!isLogin ? (
+                                        <>
+                                            <div
+                                                className={`w-[110px] border ${buttonVariants(
+                                                    {
+                                                        variant: 'secondary'
+                                                    }
+                                                )}`}
+                                                onClick={handleLogin}
+                                            >
+                                                Login
+                                            </div>
+                                            <a
+                                                rel='noreferrer noopener'
+                                                href='#'
+                                                target='_blank'
+                                                className={`w-[110px] border ${buttonVariants(
+                                                    {
+                                                        variant: 'primary'
+                                                    }
+                                                )}`}
+                                            >
+                                                Sign Up
+                                            </a>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div
+                                                className={`w-[110px] border ${buttonVariants(
+                                                    {
+                                                        variant: 'outline'
+                                                    }
+                                                )}`}
+                                                onClick={handleLogout}
+                                            >
+                                                Logout
+                                            </div>
+                                        </>
+                                    )}
                                 </nav>
                             </SheetContent>
                         </Sheet>
@@ -143,22 +160,45 @@ export const Header = () => {
                     </div>
 
                     <div className='hidden lg:flex gap-2 items-center'>
-                        <a
-                            rel='noreferrer noopener'
-                            href='#'
-                            target='_blank'
-                            className={`border ${buttonVariants({ variant: 'secondary' })}`}
-                        >
-                            Login
-                        </a>
-                        <a
-                            rel='noreferrer noopener'
-                            href='#'
-                            target='_blank'
-                            className={`border ${buttonVariants({ variant: 'primary' })}`}
-                        >
-                            Sign Up
-                        </a>
+                        {!isLogin ? (
+                            <>
+                                <div
+                                    className={`w-[110px] border ${buttonVariants(
+                                        {
+                                            variant: 'secondary'
+                                        }
+                                    )}`}
+                                    onClick={handleLogin}
+                                >
+                                    Login
+                                </div>
+                                <a
+                                    rel='noreferrer noopener'
+                                    href='#'
+                                    target='_blank'
+                                    className={`w-[110px] border ${buttonVariants(
+                                        {
+                                            variant: 'primary'
+                                        }
+                                    )}`}
+                                >
+                                    Sign Up
+                                </a>
+                            </>
+                        ) : (
+                            <>
+                                <div
+                                    className={`w-[110px] border ${buttonVariants(
+                                        {
+                                            variant: 'outline'
+                                        }
+                                    )}`}
+                                    onClick={handleLogout}
+                                >
+                                    Logout
+                                </div>
+                            </>
+                        )}
                         <ModeToggle />
                     </div>
                 </div>

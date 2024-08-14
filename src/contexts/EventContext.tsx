@@ -1,6 +1,7 @@
 import React, {
     createContext,
     ReactNode,
+    useCallback,
     useContext,
     useEffect,
     useState
@@ -12,9 +13,12 @@ import {
     ESide,
     Market,
     MarketDetail,
+    Order,
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
+import { OrderRequestBody } from '@/types/request.ts'
+import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 
 interface EventContextType {
     formStatus: ESide
@@ -32,6 +36,9 @@ interface EventContextType {
     handleSelectMarket: (id: string) => void
     currentMarket: MarketDetail | null
     selectedMarketId: string
+    selectedOrder: Order | null
+    handleSelectOrder: (order: Order | null) => void
+    handleOrder: (payload: OrderRequestBody) => void
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -64,6 +71,9 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     )
     const [betOption, setBetOption] = useState<EBetOption>(EBetOption.YES)
 
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    const { orderBookEvent, subscribe } = useEventWebSocket()
+
     const changeForm = (status: ESide) => {
         setFormStatus(status)
     }
@@ -83,6 +93,10 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const handleSelectMarket = (id: string) => {
         if (id === '') return
         setSelectedMarketId(id)
+    }
+
+    const handleSelectOrder = (order: Order | null) => {
+        setSelectedOrder(order)
     }
 
     useEffect(() => {
@@ -128,6 +142,47 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         if (selectedMarketId) fetchMarket(selectedMarketId)
     }, [request, selectedMarketId])
 
+    const subscribeToMarket = useCallback(() => {
+        if (currentMarket?.clobTokenIds) {
+            subscribe([
+                betOption === EBetOption.YES
+                    ? currentMarket.clobTokenIds[0]
+                    : currentMarket.clobTokenIds[1]
+            ])
+        }
+    }, [betOption, currentMarket?.clobTokenIds])
+
+    useEffect(() => {
+        subscribeToMarket()
+    }, [subscribeToMarket])
+
+    useEffect(() => {
+        if (formStatus === ESide.BUY) {
+            handleSelectOrder(
+                orderBookEvent?.asks.length
+                    ? orderBookEvent.asks[orderBookEvent.asks.length - 1]
+                    : null
+            )
+        } else {
+            handleSelectOrder(
+                orderBookEvent?.bids.length
+                    ? orderBookEvent.bids[orderBookEvent.bids.length - 1]
+                    : null
+            )
+        }
+    }, [formStatus, orderBookEvent])
+
+    const handleOrder = async (payload: OrderRequestBody) => {
+        try {
+            const response = await request.order(payload)
+            if (response) {
+                console.log(response)
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     return (
         <EventContext.Provider
             value={{
@@ -145,7 +200,10 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 loading,
                 handleSelectMarket,
                 currentMarket,
-                selectedMarketId
+                selectedMarketId,
+                selectedOrder,
+                handleSelectOrder,
+                handleOrder
             }}
         >
             {children}

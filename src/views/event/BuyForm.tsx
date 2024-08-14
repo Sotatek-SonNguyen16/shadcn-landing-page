@@ -1,14 +1,82 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
 import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import { EBetOption, EFormType } from '@/types'
+import { EBetOption, EFormType, ESide } from '@/types'
+import { Tooltip } from '@/components/ui/tooltip.tsx'
+import { Resolver, useForm } from 'react-hook-form'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
+
+type FormValues = {
+    amount: number
+    size: number
+}
+
+const resolver: Resolver<FormValues> = async (values) => {
+    const errors: any = {}
+
+    if (
+        values.amount === undefined ||
+        values.amount === null ||
+        isNaN(values.amount) ||
+        values.amount <= 0
+    ) {
+        errors.amount = {
+            type: 'required',
+            message: 'Amount is required and must be a positive number.'
+        }
+    }
+
+    if (
+        values.size === undefined ||
+        values.size === null ||
+        isNaN(values.size) ||
+        values.size <= 0
+    ) {
+        errors.size = {
+            type: 'required',
+            message: 'Size is required and must be a positive number.'
+        }
+    }
+
+    return {
+        values: Object.keys(errors).length ? {} : values,
+        errors: errors
+    }
+}
 
 const BuyForm: React.FC = () => {
-    const { formType, betOption, currentMarket, changeBetOption } =
-        useEventContext()
+    const {
+        formType,
+        betOption,
+        formStatus,
+        currentMarket,
+        changeBetOption,
+        selectedOrder,
+        handleOrder
+    } = useEventContext()
+    const { isLogin, userAddress } = useAuthContext()
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+        watch
+    } = useForm<FormValues>({ resolver })
+    const onSubmit = handleSubmit((data) => {
+        handleOrder({
+            userAddress: userAddress ?? '',
+            assetId:
+                formStatus === ESide.BUY
+                    ? (currentMarket?.clobTokenIds[0] ?? '')
+                    : (currentMarket?.clobTokenIds[1] ?? ''),
+            side: formStatus,
+            price: data.amount,
+            size: data.size
+        })
+    })
 
     const formatterEuro = useMemo(
         () =>
@@ -16,41 +84,129 @@ const BuyForm: React.FC = () => {
                 style: 'currency',
                 currency: 'EUR',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 2
+                maximumFractionDigits: 1
             }),
         []
     )
+
+    const formatterUSD = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }),
+        []
+    )
+
+    const amount = watch('amount')
+    const size = watch('size')
+
+    useEffect(() => {
+        setValue(
+            'amount',
+            Number(((selectedOrder?.price ?? 0) * 100).toFixed(1))
+        )
+        setValue('size', selectedOrder?.size ?? 0)
+    }, [selectedOrder?.price, selectedOrder?.size, setValue])
 
     const formFields = {
         [EFormType.MARKET]: (
             <>
                 <div className={`mb-3`}>
-                    <div>
-                        <div className={`mb-2 font-semibold`}>Amount</div>
+                    <form id='marketForm' onSubmit={onSubmit}>
+                        <div className='flex justify-between items-center mb-1'>
+                            <div className={`mb-2 font-semibold`}>Amount</div>
+                            <div className='flex gap-1 items-center justify-center'>
+                                <div className='text-[14px] font-semibold rounded-2xl bg-gray-100 py-1 px-2'>
+                                    Balance $0.00
+                                </div>
+                                <Button
+                                    className='rounded-2xl'
+                                    variant='default'
+                                    size={'iconGroup'}
+                                    type={`button`}
+                                >
+                                    Max
+                                </Button>
+                            </div>
+                        </div>
                         <div
-                            className={`flex justify-around px-3 py-2 border border-gray-300 rounded-lg`}
+                            className={clsx(
+                                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
+                                { 'border-red-500': errors?.amount }
+                            )}
                         >
-                            <IconButton>
-                                <Minus width={15} height={15} />
-                            </IconButton>
+                            <Button
+                                variant={`secondary`}
+                                size={`icon`}
+                                type={`button`}
+                                onClick={() => {
+                                    setValue(
+                                        'amount',
+                                        Number(
+                                            (amount > 10
+                                                ? amount - 10
+                                                : amount
+                                            ).toFixed(1)
+                                        )
+                                    )
+                                }}
+                            >
+                                <Tooltip
+                                    trigger={<Minus width={15} height={15} />}
+                                    content='-$10'
+                                />
+                            </Button>
                             <input
                                 className={clsx(
                                     'text-center bg-background text-primary placeholder-gray-400',
                                     'border-none outline-none',
                                     'focus:outline-none'
                                 )}
-                                placeholder={`$0`}
+                                placeholder='$0'
+                                {...register('amount')}
                             />
-                            <IconButton>
-                                <Plus width={15} height={15} />
-                            </IconButton>
+                            <Button
+                                variant={`secondary`}
+                                size={`icon`}
+                                type={`button`}
+                                onClick={() =>
+                                    setValue(
+                                        'amount',
+                                        Number((amount + 10).toFixed(1))
+                                    )
+                                }
+                            >
+                                <Tooltip
+                                    trigger={<Plus width={15} height={15} />}
+                                    content='+$10'
+                                />
+                            </Button>
                         </div>
-                    </div>
+                        {errors?.amount && (
+                            <p className='text-red-600'>
+                                {errors.amount.message}
+                            </p>
+                        )}
+                    </form>
                 </div>
                 <div className={'flex mb-3'}>
-                    <Button className={`flex-1`} variant={`primary`}>
-                        Login
-                    </Button>
+                    {isLogin ? (
+                        <Button
+                            form='marketForm'
+                            className={`flex-1`}
+                            variant={`primary`}
+                            type={`submit`}
+                        >
+                            Buy
+                        </Button>
+                    ) : (
+                        <Button className={`flex-1`} variant={`primary`}>
+                            Login
+                        </Button>
+                    )}
                 </div>
                 <div>
                     <DataList.Root>
@@ -65,7 +221,10 @@ const BuyForm: React.FC = () => {
                                     <span
                                         className={`border-dotted border-b-2 border-sky-500 cursor-pointer`}
                                     >
-                                        0.0#
+                                        {formatterEuro.format(
+                                            Number(selectedOrder?.price ?? 0) *
+                                                100
+                                        )}
                                     </span>
                                 </div>
                             </DataList.Value>
@@ -75,18 +234,23 @@ const BuyForm: React.FC = () => {
                                 Shares
                             </DataList.Label>
                             <DataList.Value>
-                                <div className={`w-full text-end`}>0.0#</div>
+                                <div className={`w-full text-end`}>
+                                    {`${(
+                                        amount /
+                                        Number(selectedOrder?.price ?? 1)
+                                    ).toFixed(2)}`}
+                                </div>
                             </DataList.Value>
                         </DataList.Item>
                         <DataList.Item align='center'>
                             <DataList.Label minWidth='88px'>
-                                Potential
+                                Potential return
                             </DataList.Label>
                             <DataList.Value>
                                 <div
-                                    className={`w-full text-end text-green-500`}
+                                    className={`w-full text-end text-green-600`}
                                 >
-                                    0.0#
+                                    {formatterUSD.format(0.0)} (0.00%)
                                 </div>
                             </DataList.Value>
                         </DataList.Item>
@@ -96,36 +260,101 @@ const BuyForm: React.FC = () => {
         ),
         [EFormType.LIMIT]: (
             <>
-                <div className={`flex flex-col gap-3 mb-3`}>
+                <form
+                    className={`flex flex-col gap-3 mb-3`}
+                    id='limitForm'
+                    onSubmit={onSubmit}
+                >
                     <div>
                         <div className={`mb-2 font-semibold`}>Limit Price</div>
                         <div
-                            className={`flex justify-around px-3 py-2 border border-gray-300 rounded-lg`}
+                            className={clsx(
+                                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
+                                { 'border-red-500': errors?.amount }
+                            )}
                         >
-                            <IconButton>
-                                <Minus width={15} height={15} />
-                            </IconButton>
+                            <Button
+                                variant={`secondary`}
+                                size={`icon`}
+                                type={`button`}
+                                onClick={() => {
+                                    setValue(
+                                        'amount',
+                                        Number(
+                                            (amount > 1
+                                                ? amount - 1
+                                                : amount
+                                            ).toFixed(1)
+                                        )
+                                    )
+                                }}
+                            >
+                                <Tooltip
+                                    trigger={<Minus width={15} height={15} />}
+                                    content='-$1'
+                                />
+                            </Button>
                             <input
                                 className={clsx(
                                     'text-center bg-background text-primary placeholder-gray-400',
                                     'border-none outline-none',
                                     'focus:outline-none'
                                 )}
-                                placeholder={`$0`}
+                                placeholder='$0'
+                                {...register('amount')}
                             />
-                            <IconButton>
-                                <Plus width={15} height={15} />
-                            </IconButton>
+                            <Button
+                                variant={`secondary`}
+                                size={`icon`}
+                                type={`button`}
+                                onClick={() =>
+                                    setValue(
+                                        'amount',
+                                        Number((amount + 1).toFixed(1))
+                                    )
+                                }
+                            >
+                                <Tooltip
+                                    trigger={<Plus width={15} height={15} />}
+                                    content='+$1'
+                                />
+                            </Button>
                         </div>
+                        {errors?.amount && (
+                            <p className='text-red-600'>
+                                {errors.amount.message}
+                            </p>
+                        )}
                     </div>
                     <div>
                         <div className={`mb-2 font-semibold`}>Shares</div>
                         <div
-                            className={`flex justify-around px-3 py-2 border border-gray-300 rounded-lg`}
+                            className={clsx(
+                                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
+                                { 'border-red-500': errors?.size }
+                            )}
                         >
-                            <IconButton>
-                                <Minus width={15} height={15} />
-                            </IconButton>
+                            <Button
+                                variant={`secondary`}
+                                size={`icon`}
+                                type={`button`}
+                                onClick={() => {
+                                    setValue(
+                                        'size',
+                                        Number(
+                                            (size > 10
+                                                ? size - 10
+                                                : size
+                                            ).toFixed(1)
+                                        )
+                                    )
+                                }}
+                            >
+                                <Tooltip
+                                    trigger={<Plus width={15} height={15} />}
+                                    content='-10'
+                                />
+                            </Button>
                             <input
                                 className={clsx(
                                     'text-center bg-background text-primary placeholder-gray-400',
@@ -133,21 +362,51 @@ const BuyForm: React.FC = () => {
                                     'focus:outline-none'
                                 )}
                                 placeholder={`$0`}
+                                {...register('size')}
                             />
-                            <IconButton>
-                                <Plus width={15} height={15} />
-                            </IconButton>
+                            <Button
+                                variant={`secondary`}
+                                size={`icon`}
+                                type={`button`}
+                                onClick={() =>
+                                    setValue(
+                                        'size',
+                                        Number((size + 10).toFixed(1))
+                                    )
+                                }
+                            >
+                                <Tooltip
+                                    trigger={<Plus width={15} height={15} />}
+                                    content='+10'
+                                />
+                            </Button>
                         </div>
+                        {errors?.size && (
+                            <p className='text-red-600'>
+                                {errors.size.message}
+                            </p>
+                        )}
                     </div>
                     <div className={`flex justify-between items-center`}>
                         <div className={`font-semibold`}>Set Expiration</div>
                         <Checkbox size='3' defaultChecked />
                     </div>
-                </div>
+                </form>
                 <div className={'flex mb-3'}>
-                    <Button className={`flex-1`} variant={`primary`}>
-                        Login
-                    </Button>
+                    {isLogin ? (
+                        <Button
+                            form='limitForm'
+                            className={`flex-1`}
+                            variant={`primary`}
+                            type={`submit`}
+                        >
+                            Buy
+                        </Button>
+                    ) : (
+                        <Button className={`flex-1`} variant={`primary`}>
+                            Login
+                        </Button>
+                    )}
                 </div>
                 <div>
                     <DataList.Root>
@@ -241,7 +500,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[0]) * 100))}`}
+                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[0]) * 100)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -252,7 +511,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[1]) * 100))}`}
+                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[1]) * 100)}`}
                 </Button>
             </div>
             {_renderFormField()}

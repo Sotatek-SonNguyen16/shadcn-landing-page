@@ -2,5 +2,6 @@
   "app": {
     "apiUrl": "https://dev-prediction-market.sotatek.works/api/v1",
     "wws": "wss://dev-prediction-market.sotatek.works"
-  }
+  },
+  "address": "0x57a56D747D4466c8b3B8E69C30Eb8c875433dbC6"
 }

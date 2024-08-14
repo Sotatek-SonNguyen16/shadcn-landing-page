@@ -7,8 +7,13 @@ import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, EFormType } from '@/types'
 
 const SellForm: React.FC = () => {
-    const { formType, betOption, changeBetOption, currentMarket } =
-        useEventContext()
+    const {
+        formType,
+        betOption,
+        changeBetOption,
+        currentMarket,
+        selectedOrder
+    } = useEventContext()
 
     const formatterEuro = useMemo(
         () =>
@@ -16,7 +21,7 @@ const SellForm: React.FC = () => {
                 style: 'currency',
                 currency: 'EUR',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 2
+                maximumFractionDigits: 1
             }),
         []
     )
@@ -40,6 +45,7 @@ const SellForm: React.FC = () => {
                                     'focus:outline-none'
                                 )}
                                 placeholder={`$0`}
+                                defaultValue={selectedOrder?.price}
                             />
                             <IconButton>
                                 <Plus width={15} height={15} />
@@ -217,7 +223,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[0]) * 100))}`}
+                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[0]) * 100)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -228,7 +234,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[1]) * 100))}`}
+                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[1]) * 100)}`}
                 </Button>
             </div>
             {_renderFormField()}
