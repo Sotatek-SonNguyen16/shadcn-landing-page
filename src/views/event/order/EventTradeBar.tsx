@@ -168,7 +168,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 </div>
                                 <div
                                     className={clsx(
-                                        'relative',
+                                        'flex justify-center gap-2 items-center',
                                         'text-center font-semibold py-2 text-[14px] lg:text-[16px]',
                                         {
                                             'text-green-500':
@@ -178,7 +178,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                         }
                                     )}
                                 >
-                                    <div className='absolute ms-6'>
+                                    <div className='h-auto'>
                                         <ActiveOrderTooltip
                                             activeOrder={activeOrder}
                                             variant={variant}

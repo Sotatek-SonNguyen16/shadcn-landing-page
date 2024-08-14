@@ -8,7 +8,7 @@ import { ArrowRightLeft, Minus, Plus, Settings } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { useForm } from 'react-hook-form'
-import { Tooltip } from '@/components/ui/tooltip.tsx'
+import TooltipIcon from '@/components/TooltipIcon.tsx'
 
 const InputHorizontal: React.FC<{ label: string; content: JSX.Element }> = ({
     content,
@@ -193,7 +193,7 @@ const SaleDrawer: React.FC = () => {
                                             updateValue('amount', -1)
                                         }
                                     >
-                                        <Tooltip
+                                        <TooltipIcon
                                             trigger={
                                                 <Minus width={15} height={15} />
                                             }
@@ -215,7 +215,7 @@ const SaleDrawer: React.FC = () => {
                                         type={`button`}
                                         onClick={() => updateValue('amount', 1)}
                                     >
-                                        <Tooltip
+                                        <TooltipIcon
                                             trigger={
                                                 <Plus width={15} height={15} />
                                             }

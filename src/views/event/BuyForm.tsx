@@ -5,7 +5,7 @@ import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
 import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
-import { Tooltip } from '@/components/ui/tooltip.tsx'
+import TooltipIcon from '@/components/TooltipIcon.tsx'
 import { useForm } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
@@ -113,7 +113,7 @@ const BuyForm: React.FC = () => {
                                 type={`button`}
                                 onClick={() => updateValue('amount', -10)}
                             >
-                                <Tooltip
+                                <TooltipIcon
                                     trigger={<Minus width={15} height={15} />}
                                     content='-$10'
                                 />
@@ -133,7 +133,7 @@ const BuyForm: React.FC = () => {
                                 type={`button`}
                                 onClick={() => updateValue('amount', 10)}
                             >
-                                <Tooltip
+                                <TooltipIcon
                                     trigger={<Plus width={15} height={15} />}
                                     content='+$10'
                                 />
@@ -233,7 +233,7 @@ const BuyForm: React.FC = () => {
                                 type={`button`}
                                 onClick={() => updateValue('amount', -1)}
                             >
-                                <Tooltip
+                                <TooltipIcon
                                     trigger={<Minus width={15} height={15} />}
                                     content='-$1'
                                 />
@@ -253,7 +253,7 @@ const BuyForm: React.FC = () => {
                                 type={`button`}
                                 onClick={() => updateValue('amount', 1)}
                             >
-                                <Tooltip
+                                <TooltipIcon
                                     trigger={<Plus width={15} height={15} />}
                                     content='+$1'
                                 />
@@ -279,7 +279,7 @@ const BuyForm: React.FC = () => {
                                 type={`button`}
                                 onClick={() => updateValue('size', -10)}
                             >
-                                <Tooltip
+                                <TooltipIcon
                                     trigger={<Plus width={15} height={15} />}
                                     content='-10'
                                 />
@@ -299,7 +299,7 @@ const BuyForm: React.FC = () => {
                                 type={`button`}
                                 onClick={() => updateValue('size', 10)}
                             >
-                                <Tooltip
+                                <TooltipIcon
                                     trigger={<Plus width={15} height={15} />}
                                     content='+10'
                                 />
