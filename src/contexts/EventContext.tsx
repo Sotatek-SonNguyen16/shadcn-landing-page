@@ -14,11 +14,13 @@ import {
     Market,
     MarketDetail,
     Order,
+    OrderFormValues,
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
 import { OrderRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
+import { FieldErrors, Resolver } from 'react-hook-form'
 
 interface EventContextType {
     formStatus: ESide
@@ -39,6 +41,7 @@ interface EventContextType {
     selectedOrder: Order | null
     handleSelectOrder: (order: Order | null) => void
     handleOrder: (payload: OrderRequestBody) => void
+    resolver: Resolver<OrderFormValues>
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -172,6 +175,29 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
     }, [formStatus, orderBookEvent])
 
+    const resolver: Resolver<OrderFormValues> = async (values) => {
+        const errors: FieldErrors<OrderFormValues> = {}
+
+        if (!values.amount || isNaN(values.amount) || values.amount <= 0) {
+            errors.amount = {
+                type: 'required',
+                message: 'Amount is required and must be a positive number.'
+            }
+        }
+
+        if (!values.size || isNaN(values.size) || values.size < 5) {
+            errors.size = {
+                type: 'required',
+                message: 'Size is required and must be larger 5.'
+            }
+        }
+
+        return {
+            values: Object.keys(errors).length ? {} : values,
+            errors
+        }
+    }
+
     const handleOrder = async (payload: OrderRequestBody) => {
         try {
             const response = await request.order(payload)
@@ -203,7 +229,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 selectedMarketId,
                 selectedOrder,
                 handleSelectOrder,
-                handleOrder
+                handleOrder,
+                resolver
             }}
         >
             {children}

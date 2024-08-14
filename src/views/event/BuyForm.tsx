@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
@@ -6,41 +6,8 @@ import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
 import { Tooltip } from '@/components/ui/tooltip.tsx'
-import { FieldErrors, Resolver, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
-
-const resolver: Resolver<OrderFormValues> = async (values) => {
-    const errors: FieldErrors = {}
-
-    if (
-        values.amount === undefined ||
-        values.amount === null ||
-        isNaN(values.amount) ||
-        values.amount <= 0
-    ) {
-        errors.amount = {
-            type: 'required',
-            message: 'Amount is required and must be a positive number.'
-        }
-    }
-
-    if (
-        values.size === undefined ||
-        values.size === null ||
-        isNaN(values.size) ||
-        values.size <= 0
-    ) {
-        errors.size = {
-            type: 'required',
-            message: 'Size is required and must be a positive number.'
-        }
-    }
-
-    return {
-        values: Object.keys(errors).length ? {} : values,
-        errors: errors
-    }
-}
 
 const BuyForm: React.FC = () => {
     const {
@@ -50,7 +17,8 @@ const BuyForm: React.FC = () => {
         currentMarket,
         changeBetOption,
         selectedOrder,
-        handleOrder
+        handleOrder,
+        resolver
     } = useEventContext()
     const { isLogin, userAddress } = useAuthContext()
     const {
@@ -96,7 +64,6 @@ const BuyForm: React.FC = () => {
     )
 
     const amount = Number(watch('amount'))
-    const size = Number(watch('size'))
 
     useEffect(() => {
         setValue(
@@ -105,6 +72,13 @@ const BuyForm: React.FC = () => {
         )
         setValue('size', selectedOrder?.size ?? 0)
     }, [selectedOrder?.price, selectedOrder?.size, setValue])
+
+    const updateValue = useCallback(
+        (field: keyof OrderFormValues, delta: number) => {
+            setValue(field, Number((Number(watch(field)) + delta).toFixed(1)))
+        },
+        [setValue, watch]
+    )
 
     const formFields = {
         [EFormType.MARKET]: (
@@ -137,17 +111,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() => {
-                                    setValue(
-                                        'amount',
-                                        Number(
-                                            (amount > 10
-                                                ? amount - 10
-                                                : amount
-                                            ).toFixed(1)
-                                        )
-                                    )
-                                }}
+                                onClick={() => updateValue('amount', -10)}
                             >
                                 <Tooltip
                                     trigger={<Minus width={15} height={15} />}
@@ -167,12 +131,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() =>
-                                    setValue(
-                                        'amount',
-                                        Number((amount + 10).toFixed(1))
-                                    )
-                                }
+                                onClick={() => updateValue('amount', 10)}
                             >
                                 <Tooltip
                                     trigger={<Plus width={15} height={15} />}
@@ -272,17 +231,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() => {
-                                    setValue(
-                                        'amount',
-                                        Number(
-                                            (amount > 1
-                                                ? amount - 1
-                                                : amount
-                                            ).toFixed(1)
-                                        )
-                                    )
-                                }}
+                                onClick={() => updateValue('amount', -1)}
                             >
                                 <Tooltip
                                     trigger={<Minus width={15} height={15} />}
@@ -302,12 +251,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() =>
-                                    setValue(
-                                        'amount',
-                                        Number((amount + 1).toFixed(1))
-                                    )
-                                }
+                                onClick={() => updateValue('amount', 1)}
                             >
                                 <Tooltip
                                     trigger={<Plus width={15} height={15} />}
@@ -333,17 +277,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() => {
-                                    setValue(
-                                        'size',
-                                        Number(
-                                            (size > 10
-                                                ? size - 10
-                                                : size
-                                            ).toFixed(1)
-                                        )
-                                    )
-                                }}
+                                onClick={() => updateValue('size', -10)}
                             >
                                 <Tooltip
                                     trigger={<Plus width={15} height={15} />}
@@ -363,7 +297,7 @@ const BuyForm: React.FC = () => {
                                 variant={`secondary`}
                                 size={`icon`}
                                 type={`button`}
-                                onClick={() => setValue('size', size + 10)}
+                                onClick={() => updateValue('size', 10)}
                             >
                                 <Tooltip
                                     trigger={<Plus width={15} height={15} />}
@@ -459,9 +393,10 @@ const BuyForm: React.FC = () => {
         )
     }
 
-    const _renderFormField = () => {
-        return formFields[formType]
-    }
+    const _renderFormField = useMemo(
+        () => formFields[formType],
+        [formFields, formType]
+    )
 
     return (
         <div className={clsx('p-6')}>
@@ -504,7 +439,7 @@ const BuyForm: React.FC = () => {
                     {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[1]) * 100)}`}
                 </Button>
             </div>
-            {_renderFormField()}
+            {_renderFormField}
         </div>
     )
 }

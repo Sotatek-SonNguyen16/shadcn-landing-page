@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
 import { useEventContext } from '@/contexts/EventContext.tsx'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { ArrowRightLeft, Minus, Plus, Settings } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
-import { FieldErrors, Resolver, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Tooltip } from '@/components/ui/tooltip.tsx'
 
 const InputHorizontal: React.FC<{ label: string; content: JSX.Element }> = ({
@@ -28,39 +28,6 @@ enum ExpirationType {
     Custom = 'Custom'
 }
 
-const resolver: Resolver<OrderFormValues> = async (values) => {
-    const errors: FieldErrors = {}
-
-    if (
-        values.amount === undefined ||
-        values.amount === null ||
-        isNaN(values.amount) ||
-        values.amount <= 0
-    ) {
-        errors.amount = {
-            type: 'required',
-            message: 'Amount is required and must be a positive number.'
-        }
-    }
-
-    if (
-        values.size === undefined ||
-        values.size === null ||
-        isNaN(values.size) ||
-        values.size <= 0
-    ) {
-        errors.size = {
-            type: 'required',
-            message: 'Size is required and must be a positive number.'
-        }
-    }
-
-    return {
-        values: Object.keys(errors).length ? {} : values,
-        errors: errors
-    }
-}
-
 const SaleDrawer: React.FC = () => {
     const {
         changeForm,
@@ -71,7 +38,8 @@ const SaleDrawer: React.FC = () => {
         changeBetOption,
         currentMarket,
         handleOrder,
-        selectedOrder
+        selectedOrder,
+        resolver
     } = useEventContext()
     const formTypeList: EFormType[] = Object.values(EFormType)
     const { openDrawer } = useDrawerContext()
@@ -111,8 +79,6 @@ const SaleDrawer: React.FC = () => {
         []
     )
 
-    const amount = Number(watch('amount'))
-
     useEffect(() => {
         setValue(
             'amount',
@@ -120,6 +86,13 @@ const SaleDrawer: React.FC = () => {
         )
         setValue('size', selectedOrder?.size ?? 0)
     }, [selectedOrder?.price, selectedOrder?.size, setValue])
+
+    const updateValue = useCallback(
+        (field: keyof OrderFormValues, delta: number) => {
+            setValue(field, Number((Number(watch(field)) + delta).toFixed(1)))
+        },
+        [setValue, watch]
+    )
 
     return (
         <DrawerProvider>
@@ -216,17 +189,9 @@ const SaleDrawer: React.FC = () => {
                                         variant={`secondary`}
                                         size={`icon`}
                                         type={`button`}
-                                        onClick={() => {
-                                            setValue(
-                                                'amount',
-                                                Number(
-                                                    (amount > 1
-                                                        ? amount - 1
-                                                        : amount
-                                                    ).toFixed(1)
-                                                )
-                                            )
-                                        }}
+                                        onClick={() =>
+                                            updateValue('amount', -1)
+                                        }
                                     >
                                         <Tooltip
                                             trigger={
@@ -248,12 +213,7 @@ const SaleDrawer: React.FC = () => {
                                         variant={`secondary`}
                                         size={`icon`}
                                         type={`button`}
-                                        onClick={() =>
-                                            setValue(
-                                                'amount',
-                                                Number((amount + 1).toFixed(1))
-                                            )
-                                        }
+                                        onClick={() => updateValue('amount', 1)}
                                     >
                                         <Tooltip
                                             trigger={

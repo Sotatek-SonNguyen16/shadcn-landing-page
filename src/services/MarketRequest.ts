@@ -20,7 +20,7 @@ export default class MarketRequest extends BaseRequest {
     }
 
     async order(payload: OrderRequestBody) {
-        const url = `/order`
+        const url = `/orders`
         return await this.post<OrderResponse>(url, payload)
     }
 }
