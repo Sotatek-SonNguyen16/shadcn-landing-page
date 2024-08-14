@@ -4,17 +4,12 @@ import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
 import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import { EBetOption, EFormType, ESide } from '@/types'
+import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
 import { Tooltip } from '@/components/ui/tooltip.tsx'
 import { FieldErrors, Resolver, useForm } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
-type FormValues = {
-    amount: number
-    size: number
-}
-
-const resolver: Resolver<FormValues> = async (values) => {
+const resolver: Resolver<OrderFormValues> = async (values) => {
     const errors: FieldErrors = {}
 
     if (
@@ -64,7 +59,7 @@ const BuyForm: React.FC = () => {
         formState: { errors },
         setValue,
         watch
-    } = useForm<FormValues>({ resolver })
+    } = useForm<OrderFormValues>({ resolver })
     const onSubmit = handleSubmit((data) => {
         handleOrder({
             userAddress: userAddress ?? '',

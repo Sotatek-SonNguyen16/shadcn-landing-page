@@ -234,6 +234,11 @@ interface PolyMarketDetail {
     markets: Market[]
 }
 
+type OrderFormValues = {
+    amount: number
+    size: number
+}
+
 export type {
     PriceChangeEvent,
     Order,
@@ -241,7 +246,8 @@ export type {
     PredictionMarket,
     MarketDetail,
     Market,
-    PolyMarketDetail
+    PolyMarketDetail,
+    OrderFormValues
 }
 
 export { EFormType, EMarketDepth, ESide, EBetOption, EEventType }

@@ -1,11 +1,14 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
-import { EBetOption, EFormType, ESide } from '@/types'
+import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import FormSelect from '@/components/FormSelect.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { ArrowRightLeft, Minus, Plus, Settings } from 'lucide-react'
 import { clsx } from 'clsx'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import { FieldErrors, Resolver, useForm } from 'react-hook-form'
+import { Tooltip } from '@/components/ui/tooltip.tsx'
 
 const InputHorizontal: React.FC<{ label: string; content: JSX.Element }> = ({
     content,
@@ -25,6 +28,39 @@ enum ExpirationType {
     Custom = 'Custom'
 }
 
+const resolver: Resolver<OrderFormValues> = async (values) => {
+    const errors: FieldErrors = {}
+
+    if (
+        values.amount === undefined ||
+        values.amount === null ||
+        isNaN(values.amount) ||
+        values.amount <= 0
+    ) {
+        errors.amount = {
+            type: 'required',
+            message: 'Amount is required and must be a positive number.'
+        }
+    }
+
+    if (
+        values.size === undefined ||
+        values.size === null ||
+        isNaN(values.size) ||
+        values.size <= 0
+    ) {
+        errors.size = {
+            type: 'required',
+            message: 'Size is required and must be a positive number.'
+        }
+    }
+
+    return {
+        values: Object.keys(errors).length ? {} : values,
+        errors: errors
+    }
+}
+
 const SaleDrawer: React.FC = () => {
     const {
         changeForm,
@@ -33,13 +69,36 @@ const SaleDrawer: React.FC = () => {
         formStatus,
         betOption,
         changeBetOption,
-        currentMarket
+        currentMarket,
+        handleOrder,
+        selectedOrder
     } = useEventContext()
     const formTypeList: EFormType[] = Object.values(EFormType)
     const { openDrawer } = useDrawerContext()
     const [expiration, setExpiration] = useState<ExpirationType>(
         ExpirationType.UntilCancelled
     )
+
+    const { isLogin, userAddress } = useAuthContext()
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+        watch
+    } = useForm<OrderFormValues>({ resolver })
+    const onSubmit = handleSubmit((data) => {
+        handleOrder({
+            userAddress: userAddress ?? '',
+            assetId:
+                formStatus === ESide.BUY
+                    ? (currentMarket?.clobTokenIds[0] ?? '')
+                    : (currentMarket?.clobTokenIds[1] ?? ''),
+            side: formStatus,
+            price: data.amount,
+            size: data.size
+        })
+    })
 
     const formatterUSD = useMemo(
         () =>
@@ -51,6 +110,16 @@ const SaleDrawer: React.FC = () => {
             }),
         []
     )
+
+    const amount = Number(watch('amount'))
+
+    useEffect(() => {
+        setValue(
+            'amount',
+            Number(((selectedOrder?.price ?? 0) * 100).toFixed(1))
+        )
+        setValue('size', selectedOrder?.size ?? 0)
+    }, [selectedOrder?.price, selectedOrder?.size, setValue])
 
     return (
         <DrawerProvider>
@@ -97,7 +166,11 @@ const SaleDrawer: React.FC = () => {
                         </Button>
                     </div>
                 </div>
-                <div className='p-4 flex flex-col gap-4'>
+                <form
+                    className='p-4 flex flex-col gap-4'
+                    id='saleForm'
+                    onSubmit={onSubmit}
+                >
                     <div className='flex justify-between items-center'>
                         <Button
                             className='gap-2'
@@ -139,8 +212,28 @@ const SaleDrawer: React.FC = () => {
                             label='Limit Price'
                             content={
                                 <div className={`flex justify-around`}>
-                                    <Button variant={`secondary`} size={'icon'}>
-                                        <Minus width={15} height={15} />
+                                    <Button
+                                        variant={`secondary`}
+                                        size={`icon`}
+                                        type={`button`}
+                                        onClick={() => {
+                                            setValue(
+                                                'amount',
+                                                Number(
+                                                    (amount > 1
+                                                        ? amount - 1
+                                                        : amount
+                                                    ).toFixed(1)
+                                                )
+                                            )
+                                        }}
+                                    >
+                                        <Tooltip
+                                            trigger={
+                                                <Minus width={15} height={15} />
+                                            }
+                                            content='-$1'
+                                        />
                                     </Button>
                                     <input
                                         className={clsx(
@@ -149,9 +242,25 @@ const SaleDrawer: React.FC = () => {
                                             'focus:outline-none'
                                         )}
                                         placeholder={`$0`}
+                                        {...register('amount')}
                                     />
-                                    <Button variant={`secondary`} size={'icon'}>
-                                        <Plus width={15} height={15} />
+                                    <Button
+                                        variant={`secondary`}
+                                        size={`icon`}
+                                        type={`button`}
+                                        onClick={() =>
+                                            setValue(
+                                                'amount',
+                                                Number((amount + 1).toFixed(1))
+                                            )
+                                        }
+                                    >
+                                        <Tooltip
+                                            trigger={
+                                                <Plus width={15} height={15} />
+                                            }
+                                            content='+$1'
+                                        />
                                     </Button>
                                 </div>
                             }
@@ -167,6 +276,7 @@ const SaleDrawer: React.FC = () => {
                                             'focus:outline-none'
                                         )}
                                         placeholder={`0`}
+                                        {...register('size')}
                                     />
                                 </div>
                             }
@@ -202,11 +312,26 @@ const SaleDrawer: React.FC = () => {
                             }
                         />
                     </div>
+                    {errors?.size && (
+                        <p className='text-red-600 text-[12px]'>
+                            {errors.size.message}
+                        </p>
+                    )}
                     <div className='text-center'>{`Total: ${formatterUSD.format(
                         Number(currentMarket?.volumeNum)
                     )}`}</div>
-                    <Button variant={'primary'}>Login</Button>
-                </div>
+                    {isLogin ? (
+                        <Button
+                            variant={'primary'}
+                            type={'submit'}
+                            form={'saleForm'}
+                        >
+                            Buy
+                        </Button>
+                    ) : (
+                        <Button variant={'primary'}>Login</Button>
+                    )}
+                </form>
             </div>
         </DrawerProvider>
     )
