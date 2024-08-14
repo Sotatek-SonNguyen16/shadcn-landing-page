@@ -6,6 +6,7 @@ import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
 import { useEventContext } from '@/contexts/EventContext.tsx'
+import ActiveOrderTooltip from '@/views/event/order/ActiveOrderTooltip.tsx'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
@@ -18,7 +19,7 @@ interface OrderWithTotal extends Order {
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     const { variant, data } = props
-    const { handleSelectOrder, changeType } = useEventContext()
+    const { handleSelectOrder, changeType, activeOrders } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
 
@@ -106,6 +107,11 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                         const width = Math.round(
                             (Number(total) / maxTotal) * 100 * 3
                         )
+
+                        const activeOrder =
+                            activeOrders?.find((ac) => ac.price === price) ??
+                            null
+
                         return (
                             <div
                                 key={`${price}-${index}`}
@@ -150,6 +156,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 </div>
                                 <div
                                     className={clsx(
+                                        'relative',
                                         'text-center font-semibold py-2 text-[14px] lg:text-[16px]',
                                         {
                                             'text-green-500':
@@ -159,6 +166,12 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                         }
                                     )}
                                 >
+                                    <div className='absolute ms-6'>
+                                        <ActiveOrderTooltip
+                                            activeOrder={activeOrder}
+                                            variant={variant}
+                                        />
+                                    </div>
                                     {formatterEuro.format(Number(price) * 100)}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>

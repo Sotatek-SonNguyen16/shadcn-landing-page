@@ -1,7 +1,12 @@
 import BaseRequest from '@/services/BaseRequest.ts'
-import { MarketDetail, PolyMarketDetail, PredictionMarket } from '@/types'
+import {
+    ActiveOrder,
+    MarketDetail,
+    PolyMarketDetail,
+    PredictionMarket
+} from '@/types'
 import { DocsResponse, OrderResponse } from '@/types/response.ts'
-import { OrderRequestBody } from '@/types/request.ts'
+import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
 
 export default class MarketRequest extends BaseRequest {
     async getTopEvents(params: { page: number; limit: number }) {
@@ -22,5 +27,10 @@ export default class MarketRequest extends BaseRequest {
     async order(payload: OrderRequestBody) {
         const url = `/orders`
         return await this.post<OrderResponse>(url, payload)
+    }
+
+    async getActiveOrders(payload: ActiveOrdersRequestBody) {
+        const url = `/orders/active-orders`
+        return await this.get<DocsResponse<ActiveOrder>>(url, payload)
     }
 }
