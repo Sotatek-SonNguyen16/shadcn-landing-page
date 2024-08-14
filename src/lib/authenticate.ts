@@ -11,6 +11,17 @@ export const setAuthorizationToRequest = (
     axios.defaults.headers.common['x-app-version'] = 1
 }
 
+export const setAddressToRequest = (
+    address: string | undefined | null
+): void => {
+    if (!address) {
+        delete axios.defaults.headers.common['x-address']
+    } else {
+        axios.defaults.headers.common['x-address'] = `${address}`
+    }
+    axios.defaults.headers.common['x-app-version'] = 1
+}
+
 export const setAuthorizationToRequestLinkWallet = (
     accessToken: string | undefined
 ): void => {

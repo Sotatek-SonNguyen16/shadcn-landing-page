@@ -6,6 +6,7 @@ export interface Config {
         apiUrl: string
         wws: string
     }
+    address: string
 }
 
 const env = import.meta.env.VITE_NODE_ENV as 'dev' | 'prod'

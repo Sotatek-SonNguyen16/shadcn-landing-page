@@ -103,7 +103,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                 style: 'currency',
                 currency: 'EUR',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 2
+                maximumFractionDigits: 1
             }),
         []
     )
@@ -196,7 +196,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                         }}
                     >
                         <p className='text-nowrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Math.round(Number(outcomePrices[0]) * 100))}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
                         </p>
                     </Button>
                     <Button
@@ -215,7 +215,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                         }}
                     >
                         <p className='text-nowrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Math.round(Number(outcomePrices[1]) * 100))}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
                         </p>
                     </Button>
                 </div>

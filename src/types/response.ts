@@ -6,4 +6,8 @@ type DocsResponse<T> = {
     docs: T[]
 }
 
-export type { DocsResponse }
+type OrderResponse = {
+    result: string
+}
+
+export type { DocsResponse, OrderResponse }

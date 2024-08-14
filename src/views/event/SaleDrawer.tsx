@@ -1,11 +1,14 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
-import { EBetOption, EFormType, ESide } from '@/types'
+import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import FormSelect from '@/components/FormSelect.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { ArrowRightLeft, Minus, Plus, Settings } from 'lucide-react'
 import { clsx } from 'clsx'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import { useForm } from 'react-hook-form'
+import { Tooltip } from '@/components/ui/tooltip.tsx'
 
 const InputHorizontal: React.FC<{ label: string; content: JSX.Element }> = ({
     content,
@@ -33,13 +36,36 @@ const SaleDrawer: React.FC = () => {
         formStatus,
         betOption,
         changeBetOption,
-        currentMarket
+        currentMarket,
+        handleOrder,
+        selectedOrder,
+        resolver
     } = useEventContext()
     const formTypeList: EFormType[] = Object.values(EFormType)
     const { openDrawer } = useDrawerContext()
     const [expiration, setExpiration] = useState<ExpirationType>(
         ExpirationType.UntilCancelled
     )
+
+    const { isLogin } = useAuthContext()
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+        watch
+    } = useForm<OrderFormValues>({ resolver })
+    const onSubmit = handleSubmit((data) => {
+        handleOrder({
+            assetId:
+                formStatus === ESide.BUY
+                    ? (currentMarket?.clobTokenIds[0] ?? '')
+                    : (currentMarket?.clobTokenIds[1] ?? ''),
+            side: formStatus,
+            price: Number(data.amount),
+            size: Number(data.size)
+        })
+    })
 
     const formatterUSD = useMemo(
         () =>
@@ -50,6 +76,21 @@ const SaleDrawer: React.FC = () => {
                 maximumFractionDigits: 0
             }),
         []
+    )
+
+    useEffect(() => {
+        setValue(
+            'amount',
+            Number(((selectedOrder?.price ?? 0) * 100).toFixed(1))
+        )
+        setValue('size', selectedOrder?.size ?? 0)
+    }, [selectedOrder?.price, selectedOrder?.size, setValue])
+
+    const updateValue = useCallback(
+        (field: keyof OrderFormValues, delta: number) => {
+            setValue(field, Number((Number(watch(field)) + delta).toFixed(1)))
+        },
+        [setValue, watch]
     )
 
     return (
@@ -97,7 +138,11 @@ const SaleDrawer: React.FC = () => {
                         </Button>
                     </div>
                 </div>
-                <div className='p-4 flex flex-col gap-4'>
+                <form
+                    className='p-4 flex flex-col gap-4'
+                    id='saleForm'
+                    onSubmit={onSubmit}
+                >
                     <div className='flex justify-between items-center'>
                         <Button
                             className='gap-2'
@@ -139,8 +184,20 @@ const SaleDrawer: React.FC = () => {
                             label='Limit Price'
                             content={
                                 <div className={`flex justify-around`}>
-                                    <Button variant={`secondary`} size={'icon'}>
-                                        <Minus width={15} height={15} />
+                                    <Button
+                                        variant={`secondary`}
+                                        size={`icon`}
+                                        type={`button`}
+                                        onClick={() =>
+                                            updateValue('amount', -1)
+                                        }
+                                    >
+                                        <Tooltip
+                                            trigger={
+                                                <Minus width={15} height={15} />
+                                            }
+                                            content='-$1'
+                                        />
                                     </Button>
                                     <input
                                         className={clsx(
@@ -149,9 +206,20 @@ const SaleDrawer: React.FC = () => {
                                             'focus:outline-none'
                                         )}
                                         placeholder={`$0`}
+                                        {...register('amount')}
                                     />
-                                    <Button variant={`secondary`} size={'icon'}>
-                                        <Plus width={15} height={15} />
+                                    <Button
+                                        variant={`secondary`}
+                                        size={`icon`}
+                                        type={`button`}
+                                        onClick={() => updateValue('amount', 1)}
+                                    >
+                                        <Tooltip
+                                            trigger={
+                                                <Plus width={15} height={15} />
+                                            }
+                                            content='+$1'
+                                        />
                                     </Button>
                                 </div>
                             }
@@ -167,6 +235,7 @@ const SaleDrawer: React.FC = () => {
                                             'focus:outline-none'
                                         )}
                                         placeholder={`0`}
+                                        {...register('size')}
                                     />
                                 </div>
                             }
@@ -202,11 +271,26 @@ const SaleDrawer: React.FC = () => {
                             }
                         />
                     </div>
+                    {errors?.size && (
+                        <p className='text-red-600 text-[12px]'>
+                            {errors.size.message}
+                        </p>
+                    )}
                     <div className='text-center'>{`Total: ${formatterUSD.format(
                         Number(currentMarket?.volumeNum)
                     )}`}</div>
-                    <Button variant={'primary'}>Login</Button>
-                </div>
+                    {isLogin ? (
+                        <Button
+                            variant={'primary'}
+                            type={'submit'}
+                            form={'saleForm'}
+                        >
+                            Buy
+                        </Button>
+                    ) : (
+                        <Button variant={'primary'}>Login</Button>
+                    )}
+                </form>
             </div>
         </DrawerProvider>
     )

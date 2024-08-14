@@ -1,15 +1,3 @@
-type BetEvent = {
-    id: number
-    avatar: string
-    name: string
-    price: number
-    chance: number
-    outcome: {
-        yes: number
-        no: number
-    }
-}
-
 enum ESide {
     BUY = 'BUY',
     SELL = 'SELL'
@@ -49,8 +37,8 @@ type PriceChangeEvent = {
 }
 
 type Order = {
-    price: string
-    size: string
+    price: number
+    size: number
 }
 
 type OrderBookEvent = {
@@ -106,7 +94,7 @@ interface PredictionMarket {
 interface Market {
     id: string
     outcomes: string[]
-    outcomePrices: string[]
+    outcomePrices: number[]
     active: boolean
     marketType: string
     closed: boolean
@@ -114,7 +102,7 @@ interface Market {
     groupItemThreshold: string
     clobTokenIds: string[]
     icon: string
-    volume: string
+    volume: number
 }
 
 interface MarketDetail {
@@ -132,7 +120,7 @@ interface MarketDetail {
     description: string
     outcomes: string // JSON-encoded string
     outcomePrices: string // JSON-encoded string
-    volume: string // consider converting to number if appropriate
+    volume: number // consider converting to number if appropriate
     active: boolean
     marketType: string
     closed: boolean
@@ -246,15 +234,20 @@ interface PolyMarketDetail {
     markets: Market[]
 }
 
+type OrderFormValues = {
+    amount: number
+    size: number
+}
+
 export type {
-    BetEvent,
     PriceChangeEvent,
     Order,
     OrderBookEvent,
     PredictionMarket,
     MarketDetail,
     Market,
-    PolyMarketDetail
+    PolyMarketDetail,
+    OrderFormValues
 }
 
 export { EFormType, EMarketDepth, ESide, EBetOption, EEventType }

@@ -1,6 +1,7 @@
 import React, {
     createContext,
     ReactNode,
+    useCallback,
     useContext,
     useEffect,
     useState
@@ -12,9 +13,16 @@ import {
     ESide,
     Market,
     MarketDetail,
+    Order,
+    OrderFormValues,
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
+import { OrderRequestBody } from '@/types/request.ts'
+import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
+import { FieldErrors, Resolver } from 'react-hook-form'
+import { setAddressToRequest } from '@/lib/authenticate.ts'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
 interface EventContextType {
     formStatus: ESide
@@ -32,6 +40,10 @@ interface EventContextType {
     handleSelectMarket: (id: string) => void
     currentMarket: MarketDetail | null
     selectedMarketId: string
+    selectedOrder: Order | null
+    handleSelectOrder: (order: Order | null) => void
+    handleOrder: (payload: OrderRequestBody) => void
+    resolver: Resolver<OrderFormValues>
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -58,12 +70,15 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [selectedMarketId, setSelectedMarketId] = useState<string>('')
     const [selectedEvent, setSelectedEvent] = useState<Market | null>(null)
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
-    const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
+    const [formType, setFormType] = useState<EFormType>(EFormType.LIMIT)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(
         EMarketDepth.GRAPH
     )
     const [betOption, setBetOption] = useState<EBetOption>(EBetOption.YES)
 
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    const { orderBookEvent, subscribe } = useEventWebSocket()
+    const { userAddress } = useAuthContext()
     const changeForm = (status: ESide) => {
         setFormStatus(status)
     }
@@ -83,6 +98,10 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const handleSelectMarket = (id: string) => {
         if (id === '') return
         setSelectedMarketId(id)
+    }
+
+    const handleSelectOrder = (order: Order | null) => {
+        setSelectedOrder(order)
     }
 
     useEffect(() => {
@@ -128,6 +147,71 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         if (selectedMarketId) fetchMarket(selectedMarketId)
     }, [request, selectedMarketId])
 
+    const subscribeToMarket = useCallback(() => {
+        if (currentMarket?.clobTokenIds) {
+            subscribe([
+                betOption === EBetOption.YES
+                    ? currentMarket.clobTokenIds[0]
+                    : currentMarket.clobTokenIds[1]
+            ])
+        }
+    }, [betOption, currentMarket?.clobTokenIds])
+
+    useEffect(() => {
+        subscribeToMarket()
+    }, [subscribeToMarket])
+
+    useEffect(() => {
+        if (formStatus === ESide.BUY) {
+            handleSelectOrder(
+                orderBookEvent?.asks.length
+                    ? orderBookEvent.asks[orderBookEvent.asks.length - 1]
+                    : null
+            )
+        } else {
+            handleSelectOrder(
+                orderBookEvent?.bids.length
+                    ? orderBookEvent.bids[orderBookEvent.bids.length - 1]
+                    : null
+            )
+        }
+    }, [formStatus, orderBookEvent])
+
+    const resolver: Resolver<OrderFormValues> = async (values) => {
+        const errors: FieldErrors<OrderFormValues> = {}
+
+        if (!values.amount || isNaN(values.amount) || values.amount <= 0) {
+            errors.amount = {
+                type: 'required',
+                message: 'Amount is required and must be a positive number.'
+            }
+        }
+
+        if (!values.size || isNaN(values.size) || values.size < 5) {
+            errors.size = {
+                type: 'required',
+                message: 'Size is required and must be larger 5.'
+            }
+        }
+
+        return {
+            values: Object.keys(errors).length ? {} : values,
+            errors
+        }
+    }
+
+    const handleOrder = async (payload: OrderRequestBody) => {
+        try {
+            setAddressToRequest(userAddress)
+            const response = await request.order(payload)
+            if (response) {
+                console.log(response)
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     return (
         <EventContext.Provider
             value={{
@@ -145,7 +229,11 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 loading,
                 handleSelectMarket,
                 currentMarket,
-                selectedMarketId
+                selectedMarketId,
+                selectedOrder,
+                handleSelectOrder,
+                handleOrder,
+                resolver
             }}
         >
             {children}

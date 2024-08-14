@@ -47,6 +47,16 @@ const EventPageLayout: React.FC = () => {
                     className={`hidden lg:block sticky top-[140px] right-0 px-3 w-fit`}
                 >
                     <PredictionCard />
+                    <div
+                        className={clsx(
+                            'w-[338px] h-fit bg-card rounded-xl border-[1px] border-gray-200 shadow-lg',
+                            'mt-4 p-2 flex justify-center items-center cursor-pointer',
+                            'hover:bg-gray-100',
+                            'dark:border-slate-700 dark:hover:bg-gray-800'
+                        )}
+                    >
+                        More
+                    </div>
                 </aside>
             </div>
         </div>

@@ -78,7 +78,10 @@ export default class BaseRequest {
         }
     }
 
-    async post(url: string, data: RequestData): Promise<unknown> {
+    async post<T>(
+        url: string,
+        data: RequestData
+    ): Promise<T | undefined | null> {
         try {
             const response: AxiosResponse = await axios.post(
                 this.getUrlPrefix() + url,
