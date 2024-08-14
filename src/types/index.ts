@@ -239,6 +239,26 @@ type OrderFormValues = {
     size: number
 }
 
+type OrderStatus =
+    | 'New'
+    | 'Pending'
+    | 'Accepted'
+    | 'Rejected'
+    | 'Cancelling'
+    | 'Filled'
+    | 'Partially Filled'
+
+type ActiveOrder = {
+    orderId: string
+    assetId: string
+    price: number
+    side: ESide
+    size: number
+    orderType: string
+    userAddress: string
+    status: OrderStatus
+}
+
 export type {
     PriceChangeEvent,
     Order,
@@ -247,7 +267,8 @@ export type {
     MarketDetail,
     Market,
     PolyMarketDetail,
-    OrderFormValues
+    OrderFormValues,
+    ActiveOrder
 }
 
 export { EFormType, EMarketDepth, ESide, EBetOption, EEventType }

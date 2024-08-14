@@ -7,6 +7,7 @@ import React, {
     useState
 } from 'react'
 import {
+    ActiveOrder,
     EBetOption,
     EFormType,
     EMarketDepth,
@@ -18,7 +19,7 @@ import {
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { OrderRequestBody } from '@/types/request.ts'
+import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { setAddressToRequest } from '@/lib/authenticate.ts'
@@ -44,6 +45,7 @@ interface EventContextType {
     handleSelectOrder: (order: Order | null) => void
     handleOrder: (payload: OrderRequestBody) => void
     resolver: Resolver<OrderFormValues>
+    activeOrders: ActiveOrder[] | null
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -77,6 +79,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [betOption, setBetOption] = useState<EBetOption>(EBetOption.YES)
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    const [activeOrders, setActiveOrders] = useState<ActiveOrder[] | null>(null)
+
     const { orderBookEvent, subscribe } = useEventWebSocket()
     const { userAddress } = useAuthContext()
     const changeForm = (status: ESide) => {
@@ -146,6 +150,32 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
         if (selectedMarketId) fetchMarket(selectedMarketId)
     }, [request, selectedMarketId])
+
+    useEffect(() => {
+        const fetchActiveOrder = async (payload: ActiveOrdersRequestBody) => {
+            try {
+                const response = await request.getActiveOrders(payload)
+                if (response) {
+                    setActiveOrders(response.docs)
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        if (currentMarket) {
+            setAddressToRequest(userAddress)
+            fetchActiveOrder({
+                assetId:
+                    formStatus === ESide.BUY
+                        ? (currentMarket?.clobTokenIds[0] ?? '')
+                        : (currentMarket?.clobTokenIds[1] ?? ''),
+                limit: 20,
+                page: 1,
+                side: formStatus
+            })
+        }
+    }, [currentMarket, formStatus, request, userAddress])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
@@ -233,7 +263,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 selectedOrder,
                 handleSelectOrder,
                 handleOrder,
-                resolver
+                resolver,
+                activeOrders
             }}
         >
             {children}

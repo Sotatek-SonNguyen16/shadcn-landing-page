@@ -57,6 +57,7 @@ const SaleDrawer: React.FC = () => {
     } = useForm<OrderFormValues>({ resolver })
     const onSubmit = handleSubmit((data) => {
         handleOrder({
+            marketId: currentMarket?.id ?? '',
             assetId:
                 formStatus === ESide.BUY
                     ? (currentMarket?.clobTokenIds[0] ?? '')
