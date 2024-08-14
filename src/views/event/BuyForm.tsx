@@ -20,7 +20,7 @@ const BuyForm: React.FC = () => {
         handleOrder,
         resolver
     } = useEventContext()
-    const { isLogin, userAddress } = useAuthContext()
+    const { isLogin } = useAuthContext()
     const {
         register,
         handleSubmit,
@@ -30,14 +30,13 @@ const BuyForm: React.FC = () => {
     } = useForm<OrderFormValues>({ resolver })
     const onSubmit = handleSubmit((data) => {
         handleOrder({
-            userAddress: userAddress ?? '',
             assetId:
                 formStatus === ESide.BUY
                     ? (currentMarket?.clobTokenIds[0] ?? '')
                     : (currentMarket?.clobTokenIds[1] ?? ''),
             side: formStatus,
-            price: data.amount,
-            size: data.size
+            price: Number(data.amount),
+            size: Number(data.size)
         })
     })
 

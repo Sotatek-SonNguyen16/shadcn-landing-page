@@ -25,7 +25,7 @@ const tabs: Tab<ESide>[] = [
 const PredictionCard: React.FC = () => {
     const { currentMarket, changeForm, changeType, formType } =
         useEventContext()
-    const formTypeList: EFormType[] = Object.values(EFormType)
+    const formTypeList: EFormType[] = [EFormType.LIMIT]
 
     if (!currentMarket) {
         return <PredictionCardSkeleton />

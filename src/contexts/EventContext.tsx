@@ -21,6 +21,8 @@ import RequestFactory from '@/services/RequestFactory.ts'
 import { OrderRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
+import { setAddressToRequest } from '@/lib/authenticate.ts'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
 interface EventContextType {
     formStatus: ESide
@@ -68,7 +70,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [selectedMarketId, setSelectedMarketId] = useState<string>('')
     const [selectedEvent, setSelectedEvent] = useState<Market | null>(null)
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
-    const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
+    const [formType, setFormType] = useState<EFormType>(EFormType.LIMIT)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(
         EMarketDepth.GRAPH
     )
@@ -76,7 +78,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
     const { orderBookEvent, subscribe } = useEventWebSocket()
-
+    const { userAddress } = useAuthContext()
     const changeForm = (status: ESide) => {
         setFormStatus(status)
     }
@@ -200,6 +202,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     const handleOrder = async (payload: OrderRequestBody) => {
         try {
+            setAddressToRequest(userAddress)
             const response = await request.order(payload)
             if (response) {
                 console.log(response)
