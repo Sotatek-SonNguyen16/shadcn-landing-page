@@ -130,8 +130,9 @@ const EventListLayout: React.FC = () => {
                             Resolver
                         </div>
                         <div className='text-[16px] text-blue-700'>
-                            {`${market?.negRiskMarketID.substr(0, 12)}...` ||
-                                ''}
+                            {market?.negRiskMarketID
+                                ? `${market?.negRiskMarketID.substr(0, 12)}...`
+                                : '...'}
                         </div>
                     </div>
                 </div>
