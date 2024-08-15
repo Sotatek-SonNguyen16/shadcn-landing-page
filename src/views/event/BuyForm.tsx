@@ -1,13 +1,184 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
 import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
-import { Tooltip } from '@/components/ui/tooltip.tsx'
-import { useForm } from 'react-hook-form'
+import { EBetOption, EFormType, OrderFormValues } from '@/types'
+import TooltipIcon from '@/components/TooltipIcon.tsx'
+import {
+    FieldError,
+    useForm,
+    UseFormRegister,
+    UseFormSetValue
+} from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import { LoadingSpinner } from '@/components/ui/spinner.tsx'
+import { formatToCents } from '@/lib/utils.ts'
+
+const InputField: React.FC<{
+    register: UseFormRegister<OrderFormValues>
+    name: keyof OrderFormValues
+    placeholder: string
+    onChange: (value: number) => void
+    error?: FieldError
+}> = ({ placeholder, register, name, onChange, error }) => (
+    <>
+        <div
+            className={clsx(
+                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
+                { 'border-red-500': !!error }
+            )}
+        >
+            <Button
+                variant='secondary'
+                size='icon'
+                type='button'
+                onClick={() => onChange(-10)}
+            >
+                <TooltipIcon
+                    trigger={<Minus width={15} height={15} />}
+                    content={`-$10`}
+                />
+            </Button>
+            <input
+                className={clsx(
+                    'text-center bg-background text-primary placeholder-gray-400',
+                    'border-none outline-none',
+                    'focus:outline-none'
+                )}
+                {...register(name)}
+                placeholder={placeholder}
+            />
+            <Button
+                variant='secondary'
+                size='icon'
+                type='button'
+                onClick={() => onChange(10)}
+            >
+                <TooltipIcon
+                    trigger={<Plus width={15} height={15} />}
+                    content={`+$10`}
+                />
+            </Button>
+        </div>
+        {error && <p className='text-red-600 text-[12px]'>{error?.message}</p>}
+    </>
+)
+
+const CentsInputField: React.FC<{
+    setValue: UseFormSetValue<OrderFormValues>
+    name: keyof OrderFormValues
+    placeholder: string
+    onChange: (value: number) => void
+    error?: FieldError
+    value: number
+}> = ({ value, placeholder, name, setValue, onChange, error }) => {
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const numericValue = Number(e.target.value.replace('¢', '').trim()) || 0
+
+        setValue(name, numericValue)
+    }
+
+    useEffect(() => {
+        if (inputRef.current) {
+            const input = inputRef.current
+            const valueWithoutSymbol = value.toString()
+            input.value = `${valueWithoutSymbol}¢`
+
+            input.setSelectionRange(
+                valueWithoutSymbol.length,
+                valueWithoutSymbol.length
+            )
+        }
+    }, [value])
+
+    return (
+        <>
+            <div
+                className={clsx(
+                    'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
+                    { 'border-red-500': !!error }
+                )}
+            >
+                <Button
+                    variant='secondary'
+                    size='icon'
+                    type='button'
+                    onClick={() => onChange(-10)}
+                >
+                    <TooltipIcon
+                        trigger={<Minus width={15} height={15} />}
+                        content={`-$10`}
+                    />
+                </Button>
+                <input
+                    ref={inputRef}
+                    className={clsx(
+                        'text-center bg-background text-primary placeholder-gray-400',
+                        'border-none outline-none',
+                        'focus:outline-none'
+                    )}
+                    placeholder={placeholder}
+                    onChange={handleInputChange}
+                    defaultValue={`${value}¢`}
+                />
+                <Button
+                    variant='secondary'
+                    size='icon'
+                    type='button'
+                    onClick={() => onChange(10)}
+                >
+                    <TooltipIcon
+                        trigger={<Plus width={15} height={15} />}
+                        content={`+$10`}
+                    />
+                </Button>
+            </div>
+            {error && (
+                <p className='text-red-600 text-[12px]'>{error?.message}</p>
+            )}
+        </>
+    )
+}
+
+const ActionButton: React.FC<{
+    formId: string
+    isLogin: boolean
+    isPending: boolean
+    disabled?: boolean
+}> = ({ formId, isLogin, isPending, disabled = false }) => {
+    return (
+        <div className='flex mb-3'>
+            <Button
+                form={formId}
+                className='flex-1'
+                variant='primary'
+                type={isLogin ? 'submit' : 'button'}
+                disabled={isPending || disabled}
+            >
+                {isLogin ? isPending ? <LoadingSpinner /> : 'Buy' : 'Login'}
+            </Button>
+        </div>
+    )
+}
+
+const DataListItem: React.FC<{
+    label: string
+    value: string
+    className?: string
+}> = ({ label, value, className }) => (
+    <DataList.Item align='center'>
+        <DataList.Label minWidth='88px'>{label}</DataList.Label>
+        <DataList.Value>
+            <div className='w-full text-end'>
+                <span className={clsx(className)}>{value}</span>
+            </div>
+        </DataList.Value>
+    </DataList.Item>
+)
 
 const BuyForm: React.FC = () => {
     const {
@@ -24,32 +195,22 @@ const BuyForm: React.FC = () => {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
         setValue,
         watch
     } = useForm<OrderFormValues>({ resolver })
-    const onSubmit = handleSubmit((data) => {
-        handleOrder({
-            marketId: currentMarket?.id ?? '',
-            assetId:
-                formStatus === ESide.BUY
-                    ? (currentMarket?.clobTokenIds[0] ?? '')
-                    : (currentMarket?.clobTokenIds[1] ?? ''),
-            side: formStatus,
-            price: Number(data.amount),
-            size: Number(data.size)
-        })
-    })
-
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 1
-            }),
-        []
+    const onSubmit = handleSubmit(
+        async (data) =>
+            await handleOrder({
+                marketId: currentMarket?.id ?? '',
+                assetId:
+                    betOption === EBetOption.YES
+                        ? (currentMarket?.clobTokenIds[0] ?? '')
+                        : (currentMarket?.clobTokenIds[1] ?? ''),
+                side: formStatus,
+                price: Number(data.amount / 100),
+                size: Number(data.size)
+            })
     )
 
     const formatterUSD = useMemo(
@@ -75,323 +236,160 @@ const BuyForm: React.FC = () => {
 
     const updateValue = useCallback(
         (field: keyof OrderFormValues, delta: number) => {
-            setValue(field, Number((Number(watch(field)) + delta).toFixed(1)))
+            const currentValue = Number(watch(field))
+            const newValue = Number((currentValue + delta).toFixed(1))
+
+            if (newValue >= 0) {
+                setValue(field, newValue)
+            }
         },
         [setValue, watch]
     )
 
-    const formFields = {
-        [EFormType.MARKET]: (
-            <>
-                <div className={`mb-3`}>
-                    <form id='marketForm' onSubmit={onSubmit}>
-                        <div className='flex justify-between items-center mb-1'>
-                            <div className={`mb-2 font-semibold`}>Amount</div>
-                            <div className='flex gap-1 items-center justify-center'>
-                                <div className='text-[14px] font-semibold rounded-2xl bg-gray-100 py-1 px-2'>
-                                    Balance $0.00
+    const formFields = useMemo(
+        () => ({
+            [EFormType.MARKET]: (
+                <>
+                    <div className='mb-3'>
+                        <form id='marketForm' onSubmit={onSubmit}>
+                            <div className='flex justify-between items-center mb-1'>
+                                <div className='mb-2 font-semibold'>Amount</div>
+                                <div className='flex gap-1 items-center justify-center'>
+                                    <div className='text-[14px] font-semibold rounded-2xl bg-gray-100 py-1 px-2'>
+                                        Balance $0.00
+                                    </div>
+                                    <Button
+                                        className='rounded-2xl'
+                                        variant='default'
+                                        size='iconGroup'
+                                        type='button'
+                                    >
+                                        Max
+                                    </Button>
                                 </div>
-                                <Button
-                                    className='rounded-2xl'
-                                    variant='default'
-                                    size={'iconGroup'}
-                                    type={`button`}
-                                >
-                                    Max
-                                </Button>
                             </div>
-                        </div>
-                        <div
-                            className={clsx(
-                                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
-                                { 'border-red-500': errors?.amount }
-                            )}
-                        >
-                            <Button
-                                variant={`secondary`}
-                                size={`icon`}
-                                type={`button`}
-                                onClick={() => updateValue('amount', -10)}
-                            >
-                                <Tooltip
-                                    trigger={<Minus width={15} height={15} />}
-                                    content='-$10'
-                                />
-                            </Button>
-                            <input
-                                className={clsx(
-                                    'text-center bg-background text-primary placeholder-gray-400',
-                                    'border-none outline-none',
-                                    'focus:outline-none'
-                                )}
+                            <InputField
                                 placeholder='$0'
-                                {...register('amount')}
+                                name={'amount'}
+                                register={register}
+                                onChange={(val) => updateValue('amount', val)}
+                                error={errors?.amount}
                             />
-                            <Button
-                                variant={`secondary`}
-                                size={`icon`}
-                                type={`button`}
-                                onClick={() => updateValue('amount', 10)}
-                            >
-                                <Tooltip
-                                    trigger={<Plus width={15} height={15} />}
-                                    content='+$10'
-                                />
-                            </Button>
-                        </div>
-                        {errors?.amount && (
-                            <p className='text-red-600 text-[12px]'>
-                                {errors.amount.message}
-                            </p>
-                        )}
-                    </form>
-                </div>
-                <div className={'flex mb-3'}>
-                    {isLogin ? (
-                        <Button
-                            form='marketForm'
-                            className={`flex-1`}
-                            variant={`primary`}
-                            type={`submit`}
-                        >
-                            Buy
-                        </Button>
-                    ) : (
-                        <Button className={`flex-1`} variant={`primary`}>
-                            Login
-                        </Button>
-                    )}
-                </div>
-                <div>
-                    <DataList.Root>
-                        <DataList.Item align='center'>
-                            <DataList.Label minWidth='88px'>
-                                Avg price
-                            </DataList.Label>
-                            <DataList.Value>
-                                <div
-                                    className={`w-full text-end text-blue-500`}
-                                >
-                                    <span
-                                        className={`border-dotted border-b-2 border-sky-500 cursor-pointer`}
-                                    >
-                                        {formatterEuro.format(
-                                            Number(selectedOrder?.price ?? 0) *
-                                                100
+                            <ActionButton
+                                isPending={isSubmitting}
+                                formId='marketForm'
+                                isLogin={isLogin}
+                            />
+                            <div>
+                                <DataList.Root>
+                                    <DataListItem
+                                        label='Avg price'
+                                        value={formatToCents(
+                                            Number(selectedOrder?.price ?? 0),
+                                            1
                                         )}
-                                    </span>
-                                </div>
-                            </DataList.Value>
-                        </DataList.Item>
-                        <DataList.Item align='center'>
-                            <DataList.Label minWidth='88px'>
-                                Shares
-                            </DataList.Label>
-                            <DataList.Value>
-                                <div className={`w-full text-end`}>
-                                    {`${(
-                                        amount /
-                                        Number(selectedOrder?.price ?? 1)
-                                    ).toFixed(2)}`}
-                                </div>
-                            </DataList.Value>
-                        </DataList.Item>
-                        <DataList.Item align='center'>
-                            <DataList.Label minWidth='88px'>
-                                Potential return
-                            </DataList.Label>
-                            <DataList.Value>
-                                <div
-                                    className={`w-full text-end text-green-600`}
-                                >
-                                    {formatterUSD.format(0.0)} (0.00%)
-                                </div>
-                            </DataList.Value>
-                        </DataList.Item>
-                    </DataList.Root>
-                </div>
-            </>
-        ),
-        [EFormType.LIMIT]: (
-            <>
-                <form
-                    className={`flex flex-col gap-3 mb-3`}
-                    id='limitForm'
-                    onSubmit={onSubmit}
-                >
-                    <div>
-                        <div className={`mb-2 font-semibold`}>Limit Price</div>
-                        <div
-                            className={clsx(
-                                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
-                                { 'border-red-500': errors?.amount }
-                            )}
-                        >
-                            <Button
-                                variant={`secondary`}
-                                size={`icon`}
-                                type={`button`}
-                                onClick={() => updateValue('amount', -1)}
-                            >
-                                <Tooltip
-                                    trigger={<Minus width={15} height={15} />}
-                                    content='-$1'
-                                />
-                            </Button>
-                            <input
-                                className={clsx(
-                                    'text-center bg-background text-primary placeholder-gray-400',
-                                    'border-none outline-none',
-                                    'focus:outline-none'
-                                )}
-                                placeholder='$0'
-                                {...register('amount')}
-                            />
-                            <Button
-                                variant={`secondary`}
-                                size={`icon`}
-                                type={`button`}
-                                onClick={() => updateValue('amount', 1)}
-                            >
-                                <Tooltip
-                                    trigger={<Plus width={15} height={15} />}
-                                    content='+$1'
-                                />
-                            </Button>
-                        </div>
-                        {errors?.amount && (
-                            <p className='text-red-600 text-[12px]'>
-                                {errors.amount.message}
-                            </p>
-                        )}
+                                        className='text-blue-500 border-dotted border-b-2 border-sky-500 cursor-pointer'
+                                    />
+                                    <DataListItem
+                                        label='Shares'
+                                        value={`${(amount / Number(selectedOrder?.price ?? 1)).toFixed(2)}`}
+                                    />
+                                    <DataListItem
+                                        label='Potential return'
+                                        value={
+                                            formatterUSD.format(0.0) +
+                                            ' (0.00%)'
+                                        }
+                                        className='text-green-600'
+                                    />
+                                </DataList.Root>
+                            </div>
+                        </form>
                     </div>
-                    <div>
-                        <div className={`mb-2 font-semibold`}>Shares</div>
-                        <div
-                            className={clsx(
-                                'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
-                                { 'border-red-500': errors?.size }
-                            )}
-                        >
-                            <Button
-                                variant={`secondary`}
-                                size={`icon`}
-                                type={`button`}
-                                onClick={() => updateValue('size', -10)}
-                            >
-                                <Tooltip
-                                    trigger={<Plus width={15} height={15} />}
-                                    content='-10'
-                                />
-                            </Button>
-                            <input
-                                className={clsx(
-                                    'text-center bg-background text-primary placeholder-gray-400',
-                                    'border-none outline-none',
-                                    'focus:outline-none'
-                                )}
-                                placeholder={`$0`}
-                                {...register('size')}
-                            />
-                            <Button
-                                variant={`secondary`}
-                                size={`icon`}
-                                type={`button`}
-                                onClick={() => updateValue('size', 10)}
-                            >
-                                <Tooltip
-                                    trigger={<Plus width={15} height={15} />}
-                                    content='+10'
-                                />
-                            </Button>
-                        </div>
-                        {errors?.size && (
-                            <p className='text-red-600 text-[12px]'>
-                                {errors.size.message}
-                            </p>
-                        )}
-                    </div>
-                    <div className={`flex justify-between items-center`}>
-                        <div className={`font-semibold`}>Set Expiration</div>
-                        <Checkbox size='3' defaultChecked />
-                    </div>
-                </form>
-                <div className={'flex mb-3'}>
-                    {isLogin ? (
-                        <Button
-                            form='limitForm'
-                            className={`flex-1`}
-                            variant={`primary`}
-                            type={`submit`}
-                        >
-                            Buy
-                        </Button>
-                    ) : (
-                        <Button className={`flex-1`} variant={`primary`}>
-                            Login
-                        </Button>
-                    )}
-                </div>
-                <div>
-                    <DataList.Root>
-                        <DataList.Item align='center'>
-                            <DataList.Label minWidth='88px'>
-                                Total
-                            </DataList.Label>
-                            <DataList.Value>
-                                <div
-                                    className={`w-full text-end text-blue-500`}
-                                >
-                                    <span
-                                        className={`border-dotted border-b-2 border-sky-500 cursor-pointer`}
-                                    >
-                                        0.0#
-                                    </span>
-                                </div>
-                            </DataList.Value>
-                        </DataList.Item>
-                        <DataList.Item align='center'>
-                            <DataList.Label minWidth='88px'>
-                                Potential return
-                            </DataList.Label>
-                            <DataList.Value>
-                                <div
-                                    className={`w-full text-end text-green-500`}
-                                >
-                                    0.0#
-                                </div>
-                            </DataList.Value>
-                        </DataList.Item>
-                    </DataList.Root>
-                </div>
-            </>
-        ),
-        [EFormType.AMM]: (
-            <>
-                <div className={`mb-3`}>
-                    <div className={`mb-2 font-semibold`}>Amount</div>
-                    <div
-                        className={`flex justify-around px-3 py-2 border border-gray-300 rounded-lg`}
+                </>
+            ),
+            [EFormType.LIMIT]: (
+                <>
+                    <form
+                        className='flex flex-col gap-3 mb-3'
+                        id='limitForm'
+                        onSubmit={onSubmit}
                     >
-                        <IconButton>
-                            <Minus width={15} height={15} />
-                        </IconButton>
-                        <input
-                            className={clsx(
-                                'text-center bg-background text-primary placeholder-gray-400',
-                                'border-none outline-none',
-                                'focus:outline-none'
-                            )}
-                            placeholder={`$0`}
+                        <div>
+                            <div className='mb-2 font-semibold'>
+                                Limit Price
+                            </div>
+                            <CentsInputField
+                                placeholder='0¢'
+                                setValue={setValue}
+                                name={'amount'}
+                                onChange={(val) => updateValue('amount', val)}
+                                error={errors?.amount}
+                                value={watch('amount', 0)}
+                            />
+                        </div>
+                        <div>
+                            <div className='mb-2 font-semibold'>Shares</div>
+                            <InputField
+                                placeholder='0'
+                                register={register}
+                                name={'size'}
+                                onChange={(val) => updateValue('size', val)}
+                                error={errors?.size}
+                            />
+                        </div>
+                        <div className='flex justify-between items-center'>
+                            <div className='font-semibold'>Set Expiration</div>
+                            <Checkbox size='3' defaultChecked />
+                        </div>
+                        <ActionButton
+                            formId='limitForm'
+                            isLogin={isLogin}
+                            isPending={isSubmitting}
                         />
-                        <IconButton>
-                            <Plus width={15} height={15} />
-                        </IconButton>
+                        <div>
+                            <DataList.Root>
+                                <DataListItem
+                                    label='Total'
+                                    value='0.0#'
+                                    className='text-blue-500 border-dotted border-b-2 border-sky-500 cursor-pointer'
+                                />
+                                <DataListItem
+                                    label='Potential return'
+                                    value='0.0#'
+                                    className='text-green-500'
+                                />
+                            </DataList.Root>
+                        </div>
+                    </form>
+                </>
+            ),
+            [EFormType.AMM]: (
+                <>
+                    <div className='mb-3'>
+                        <div className='mb-2 font-semibold'>Amount</div>
+                        <InputField
+                            placeholder='$0'
+                            name={'amount'}
+                            register={register}
+                            onChange={(val) => updateValue('amount', val)}
+                        />
                     </div>
-                </div>
-            </>
-        )
-    }
+                </>
+            )
+        }),
+        [
+            amount,
+            errors?.amount,
+            errors?.size,
+            formatterUSD,
+            isLogin,
+            onSubmit,
+            register,
+            selectedOrder?.price,
+            updateValue
+        ]
+    )
 
     const _renderFormField = useMemo(
         () => formFields[formType],
@@ -425,7 +423,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[0]) * 100)}`}
+                    {`${currentMarket?.outcomes[0]} ${formatToCents(Number(currentMarket?.outcomePrices[0]), 1)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -436,7 +434,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[1]) * 100)}`}
+                    {`${currentMarket?.outcomes[1]} ${formatToCents(Number(currentMarket?.outcomePrices[1]), 1)}`}
                 </Button>
             </div>
             {_renderFormField}

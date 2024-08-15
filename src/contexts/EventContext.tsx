@@ -24,6 +24,7 @@ import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { setAddressToRequest } from '@/lib/authenticate.ts'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import { useToast } from '@/components/ui/use-toast.ts'
 
 interface EventContextType {
     formStatus: ESide
@@ -43,7 +44,7 @@ interface EventContextType {
     selectedMarketId: string
     selectedOrder: Order | null
     handleSelectOrder: (order: Order | null) => void
-    handleOrder: (payload: OrderRequestBody) => void
+    handleOrder: (payload: OrderRequestBody) => Promise<void>
     resolver: Resolver<OrderFormValues>
     activeOrders: ActiveOrder[] | null
 }
@@ -83,6 +84,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     const { orderBookEvent, subscribe } = useEventWebSocket()
     const { userAddress } = useAuthContext()
+    const { toast } = useToast()
+
     const changeForm = (status: ESide) => {
         setFormStatus(status)
     }
@@ -167,7 +170,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             setAddressToRequest(userAddress)
             fetchActiveOrder({
                 assetId:
-                    formStatus === ESide.BUY
+                    betOption === EBetOption.YES
                         ? (currentMarket?.clobTokenIds[0] ?? '')
                         : (currentMarket?.clobTokenIds[1] ?? ''),
                 limit: 20,
@@ -175,14 +178,14 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 side: formStatus
             })
         }
-    }, [currentMarket, formStatus, request, userAddress])
+    }, [betOption, currentMarket, formStatus, request, userAddress])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
             subscribe([
                 betOption === EBetOption.YES
-                    ? currentMarket.clobTokenIds[0]
-                    : currentMarket.clobTokenIds[1]
+                    ? (currentMarket.clobTokenIds[0] ?? '')
+                    : (currentMarket.clobTokenIds[1] ?? '')
             ])
         }
     }, [betOption, currentMarket?.clobTokenIds])
@@ -192,7 +195,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     }, [subscribeToMarket])
 
     useEffect(() => {
-        if (formStatus === ESide.BUY) {
+        if (betOption === EBetOption.YES) {
             handleSelectOrder(
                 orderBookEvent?.asks.length
                     ? orderBookEvent.asks[orderBookEvent.asks.length - 1]
@@ -235,10 +238,27 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             setAddressToRequest(userAddress)
             const response = await request.order(payload)
             if (response) {
-                console.log(response)
+                toast({
+                    variant: 'success',
+                    title: 'Successful purchase!'
+                })
             }
-        } catch (err) {
-            console.log(err)
+        } catch (err: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Purchase failed!',
+                description: JSON.parse(err.message)
+                    .map((item: string | { message: string }) => {
+                        if (typeof item === 'string') {
+                            return item
+                        } else if (typeof item === 'object' && item !== null) {
+                            const parsedMessage = JSON.parse(item['message'])
+                            return Object.values(parsedMessage).join(', ')
+                        }
+                        return ''
+                    })
+                    .join(', ')
+            })
         }
     }
 

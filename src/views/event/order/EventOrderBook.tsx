@@ -5,23 +5,13 @@ import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption } from '@/types'
 import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton.tsx'
+import { formatToCents } from '@/lib/utils.ts'
 
 const EventOrderBook: React.FC = () => {
     const { betOption, currentMarket, selectedMarketId } = useEventContext()
     const { orderBookEvent } = useEventWebSocket()
     const containerRef = useRef<HTMLDivElement>(null)
     const centerRef = useRef<HTMLDivElement>(null)
-
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }),
-        []
-    )
 
     const lastPrice = useMemo(
         () =>
@@ -109,10 +99,10 @@ const EventOrderBook: React.FC = () => {
                             'font-semibold text-gray-500'
                         )}
                     >
-                        Last: {formatterEuro.format(lastPrice * 100)}
+                        Last: {formatToCents(lastPrice)}
                     </div>
                     <div className='text-center font-semibold text-gray-500 text-nowrap'>
-                        Spread: {formatterEuro.format(spread * 100)}
+                        Spread: {formatToCents(spread)}
                     </div>
                     <div className='text-center font-semibold text-gray-600'></div>
                     <div className='text-center font-semibold text-gray-600'></div>

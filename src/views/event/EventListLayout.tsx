@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Tooltip } from '@/components/ui/tooltip.tsx'
+import TooltipIcon from '@/components/TooltipIcon.tsx'
 import { UpdateIcon } from '@radix-ui/react-icons'
 import OutcomeEventList from '@/views/event/OutcomeEventList.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
@@ -45,7 +45,7 @@ const EventListLayout: React.FC = () => {
                     className={`inline-flex justify-center items-center gap-2`}
                 >
                     <p className='text-nowrap'>% Chance</p>
-                    <Tooltip
+                    <TooltipIcon
                         trigger={
                             <Button size={`icon`} variant={`outline`}>
                                 <UpdateIcon width='10' height='10' />

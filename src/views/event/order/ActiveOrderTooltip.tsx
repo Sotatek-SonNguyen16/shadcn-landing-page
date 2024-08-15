@@ -1,8 +1,13 @@
 import React, { useState } from 'react'
-import * as Tooltip from '@radix-ui/react-tooltip'
 import { ActiveOrder } from '@/types'
 import { Clock3, X } from 'lucide-react'
 import * as Progress from '@radix-ui/react-progress'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from '@/components/ui/tooltip.tsx'
 
 const OrderProgress: React.FC<{ progress: number }> = ({ progress }) => {
     return (
@@ -25,17 +30,20 @@ const ActiveOrderTooltip: React.FC<{
     activeOrder: ActiveOrder | null
     variant: 'success' | 'accent'
 }> = ({ activeOrder, variant }) => {
-    const [open, setOpen] = useState<boolean>(false)
+    const [open, setOpen] = useState<boolean>(true)
 
     if (!activeOrder) return <></>
 
     return (
-        <Tooltip.Provider>
-            <Tooltip.Root open={open} onOpenChange={setOpen}>
-                <Tooltip.Trigger asChild>
+        <TooltipProvider>
+            <Tooltip open={open} onOpenChange={setOpen}>
+                <TooltipTrigger asChild>
                     <div
                         className='h-full flex items-center my-1'
-                        onClick={() => setOpen(true)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setOpen(true)
+                        }}
                     >
                         <Clock3
                             className='cursor-pointer'
@@ -44,35 +52,29 @@ const ActiveOrderTooltip: React.FC<{
                             height={16}
                         />
                     </div>
-                </Tooltip.Trigger>
-                <Tooltip.Portal>
-                    <Tooltip.Content
-                        className='data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade text-violet11 select-none rounded-[4px] bg-white px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity]'
-                        sideOffset={5}
-                        side={`left`}
-                        asChild
-                    >
-                        <div className='flex flex-col gap-2 p-2 w-[200px]'>
-                            <div className='flex justify-between items-center text-[16px] font-bold'>
-                                <div>{activeOrder.status}</div>
-                                <div>0 / 5</div>
-                            </div>
-                            <OrderProgress progress={10} />
-                            <div className='flex justify-between items-center'>
-                                <div className='text-gray-400'>5 remaining</div>
-                                <div>
-                                    <X
-                                        color={'#dc2626'}
-                                        width={16}
-                                        height={16}
-                                    />
-                                </div>
+                </TooltipTrigger>
+                <TooltipContent
+                    className='data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade text-violet11 select-none rounded-[4px] bg-white px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity]'
+                    sideOffset={5}
+                    side={`left`}
+                    asChild
+                >
+                    <div className='flex flex-col gap-2 p-2 w-[200px]'>
+                        <div className='flex justify-between text-gray-900 items-center text-[16px] font-bold'>
+                            <div>{activeOrder.status}</div>
+                            <div>0 / 5</div>
+                        </div>
+                        <OrderProgress progress={10} />
+                        <div className='flex justify-between items-center'>
+                            <div className='text-gray-400'>5 remaining</div>
+                            <div>
+                                <X color={'#dc2626'} width={16} height={16} />
                             </div>
                         </div>
-                    </Tooltip.Content>
-                </Tooltip.Portal>
-            </Tooltip.Root>
-        </Tooltip.Provider>
+                    </div>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     )
 }
 

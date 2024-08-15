@@ -50,7 +50,7 @@ export default class BaseRequest {
             )
             return this._responseHandler(response)
         } catch (error) {
-            return this._errorHandler(error as ErrorResponse)
+            throw await this._errorHandler(error as ErrorResponse)
         }
     }
 
@@ -89,7 +89,7 @@ export default class BaseRequest {
             )
             return this._responseHandler(response)
         } catch (error) {
-            return this._errorHandler(error as ErrorResponse)
+            throw await this._errorHandler(error as ErrorResponse)
         }
     }
 
