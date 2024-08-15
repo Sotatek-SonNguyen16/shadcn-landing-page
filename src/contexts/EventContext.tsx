@@ -19,7 +19,7 @@ import {
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
+import { ActiveOrdersRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { setAddressToRequest } from '@/lib/authenticate.ts'
@@ -44,7 +44,7 @@ interface EventContextType {
     selectedMarketId: string
     selectedOrder: Order | null
     handleSelectOrder: (order: Order | null) => void
-    handleOrder: (payload: OrderRequestBody) => Promise<void>
+    handleOrder: (data: OrderFormValues) => Promise<void>
     resolver: Resolver<OrderFormValues>
     activeOrders: ActiveOrder[] | null
 }
@@ -233,7 +233,18 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
     }
 
-    const handleOrder = async (payload: OrderRequestBody) => {
+    const handleOrder = async (data: OrderFormValues) => {
+        const payload = {
+            marketId: currentMarket?.id ?? '',
+            assetId:
+                betOption === EBetOption.YES
+                    ? (currentMarket?.clobTokenIds[0] ?? '')
+                    : (currentMarket?.clobTokenIds[1] ?? ''),
+            side: formStatus,
+            price: Number(data.amount / 100),
+            size: Number(data.size)
+        }
+
         try {
             setAddressToRequest(userAddress)
             const response = await request.order(payload)

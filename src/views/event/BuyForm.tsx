@@ -184,7 +184,6 @@ const BuyForm: React.FC = () => {
     const {
         formType,
         betOption,
-        formStatus,
         currentMarket,
         changeBetOption,
         selectedOrder,
@@ -199,19 +198,6 @@ const BuyForm: React.FC = () => {
         setValue,
         watch
     } = useForm<OrderFormValues>({ resolver })
-    const onSubmit = handleSubmit(
-        async (data) =>
-            await handleOrder({
-                marketId: currentMarket?.id ?? '',
-                assetId:
-                    betOption === EBetOption.YES
-                        ? (currentMarket?.clobTokenIds[0] ?? '')
-                        : (currentMarket?.clobTokenIds[1] ?? ''),
-                side: formStatus,
-                price: Number(data.amount / 100),
-                size: Number(data.size)
-            })
-    )
 
     const formatterUSD = useMemo(
         () =>
@@ -251,7 +237,10 @@ const BuyForm: React.FC = () => {
             [EFormType.MARKET]: (
                 <>
                     <div className='mb-3'>
-                        <form id='marketForm' onSubmit={onSubmit}>
+                        <form
+                            id='marketForm'
+                            onSubmit={handleSubmit(handleOrder)}
+                        >
                             <div className='flex justify-between items-center mb-1'>
                                 <div className='mb-2 font-semibold'>Amount</div>
                                 <div className='flex gap-1 items-center justify-center'>
@@ -313,7 +302,7 @@ const BuyForm: React.FC = () => {
                     <form
                         className='flex flex-col gap-3 mb-3'
                         id='limitForm'
-                        onSubmit={onSubmit}
+                        onSubmit={handleSubmit(handleOrder)}
                     >
                         <div>
                             <div className='mb-2 font-semibold'>
@@ -383,11 +372,15 @@ const BuyForm: React.FC = () => {
             errors?.amount,
             errors?.size,
             formatterUSD,
+            handleOrder,
+            handleSubmit,
             isLogin,
-            onSubmit,
+            isSubmitting,
             register,
             selectedOrder?.price,
-            updateValue
+            setValue,
+            updateValue,
+            watch
         ]
     )
 
