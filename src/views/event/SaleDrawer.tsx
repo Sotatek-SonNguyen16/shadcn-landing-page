@@ -89,7 +89,7 @@ const SaleDrawer: React.FC = () => {
                         ? (currentMarket?.clobTokenIds[0] ?? '')
                         : (currentMarket?.clobTokenIds[1] ?? ''),
                 side: formStatus,
-                price: Number(data.amount),
+                price: Number(data.amount) / 100,
                 size: Number(data.size)
             })
     )
