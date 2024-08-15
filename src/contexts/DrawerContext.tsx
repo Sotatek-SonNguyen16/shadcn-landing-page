@@ -66,6 +66,7 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
                 }
                 modal={true}
                 shouldScaleBackground={true}
+                disablePreventScroll={true}
             >
                 <DrawerContent>
                     <div

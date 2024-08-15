@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
 import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, EFormType } from '@/types'
+import { formatToCents } from '@/lib/utils.ts'
 
 const SellForm: React.FC = () => {
     const {
@@ -14,17 +15,6 @@ const SellForm: React.FC = () => {
         currentMarket,
         selectedOrder
     } = useEventContext()
-
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 1
-            }),
-        []
-    )
 
     const formFields = {
         [EFormType.MARKET]: (
@@ -223,7 +213,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[0]) * 100)}`}
+                    {`${currentMarket?.outcomes[0]} ${formatToCents(Number(currentMarket?.outcomePrices[0]))}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -234,7 +224,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[1]) * 100)}`}
+                    {`${currentMarket?.outcomes[1]} ${formatToCents(Number(currentMarket?.outcomePrices[1]))}`}
                 </Button>
             </div>
             {_renderFormField()}

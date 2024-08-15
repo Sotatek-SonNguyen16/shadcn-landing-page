@@ -35,3 +35,15 @@ export function formatCurrency(value: number): string {
         return `$${value.toFixed(0)}`
     }
 }
+
+export function formatToCents(value: number, digit: number = 5): string {
+    const formatterCents = new Intl.NumberFormat('default', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digit
+    })
+
+    const formattedValue = formatterCents.format(value * 100)
+    return formattedValue.replace('€', '¢')
+}
