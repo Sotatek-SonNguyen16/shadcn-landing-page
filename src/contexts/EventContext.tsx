@@ -19,8 +19,6 @@ import {
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { OrderRequestBody } from '@/types/request.ts'
-import { ActiveOrdersRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { setAddressToRequest } from '@/lib/authenticate.ts'

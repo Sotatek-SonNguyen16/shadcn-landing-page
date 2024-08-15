@@ -19,7 +19,7 @@ const UnderlineTabs = <T extends string>(props: TabsProps<T>) => {
 
     return (
         <Tabs.Root
-            defaultValue={active}
+            value={active}
             onValueChange={(value) => onClickTab(value as T)}
         >
             <Tabs.List color='indigo' className={clsx('')}>

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
-import { EFormType, MarketTrade, Order } from '@/types'
+import { EFormType, ESide, MarketTrade, Order } from '@/types'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
@@ -21,7 +21,7 @@ interface OrderWithTotal extends Order {
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     const { variant, data, trades } = props
-    const { handleSelectOrder, changeType } = useEventContext()
+    const { handleSelectOrder, changeType, changeForm } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
 
@@ -76,6 +76,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
 
     const handleClickEventTradeBar = (order: Order) => {
         handleSelectOrder(order)
+        changeForm(variant === 'accent' ? ESide.SELL : ESide.BUY)
         changeType(EFormType.LIMIT)
         if (!isLargerThan('lg')) {
             openDrawer({
