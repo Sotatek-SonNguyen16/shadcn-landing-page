@@ -3,19 +3,13 @@ import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import { EBetOption } from '@/types'
+import { EBetOption, ESide } from '@/types'
 import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton.tsx'
 import { formatToCents } from '@/lib/utils.ts'
 
 const EventOrderBook: React.FC = () => {
-    const {
-        betOption,
-        currentMarket,
-        selectedMarketId,
-        tradeYes,
-        tradeNo,
-        formStatus
-    } = useEventContext()
+    const { betOption, currentMarket, selectedMarketId, tradeYes, tradeNo } =
+        useEventContext()
     const { orderBookEvent } = useEventWebSocket()
     const containerRef = useRef<HTMLDivElement>(null)
     const centerRef = useRef<HTMLDivElement>(null)
@@ -38,12 +32,19 @@ const EventOrderBook: React.FC = () => {
 
     const spread = useMemo(() => lastPrice - lastBid, [lastPrice, lastBid])
 
-    const trades = useMemo(() => {
+    const tradeBuy = useMemo(() => {
         if (betOption === EBetOption.YES) {
-            return tradeYes?.filter((trade) => trade.side === formStatus)
+            return tradeYes?.filter((trade) => trade.side === ESide.BUY)
         }
-        return tradeNo?.filter((trade) => trade.side === formStatus)
-    }, [betOption, tradeNo, tradeYes, formStatus])
+        return tradeNo?.filter((trade) => trade.side === ESide.BUY)
+    }, [betOption, tradeNo, tradeYes])
+
+    const tradeSell = useMemo(() => {
+        if (betOption === EBetOption.YES) {
+            return tradeYes?.filter((trade) => trade.side === ESide.SELL)
+        }
+        return tradeNo?.filter((trade) => trade.side === ESide.SELL)
+    }, [betOption, tradeNo, tradeYes])
 
     useEffect(() => {
         if (containerRef.current && centerRef.current) {
@@ -96,7 +97,7 @@ const EventOrderBook: React.FC = () => {
                     <EventTradeBar
                         variant='accent'
                         data={asks}
-                        trades={trades}
+                        trades={tradeSell}
                     />
                 ) : (
                     <div className='text-center p-2'>
@@ -129,7 +130,7 @@ const EventOrderBook: React.FC = () => {
                     <EventTradeBar
                         variant='success'
                         data={bids}
-                        trades={trades}
+                        trades={tradeBuy}
                     />
                 ) : (
                     <div className='text-center p-2'>
