@@ -35,9 +35,6 @@ const ActionButton: React.FC<{
     isPending: boolean
     disabled?: boolean
 }> = ({ formId, isLogin, isPending, disabled = false }) => {
-    useEffect(() => {
-        console.log(isPending)
-    }, [isPending])
     return (
         <div className='flex mb-3'>
             <Button
@@ -147,19 +144,6 @@ const SaleDrawer: React.FC = () => {
         setValue,
         watch
     } = useForm<OrderFormValues>({ resolver })
-    const onSubmit = handleSubmit(
-        async (data) =>
-            await handleOrder({
-                marketId: currentMarket?.id ?? '',
-                assetId:
-                    betOption === EBetOption.YES
-                        ? (currentMarket?.clobTokenIds[0] ?? '')
-                        : (currentMarket?.clobTokenIds[1] ?? ''),
-                side: formStatus,
-                price: Number(data.amount) / 100,
-                size: Number(data.size)
-            })
-    )
 
     const formatterUSD = useMemo(
         () =>
@@ -240,7 +224,7 @@ const SaleDrawer: React.FC = () => {
                 <form
                     className='p-4 flex flex-col gap-4'
                     id='saleForm'
-                    onSubmit={onSubmit}
+                    onSubmit={handleSubmit(handleOrder)}
                 >
                     <div className='flex justify-between items-center'>
                         <Button
