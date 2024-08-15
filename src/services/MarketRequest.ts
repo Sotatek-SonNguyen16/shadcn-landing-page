@@ -5,7 +5,11 @@ import {
     PolyMarketDetail,
     PredictionMarket
 } from '@/types'
-import { DocsResponse, OrderResponse } from '@/types/response.ts'
+import {
+    DocsResponse,
+    MarketTradesResponse,
+    OrderResponse
+} from '@/types/response.ts'
 import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
 
 export default class MarketRequest extends BaseRequest {
@@ -32,5 +36,10 @@ export default class MarketRequest extends BaseRequest {
     async getActiveOrders(payload: ActiveOrdersRequestBody) {
         const url = `/orders/active-orders`
         return await this.get<DocsResponse<ActiveOrder>>(url, payload)
+    }
+
+    async getActiveTrades(marketId: string) {
+        const url = `/orders/market-${marketId}/my-active-trade`
+        return await this.get<MarketTradesResponse>(url)
     }
 }

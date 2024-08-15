@@ -8,7 +8,14 @@ import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton
 import { formatToCents } from '@/lib/utils.ts'
 
 const EventOrderBook: React.FC = () => {
-    const { betOption, currentMarket, selectedMarketId } = useEventContext()
+    const {
+        betOption,
+        currentMarket,
+        selectedMarketId,
+        tradeYes,
+        tradeNo,
+        formStatus
+    } = useEventContext()
     const { orderBookEvent } = useEventWebSocket()
     const containerRef = useRef<HTMLDivElement>(null)
     const centerRef = useRef<HTMLDivElement>(null)
@@ -30,6 +37,13 @@ const EventOrderBook: React.FC = () => {
     )
 
     const spread = useMemo(() => lastPrice - lastBid, [lastPrice, lastBid])
+
+    const trades = useMemo(() => {
+        if (betOption === EBetOption.YES) {
+            return tradeYes?.filter((trade) => trade.side === formStatus)
+        }
+        return tradeNo?.filter((trade) => trade.side === formStatus)
+    }, [betOption, tradeNo, tradeYes, formStatus])
 
     useEffect(() => {
         if (containerRef.current && centerRef.current) {
@@ -79,7 +93,11 @@ const EventOrderBook: React.FC = () => {
                 className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
             >
                 {asks && asks?.length > 0 ? (
-                    <EventTradeBar variant='accent' data={asks} />
+                    <EventTradeBar
+                        variant='accent'
+                        data={asks}
+                        trades={trades}
+                    />
                 ) : (
                     <div className='text-center p-2'>
                         <span className='text-gray-300'>No asks</span>
@@ -108,7 +126,11 @@ const EventOrderBook: React.FC = () => {
                     <div className='text-center font-semibold text-gray-600'></div>
                 </div>
                 {bids && bids?.length > 0 ? (
-                    <EventTradeBar variant='success' data={bids} />
+                    <EventTradeBar
+                        variant='success'
+                        data={bids}
+                        trades={trades}
+                    />
                 ) : (
                     <div className='text-center p-2'>
                         <span className='text-gray-300'>No bids</span>

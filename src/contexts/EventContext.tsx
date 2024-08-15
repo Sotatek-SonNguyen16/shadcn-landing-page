@@ -7,19 +7,19 @@ import React, {
     useState
 } from 'react'
 import {
-    ActiveOrder,
     EBetOption,
     EFormType,
     EMarketDepth,
     ESide,
     Market,
     MarketDetail,
+    MarketTrade,
     Order,
     OrderFormValues,
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
+import { OrderRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { setAddressToRequest } from '@/lib/authenticate.ts'
@@ -46,7 +46,8 @@ interface EventContextType {
     handleSelectOrder: (order: Order | null) => void
     handleOrder: (payload: OrderRequestBody) => Promise<void>
     resolver: Resolver<OrderFormValues>
-    activeOrders: ActiveOrder[] | null
+    tradeYes: MarketTrade[] | null
+    tradeNo: MarketTrade[] | null
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -75,20 +76,21 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
     const [formType, setFormType] = useState<EFormType>(EFormType.LIMIT)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(
-        EMarketDepth.GRAPH
+        EMarketDepth.ORDER_BOOK
     )
     const [betOption, setBetOption] = useState<EBetOption>(EBetOption.YES)
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-    const [activeOrders, setActiveOrders] = useState<ActiveOrder[] | null>(null)
+    const [tradeYes, setTradeYes] = useState<MarketTrade[] | null>(null)
+    const [tradeNo, setTradeNo] = useState<MarketTrade[] | null>(null)
 
     const { orderBookEvent, subscribe } = useEventWebSocket()
     const { userAddress } = useAuthContext()
     const { toast } = useToast()
 
-    const changeForm = (status: ESide) => {
+    const changeForm = useCallback((status: ESide) => {
         setFormStatus(status)
-    }
+    }, [])
 
     const changeType = (type: EFormType) => {
         setFormType(type)
@@ -155,11 +157,12 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     }, [request, selectedMarketId])
 
     useEffect(() => {
-        const fetchActiveOrder = async (payload: ActiveOrdersRequestBody) => {
+        const fetchActiveOrder = async (marketId: string) => {
             try {
-                const response = await request.getActiveOrders(payload)
+                const response = await request.getActiveTrades(marketId)
                 if (response) {
-                    setActiveOrders(response.docs)
+                    setTradeYes(response.tradeYes)
+                    setTradeNo(response.tradeNo)
                 }
             } catch (err) {
                 console.error(err)
@@ -168,17 +171,9 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
         if (currentMarket) {
             setAddressToRequest(userAddress)
-            fetchActiveOrder({
-                assetId:
-                    betOption === EBetOption.YES
-                        ? (currentMarket?.clobTokenIds[0] ?? '')
-                        : (currentMarket?.clobTokenIds[1] ?? ''),
-                limit: 20,
-                page: 1,
-                side: formStatus
-            })
+            fetchActiveOrder(currentMarket.id)
         }
-    }, [betOption, currentMarket, formStatus, request, userAddress])
+    }, [currentMarket, request, userAddress])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
@@ -284,7 +279,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 handleSelectOrder,
                 handleOrder,
                 resolver,
-                activeOrders
+                tradeNo,
+                tradeYes
             }}
         >
             {children}

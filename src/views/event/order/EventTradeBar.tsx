@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
-import { EFormType, Order } from '@/types'
+import { EFormType, MarketTrade, Order } from '@/types'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
@@ -11,6 +11,7 @@ import { formatToCents } from '@/lib/utils.ts'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
+    trades: MarketTrade[] | undefined
     data: Order[] | null
 }
 
@@ -19,8 +20,8 @@ interface OrderWithTotal extends Order {
 }
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
-    const { variant, data } = props
-    const { handleSelectOrder, changeType, activeOrders } = useEventContext()
+    const { variant, data, trades } = props
+    const { handleSelectOrder, changeType } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
 
@@ -97,12 +98,9 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                         const width = Math.round(
                             (Number(total) / maxTotal) * 100 * 3
                         )
-                        const activeOrder =
-                            activeOrders?.find(
-                                (ac) =>
-                                    Number(ac.price) === Number(price) ||
-                                    Number(ac.price) ===
-                                        Number((1 - Number(price)).toFixed(10))
+                        const marketTrade =
+                            trades?.find(
+                                (ac) => Number(ac.price) === Number(price)
                             ) ?? null
 
                         return (
@@ -161,7 +159,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 >
                                     <div className='h-auto'>
                                         <ActiveOrderTooltip
-                                            activeOrder={activeOrder}
+                                            marketTrade={marketTrade}
                                             variant={variant}
                                         />
                                     </div>
