@@ -259,6 +259,15 @@ type ActiveOrder = {
     status: OrderStatus
 }
 
+type MarketTrade = {
+    orderIds: string[]
+    assetId: string
+    price: number
+    side: ESide
+    size: number
+    sizeMatched: number
+}
+
 export type {
     PriceChangeEvent,
     Order,
@@ -268,7 +277,8 @@ export type {
     Market,
     PolyMarketDetail,
     OrderFormValues,
-    ActiveOrder
+    ActiveOrder,
+    MarketTrade
 }
 
 export { EFormType, EMarketDepth, ESide, EBetOption, EEventType }

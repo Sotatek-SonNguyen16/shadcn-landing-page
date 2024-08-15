@@ -31,9 +31,13 @@ const tabs: Tab<EMarketDepth>[] = [
 ]
 
 const Content = memo(() => {
-    const { changeMarketDepth } = useEventContext()
+    const { changeMarketDepth, marketDepth } = useEventContext()
     return (
-        <UnderlineTabs<EMarketDepth> tabs={tabs} onClick={changeMarketDepth} />
+        <UnderlineTabs<EMarketDepth>
+            active={marketDepth}
+            tabs={tabs}
+            onClick={changeMarketDepth}
+        />
     )
 })
 

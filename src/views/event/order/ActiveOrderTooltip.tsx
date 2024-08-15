@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
-import { ActiveOrder } from '@/types'
+import { MarketTrade } from '@/types'
 import { Clock3, X } from 'lucide-react'
 import * as Progress from '@radix-ui/react-progress'
+import { TooltipProvider } from '@/components/ui/tooltip.tsx'
+import { Button } from '@/components/ui/button.tsx'
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger
-} from '@/components/ui/tooltip.tsx'
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger
+} from '@/components/ui/hover-card'
+import TooltipIcon from '@/components/TooltipIcon.tsx'
+import { useEventContext } from '@/contexts/EventContext.tsx'
 
 const OrderProgress: React.FC<{ progress: number }> = ({ progress }) => {
     return (
@@ -27,17 +30,18 @@ const OrderProgress: React.FC<{ progress: number }> = ({ progress }) => {
 }
 
 const ActiveOrderTooltip: React.FC<{
-    activeOrder: ActiveOrder | null
+    marketTrade: MarketTrade | null
     variant: 'success' | 'accent'
-}> = ({ activeOrder, variant }) => {
-    const [open, setOpen] = useState<boolean>(true)
+}> = ({ marketTrade, variant }) => {
+    const [open, setOpen] = useState<boolean>(false)
+    const { handleCancelMarketTrade } = useEventContext()
 
-    if (!activeOrder) return <></>
+    if (!marketTrade) return <></>
 
     return (
         <TooltipProvider>
-            <Tooltip open={open} onOpenChange={setOpen}>
-                <TooltipTrigger asChild>
+            <HoverCard open={open} onOpenChange={setOpen}>
+                <HoverCardTrigger asChild>
                     <div
                         className='h-full flex items-center my-1'
                         onClick={(e) => {
@@ -52,28 +56,59 @@ const ActiveOrderTooltip: React.FC<{
                             height={16}
                         />
                     </div>
-                </TooltipTrigger>
-                <TooltipContent
+                </HoverCardTrigger>
+                <HoverCardContent
                     className='data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade text-violet11 select-none rounded-[4px] bg-white px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity]'
                     sideOffset={5}
                     side={`left`}
                     asChild
                 >
-                    <div className='flex flex-col gap-2 p-2 w-[200px]'>
+                    <div
+                        className='flex flex-col gap-2 p-2 w-[200px]'
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className='flex justify-between text-gray-900 items-center text-[16px] font-bold'>
-                            <div>{activeOrder.status}</div>
-                            <div>0 / 5</div>
-                        </div>
-                        <OrderProgress progress={10} />
-                        <div className='flex justify-between items-center'>
-                            <div className='text-gray-400'>5 remaining</div>
+                            <div>Filled</div>
                             <div>
-                                <X color={'#dc2626'} width={16} height={16} />
+                                {marketTrade.sizeMatched} / {marketTrade.size}
+                            </div>
+                        </div>
+                        <OrderProgress
+                            progress={
+                                marketTrade.sizeMatched / marketTrade.size
+                            }
+                        />
+                        <div className='flex justify-between items-center'>
+                            <div className='text-gray-400'>
+                                {marketTrade.size} remaining
+                            </div>
+                            <div>
+                                <Button
+                                    variant='secondary'
+                                    size='icon'
+                                    type='button'
+                                    onClick={() =>
+                                        handleCancelMarketTrade(
+                                            marketTrade?.orderIds
+                                        )
+                                    }
+                                >
+                                    <TooltipIcon
+                                        trigger={
+                                            <X
+                                                color={'#dc2626'}
+                                                width={16}
+                                                height={16}
+                                            />
+                                        }
+                                        content={`Cancel`}
+                                    />
+                                </Button>
                             </div>
                         </div>
                     </div>
-                </TooltipContent>
-            </Tooltip>
+                </HoverCardContent>
+            </HoverCard>
         </TooltipProvider>
     )
 }

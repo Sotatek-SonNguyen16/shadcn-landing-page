@@ -9,23 +9,24 @@ export interface Tab<T extends string> {
 }
 
 interface TabsProps<T extends string> {
+    active: T
     tabs: Tab<T>[]
     onClick: (value: T) => void
 }
 
 const UnderlineTabs = <T extends string>(props: TabsProps<T>) => {
-    const { tabs, onClick: onClickTab } = props
+    const { active, tabs, onClick: onClickTab } = props
 
     return (
         <Tabs.Root
-            defaultValue={tabs.length > 0 ? `${tabs[0].value}` : undefined}
+            value={active}
+            onValueChange={(value) => onClickTab(value as T)}
         >
             <Tabs.List color='indigo' className={clsx('')}>
                 {tabs.map(({ title, value }) => (
                     <Tabs.Trigger
                         key={`tab-trigger-${value}`}
                         value={`${value}`}
-                        onClick={() => onClickTab(value)}
                     >
                         <span className={clsx('p-3 font-semibold')}>
                             {title}

@@ -23,7 +23,7 @@ const tabs: Tab<ESide>[] = [
 ]
 
 const PredictionCard: React.FC = () => {
-    const { currentMarket, changeForm, changeType, formType } =
+    const { currentMarket, changeForm, changeType, formType, formStatus } =
         useEventContext()
     const formTypeList: EFormType[] = [EFormType.LIMIT]
 
@@ -67,7 +67,11 @@ const PredictionCard: React.FC = () => {
                         onSelect={changeType}
                     />
                 </div>
-                <UnderlineTabs<ESide> tabs={tabs} onClick={changeForm} />
+                <UnderlineTabs<ESide>
+                    active={formStatus}
+                    tabs={tabs}
+                    onClick={changeForm}
+                />
             </div>
         </div>
     )

@@ -41,7 +41,7 @@ const tabs: Tab<EBetOption>[] = [
 const PredictionDrawer: React.FC = () => {
     const src =
         'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fwill-kamala-harris-win-the-2024-us-presidential-election-21483ac3-94a5-4efd-b89e-05cdca69753f.png&w=96&q=100'
-    const { currentMarket, changeBetOption } = useEventContext()
+    const { currentMarket, changeBetOption, betOption } = useEventContext()
     const [viewMore, setViewMore] = useState<boolean>(false)
     const [displayOrderBook, setDisplayOrderBook] = useState<boolean>(false)
 
@@ -141,6 +141,7 @@ const PredictionDrawer: React.FC = () => {
                     {displayOrderBook && (
                         <div className='mt-3' onClick={handleInnerClick}>
                             <UnderlineTabs<EBetOption>
+                                active={betOption}
                                 tabs={tabs}
                                 onClick={changeBetOption}
                             />
