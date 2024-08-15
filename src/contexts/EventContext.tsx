@@ -170,7 +170,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             setAddressToRequest(userAddress)
             fetchActiveOrder({
                 assetId:
-                    formStatus === ESide.BUY
+                    betOption === EBetOption.YES
                         ? (currentMarket?.clobTokenIds[0] ?? '')
                         : (currentMarket?.clobTokenIds[1] ?? ''),
                 limit: 20,
@@ -178,14 +178,14 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 side: formStatus
             })
         }
-    }, [currentMarket, formStatus, request, userAddress])
+    }, [betOption, currentMarket, formStatus, request, userAddress])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
             subscribe([
                 betOption === EBetOption.YES
-                    ? currentMarket.clobTokenIds[0]
-                    : currentMarket.clobTokenIds[1]
+                    ? (currentMarket.clobTokenIds[0] ?? '')
+                    : (currentMarket.clobTokenIds[1] ?? '')
             ])
         }
     }, [betOption, currentMarket?.clobTokenIds])
@@ -195,7 +195,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     }, [subscribeToMarket])
 
     useEffect(() => {
-        if (formStatus === ESide.BUY) {
+        if (betOption === EBetOption.YES) {
             handleSelectOrder(
                 orderBookEvent?.asks.length
                     ? orderBookEvent.asks[orderBookEvent.asks.length - 1]
@@ -247,7 +247,17 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             toast({
                 variant: 'destructive',
                 title: 'Purchase failed!',
-                description: JSON.parse(err.message)[0] ?? ''
+                description: JSON.parse(err.message)
+                    .map((item: string | { message: string }) => {
+                        if (typeof item === 'string') {
+                            return item
+                        } else if (typeof item === 'object' && item !== null) {
+                            const parsedMessage = JSON.parse(item['message'])
+                            return Object.values(parsedMessage).join(', ')
+                        }
+                        return ''
+                    })
+                    .join(', ')
             })
         }
     }

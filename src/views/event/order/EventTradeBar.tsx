@@ -7,6 +7,7 @@ import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import ActiveOrderTooltip from '@/views/event/order/ActiveOrderTooltip.tsx'
+import { formatToCents } from '@/lib/utils.ts'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
@@ -28,17 +29,6 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
     } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
-
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 5
-            }),
-        []
-    )
 
     const formatterUSD = useMemo(
         () =>
@@ -184,7 +174,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                             variant={variant}
                                         />
                                     </div>
-                                    {formatterEuro.format(Number(price) * 100)}
+                                    {formatToCents(price)}
                                 </div>
                                 <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
                                     {formatterDecimal.format(Number(size))}

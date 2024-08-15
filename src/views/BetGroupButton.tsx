@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Ellipsis } from 'lucide-react'
@@ -12,6 +12,7 @@ import { useEventContext } from '@/contexts/EventContext.tsx'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import { EBetOption } from '@/types'
+import { formatToCents } from '@/lib/utils.ts'
 
 const OptionModalToggle = () => {
     return (
@@ -38,17 +39,6 @@ const BetGroupButton: React.FC = () => {
     const { currentMarket, changeBetOption } = useEventContext()
     const { openDrawer } = useDrawerContext()
 
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }),
-        []
-    )
-
     const onClickBetButton = (option: EBetOption) => {
         changeBetOption(option)
         openDrawer({
@@ -71,7 +61,7 @@ const BetGroupButton: React.FC = () => {
                     onClick={() => onClickBetButton(EBetOption.YES)}
                 >
                     Bet{' '}
-                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[0]) * 100))}`}
+                    {`${currentMarket?.outcomes[0]} ${formatToCents(Number(currentMarket?.outcomePrices[0]), 2)}`}
                 </Button>
                 <Button
                     variant='accentSolid'
@@ -79,7 +69,7 @@ const BetGroupButton: React.FC = () => {
                     onClick={() => onClickBetButton(EBetOption.NO)}
                 >
                     Bet{' '}
-                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Math.round(Number(currentMarket?.outcomePrices[1]) * 100))}`}
+                    {`${currentMarket?.outcomes[1]} ${formatToCents(Number(currentMarket?.outcomePrices[1]), 2)}`}
                 </Button>
                 <OptionModalToggle />
             </div>

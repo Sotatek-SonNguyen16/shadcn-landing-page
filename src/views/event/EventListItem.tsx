@@ -14,6 +14,7 @@ import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import PredictionDrawer from '@/views/event/PredictionDrawer.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
+import { formatToCents } from '@/lib/utils.ts'
 
 const tabs: Tab<EMarketDepth>[] = [
     {
@@ -96,17 +97,6 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
     } = useEventContext()
     const { id, outcomePrices, outcomes, groupItemTitle, volume, icon } = data
     const { openDrawer } = useDrawerContext()
-
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 1
-            }),
-        []
-    )
 
     const formatterUSD = useMemo(
         () =>
@@ -196,7 +186,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                         }}
                     >
                         <p className='text-nowrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatterEuro.format(Number(outcomePrices[0]) * 100)}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[0]} ${formatToCents(Number(outcomePrices[0]), 1)}`}
                         </p>
                     </Button>
                     <Button
@@ -215,7 +205,7 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
                         }}
                     >
                         <p className='text-nowrap'>
-                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatterEuro.format(Number(outcomePrices[1]) * 100)}`}
+                            {`${formStatus === ESide.BUY ? 'Bet' : 'Sell'} ${outcomes[1]} ${formatToCents(Number(outcomePrices[1]), 1)}`}
                         </p>
                     </Button>
                 </div>
@@ -232,7 +222,6 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
             betOption,
             formStatus,
             outcomes,
-            formatterEuro,
             outcomePrices,
             handleSelectMarket,
             handleBetOptionChange,

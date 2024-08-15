@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
 import { useEventContext } from '@/contexts/EventContext.tsx'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { ArrowRightLeft, Minus, Plus, Settings } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
-import { useForm } from 'react-hook-form'
+import { useForm, UseFormSetValue } from 'react-hook-form'
 import TooltipIcon from '@/components/TooltipIcon.tsx'
 import { LoadingSpinner } from '@/components/ui/spinner.tsx'
 
@@ -53,6 +53,73 @@ const ActionButton: React.FC<{
     )
 }
 
+const CentsInputField: React.FC<{
+    setValue: UseFormSetValue<OrderFormValues>
+    name: keyof OrderFormValues
+    placeholder: string
+    onChange: (value: number) => void
+    value: number
+}> = ({ value, placeholder, name, setValue, onChange }) => {
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const numericValue = Number(e.target.value.replace('¢', '').trim()) || 0
+
+        setValue(name, numericValue)
+    }
+
+    useEffect(() => {
+        if (inputRef.current) {
+            const input = inputRef.current
+            const valueWithoutSymbol = value.toString()
+            input.value = `${valueWithoutSymbol}¢`
+
+            input.setSelectionRange(
+                valueWithoutSymbol.length,
+                valueWithoutSymbol.length
+            )
+        }
+    }, [value])
+
+    return (
+        <div className='flex justify-around'>
+            <Button
+                variant='secondary'
+                size='icon'
+                type='button'
+                onClick={() => onChange(-1)}
+            >
+                <TooltipIcon
+                    trigger={<Minus width={15} height={15} />}
+                    content={`-$1`}
+                />
+            </Button>
+            <input
+                ref={inputRef}
+                className={clsx(
+                    'w-[100px] text-center',
+                    'border-none outline-none',
+                    'focus:outline-none'
+                )}
+                placeholder={placeholder}
+                onChange={handleInputChange}
+                defaultValue={`${value}¢`}
+            />
+            <Button
+                variant='secondary'
+                size='icon'
+                type='button'
+                onClick={() => onChange(1)}
+            >
+                <TooltipIcon
+                    trigger={<Plus width={15} height={15} />}
+                    content={`+$1`}
+                />
+            </Button>
+        </div>
+    )
+}
+
 const SaleDrawer: React.FC = () => {
     const {
         changeForm,
@@ -85,7 +152,7 @@ const SaleDrawer: React.FC = () => {
             await handleOrder({
                 marketId: currentMarket?.id ?? '',
                 assetId:
-                    formStatus === ESide.BUY
+                    betOption === EBetOption.YES
                         ? (currentMarket?.clobTokenIds[0] ?? '')
                         : (currentMarket?.clobTokenIds[1] ?? ''),
                 side: formStatus,
@@ -115,7 +182,12 @@ const SaleDrawer: React.FC = () => {
 
     const updateValue = useCallback(
         (field: keyof OrderFormValues, delta: number) => {
-            setValue(field, Number((Number(watch(field)) + delta).toFixed(1)))
+            const currentValue = Number(watch(field))
+            const newValue = Number((currentValue + delta).toFixed(1))
+
+            if (newValue >= 0) {
+                setValue(field, newValue)
+            }
         },
         [setValue, watch]
     )
@@ -210,45 +282,15 @@ const SaleDrawer: React.FC = () => {
                         <InputHorizontal
                             label='Limit Price'
                             content={
-                                <div className={`flex justify-around`}>
-                                    <Button
-                                        variant={`secondary`}
-                                        size={`icon`}
-                                        type={`button`}
-                                        onClick={() =>
-                                            updateValue('amount', -1)
-                                        }
-                                    >
-                                        <TooltipIcon
-                                            trigger={
-                                                <Minus width={15} height={15} />
-                                            }
-                                            content='-$1'
-                                        />
-                                    </Button>
-                                    <input
-                                        className={clsx(
-                                            'w-[100px] text-center',
-                                            'border-none outline-none',
-                                            'focus:outline-none'
-                                        )}
-                                        placeholder={`$0`}
-                                        {...register('amount')}
-                                    />
-                                    <Button
-                                        variant={`secondary`}
-                                        size={`icon`}
-                                        type={`button`}
-                                        onClick={() => updateValue('amount', 1)}
-                                    >
-                                        <TooltipIcon
-                                            trigger={
-                                                <Plus width={15} height={15} />
-                                            }
-                                            content='+$1'
-                                        />
-                                    </Button>
-                                </div>
+                                <CentsInputField
+                                    placeholder='0¢'
+                                    setValue={setValue}
+                                    name={'amount'}
+                                    onChange={(val) =>
+                                        updateValue('amount', val)
+                                    }
+                                    value={watch('amount', 0)}
+                                />
                             }
                         />
                         <InputHorizontal

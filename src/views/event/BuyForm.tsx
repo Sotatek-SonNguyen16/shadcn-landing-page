@@ -1,14 +1,20 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Info, Minus, Plus, RefreshCcw, Settings } from 'lucide-react'
 import { Checkbox, DataList, IconButton } from '@radix-ui/themes'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
+import { EBetOption, EFormType, OrderFormValues } from '@/types'
 import TooltipIcon from '@/components/TooltipIcon.tsx'
-import { FieldError, useForm, UseFormRegister } from 'react-hook-form'
+import {
+    FieldError,
+    useForm,
+    UseFormRegister,
+    UseFormSetValue
+} from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { LoadingSpinner } from '@/components/ui/spinner.tsx'
+import { formatToCents } from '@/lib/utils.ts'
 
 const InputField: React.FC<{
     register: UseFormRegister<OrderFormValues>
@@ -60,15 +66,90 @@ const InputField: React.FC<{
     </>
 )
 
+const CentsInputField: React.FC<{
+    setValue: UseFormSetValue<OrderFormValues>
+    name: keyof OrderFormValues
+    placeholder: string
+    onChange: (value: number) => void
+    error?: FieldError
+    value: number
+}> = ({ value, placeholder, name, setValue, onChange, error }) => {
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const numericValue = Number(e.target.value.replace('¢', '').trim()) || 0
+
+        setValue(name, numericValue)
+    }
+
+    useEffect(() => {
+        if (inputRef.current) {
+            const input = inputRef.current
+            const valueWithoutSymbol = value.toString()
+            input.value = `${valueWithoutSymbol}¢`
+
+            input.setSelectionRange(
+                valueWithoutSymbol.length,
+                valueWithoutSymbol.length
+            )
+        }
+    }, [value])
+
+    return (
+        <>
+            <div
+                className={clsx(
+                    'flex justify-around px-3 py-2 border border-gray-300 rounded-lg',
+                    { 'border-red-500': !!error }
+                )}
+            >
+                <Button
+                    variant='secondary'
+                    size='icon'
+                    type='button'
+                    onClick={() => onChange(-10)}
+                >
+                    <TooltipIcon
+                        trigger={<Minus width={15} height={15} />}
+                        content={`-$10`}
+                    />
+                </Button>
+                <input
+                    ref={inputRef}
+                    className={clsx(
+                        'text-center bg-background text-primary placeholder-gray-400',
+                        'border-none outline-none',
+                        'focus:outline-none'
+                    )}
+                    placeholder={placeholder}
+                    onChange={handleInputChange}
+                    defaultValue={`${value}¢`}
+                />
+                <Button
+                    variant='secondary'
+                    size='icon'
+                    type='button'
+                    onClick={() => onChange(10)}
+                >
+                    <TooltipIcon
+                        trigger={<Plus width={15} height={15} />}
+                        content={`+$10`}
+                    />
+                </Button>
+            </div>
+            {error && (
+                <p className='text-red-600 text-[12px]'>{error?.message}</p>
+            )}
+        </>
+    )
+}
+
 const ActionButton: React.FC<{
     formId: string
     isLogin: boolean
     isPending: boolean
     disabled?: boolean
 }> = ({ formId, isLogin, isPending, disabled = false }) => {
-    useEffect(() => {
-        console.log(isPending)
-    }, [isPending])
     return (
         <div className='flex mb-3'>
             <Button
@@ -123,24 +204,13 @@ const BuyForm: React.FC = () => {
             await handleOrder({
                 marketId: currentMarket?.id ?? '',
                 assetId:
-                    formStatus === ESide.BUY
+                    betOption === EBetOption.YES
                         ? (currentMarket?.clobTokenIds[0] ?? '')
                         : (currentMarket?.clobTokenIds[1] ?? ''),
                 side: formStatus,
-                price: Number(data.amount) / 100,
+                price: Number(data.amount / 100),
                 size: Number(data.size)
             })
-    )
-
-    const formatterEuro = useMemo(
-        () =>
-            new Intl.NumberFormat('default', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 1
-            }),
-        []
     )
 
     const formatterUSD = useMemo(
@@ -166,7 +236,12 @@ const BuyForm: React.FC = () => {
 
     const updateValue = useCallback(
         (field: keyof OrderFormValues, delta: number) => {
-            setValue(field, Number((Number(watch(field)) + delta).toFixed(1)))
+            const currentValue = Number(watch(field))
+            const newValue = Number((currentValue + delta).toFixed(1))
+
+            if (newValue >= 0) {
+                setValue(field, newValue)
+            }
         },
         [setValue, watch]
     )
@@ -209,9 +284,9 @@ const BuyForm: React.FC = () => {
                                 <DataList.Root>
                                     <DataListItem
                                         label='Avg price'
-                                        value={formatterEuro.format(
-                                            Number(selectedOrder?.price ?? 0) *
-                                                100
+                                        value={formatToCents(
+                                            Number(selectedOrder?.price ?? 0),
+                                            1
                                         )}
                                         className='text-blue-500 border-dotted border-b-2 border-sky-500 cursor-pointer'
                                     />
@@ -244,18 +319,19 @@ const BuyForm: React.FC = () => {
                             <div className='mb-2 font-semibold'>
                                 Limit Price
                             </div>
-                            <InputField
-                                placeholder='$0'
-                                register={register}
+                            <CentsInputField
+                                placeholder='0¢'
+                                setValue={setValue}
                                 name={'amount'}
                                 onChange={(val) => updateValue('amount', val)}
                                 error={errors?.amount}
+                                value={watch('amount', 0)}
                             />
                         </div>
                         <div>
                             <div className='mb-2 font-semibold'>Shares</div>
                             <InputField
-                                placeholder='$0'
+                                placeholder='0'
                                 register={register}
                                 name={'size'}
                                 onChange={(val) => updateValue('size', val)}
@@ -306,7 +382,6 @@ const BuyForm: React.FC = () => {
             amount,
             errors?.amount,
             errors?.size,
-            formatterEuro,
             formatterUSD,
             isLogin,
             onSubmit,
@@ -348,7 +423,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${currentMarket?.outcomes[0]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[0]) * 100)}`}
+                    {`${currentMarket?.outcomes[0]} ${formatToCents(Number(currentMarket?.outcomePrices[0]), 1)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -359,7 +434,7 @@ const BuyForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${currentMarket?.outcomes[1]} ${formatterEuro.format(Number(currentMarket?.outcomePrices[1]) * 100)}`}
+                    {`${currentMarket?.outcomes[1]} ${formatToCents(Number(currentMarket?.outcomePrices[1]), 1)}`}
                 </Button>
             </div>
             {_renderFormField}
