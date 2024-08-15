@@ -156,8 +156,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         if (selectedMarketId) fetchMarket(selectedMarketId)
     }, [request, selectedMarketId])
 
-    useEffect(() => {
-        const fetchActiveOrder = async (marketId: string) => {
+    const fetchActiveOrder = useCallback(
+        async (marketId: string) => {
             try {
                 const response = await request.getActiveTrades(marketId)
                 if (response) {
@@ -167,13 +167,16 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             } catch (err) {
                 console.error(err)
             }
-        }
+        },
+        [request]
+    )
 
+    useEffect(() => {
         if (currentMarket) {
             setAddressToRequest(userAddress)
             fetchActiveOrder(currentMarket.id)
         }
-    }, [currentMarket, request, userAddress])
+    }, [currentMarket, fetchActiveOrder, userAddress])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
@@ -237,6 +240,9 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                     variant: 'success',
                     title: 'Successful purchase!'
                 })
+                if (currentMarket?.id) {
+                    await fetchActiveOrder(currentMarket?.id)
+                }
             }
         } catch (err: any) {
             toast({
