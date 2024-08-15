@@ -44,7 +44,7 @@ interface EventContextType {
     selectedMarketId: string
     selectedOrder: Order | null
     handleSelectOrder: (order: Order | null) => void
-    handleOrder: (payload: OrderRequestBody) => void
+    handleOrder: (payload: OrderRequestBody) => Promise<void>
     resolver: Resolver<OrderFormValues>
     activeOrders: ActiveOrder[] | null
 }

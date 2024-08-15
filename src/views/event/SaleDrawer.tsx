@@ -9,6 +9,7 @@ import { clsx } from 'clsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { useForm } from 'react-hook-form'
 import TooltipIcon from '@/components/TooltipIcon.tsx'
+import { LoadingSpinner } from '@/components/ui/spinner.tsx'
 
 const InputHorizontal: React.FC<{ label: string; content: JSX.Element }> = ({
     content,
@@ -26,6 +27,30 @@ enum ExpirationType {
     UntilCancelled = 'Until cancelled',
     EndOfDay = 'End of day',
     Custom = 'Custom'
+}
+
+const ActionButton: React.FC<{
+    formId: string
+    isLogin: boolean
+    isPending: boolean
+    disabled?: boolean
+}> = ({ formId, isLogin, isPending, disabled = false }) => {
+    useEffect(() => {
+        console.log(isPending)
+    }, [isPending])
+    return (
+        <div className='flex mb-3'>
+            <Button
+                form={formId}
+                className='flex-1'
+                variant='primary'
+                type={isLogin ? 'submit' : 'button'}
+                disabled={isPending || disabled}
+            >
+                {isLogin ? isPending ? <LoadingSpinner /> : 'Buy' : 'Login'}
+            </Button>
+        </div>
+    )
 }
 
 const SaleDrawer: React.FC = () => {
@@ -51,22 +76,23 @@ const SaleDrawer: React.FC = () => {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
         setValue,
         watch
     } = useForm<OrderFormValues>({ resolver })
-    const onSubmit = handleSubmit((data) => {
-        handleOrder({
-            marketId: currentMarket?.id ?? '',
-            assetId:
-                formStatus === ESide.BUY
-                    ? (currentMarket?.clobTokenIds[0] ?? '')
-                    : (currentMarket?.clobTokenIds[1] ?? ''),
-            side: formStatus,
-            price: Number(data.amount),
-            size: Number(data.size)
-        })
-    })
+    const onSubmit = handleSubmit(
+        async (data) =>
+            await handleOrder({
+                marketId: currentMarket?.id ?? '',
+                assetId:
+                    formStatus === ESide.BUY
+                        ? (currentMarket?.clobTokenIds[0] ?? '')
+                        : (currentMarket?.clobTokenIds[1] ?? ''),
+                side: formStatus,
+                price: Number(data.amount),
+                size: Number(data.size)
+            })
+    )
 
     const formatterUSD = useMemo(
         () =>
@@ -280,17 +306,11 @@ const SaleDrawer: React.FC = () => {
                     <div className='text-center'>{`Total: ${formatterUSD.format(
                         Number(currentMarket?.volumeNum)
                     )}`}</div>
-                    {isLogin ? (
-                        <Button
-                            variant={'primary'}
-                            type={'submit'}
-                            form={'saleForm'}
-                        >
-                            Buy
-                        </Button>
-                    ) : (
-                        <Button variant={'primary'}>Login</Button>
-                    )}
+                    <ActionButton
+                        formId={`saleForm`}
+                        isLogin={isLogin}
+                        isPending={isSubmitting}
+                    />
                 </form>
             </div>
         </DrawerProvider>
