@@ -11,7 +11,7 @@ interface RequestParams {
 }
 
 interface RequestData {
-    [key: string]: number | string
+    [key: string]: number | string | string[] | number[]
 }
 
 interface ErrorResponse {

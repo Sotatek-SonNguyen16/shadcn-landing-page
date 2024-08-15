@@ -48,6 +48,7 @@ interface EventContextType {
     resolver: Resolver<OrderFormValues>
     tradeYes: MarketTrade[] | null
     tradeNo: MarketTrade[] | null
+    handleCancelMarketTrade: (orderIds: string[]) => Promise<void>
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -263,6 +264,35 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
     }
 
+    const handleCancelMarketTrade = async (orderIds: string[]) => {
+        try {
+            await request.deleteOrders({ orderIds: orderIds })
+            toast({
+                variant: 'success',
+                title: 'Delete order success!'
+            })
+            if (currentMarket?.id) {
+                await fetchActiveOrder(currentMarket?.id)
+            }
+        } catch (err: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Delete order failure!',
+                description: JSON.parse(err.message)
+                    .map((item: string | { message: string }) => {
+                        if (typeof item === 'string') {
+                            return item
+                        } else if (typeof item === 'object' && item !== null) {
+                            const parsedMessage = JSON.parse(item['message'])
+                            return Object.values(parsedMessage).join(', ')
+                        }
+                        return ''
+                    })
+                    .join(', ')
+            })
+        }
+    }
+
     return (
         <EventContext.Provider
             value={{
@@ -286,7 +316,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 handleOrder,
                 resolver,
                 tradeNo,
-                tradeYes
+                tradeYes,
+                handleCancelMarketTrade
             }}
         >
             {children}

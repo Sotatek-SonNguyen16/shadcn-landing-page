@@ -15,4 +15,12 @@ type ActiveOrdersRequestBody = {
     limit: number
 }
 
-export type { OrderRequestBody, ActiveOrdersRequestBody }
+type DeleteOrdersRequestBody = {
+    orderIds: string[]
+}
+
+export type {
+    OrderRequestBody,
+    ActiveOrdersRequestBody,
+    DeleteOrdersRequestBody
+}

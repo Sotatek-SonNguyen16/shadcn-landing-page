@@ -10,6 +10,7 @@ import {
     HoverCardTrigger
 } from '@/components/ui/hover-card'
 import TooltipIcon from '@/components/TooltipIcon.tsx'
+import { useEventContext } from '@/contexts/EventContext.tsx'
 
 const OrderProgress: React.FC<{ progress: number }> = ({ progress }) => {
     return (
@@ -33,6 +34,7 @@ const ActiveOrderTooltip: React.FC<{
     variant: 'success' | 'accent'
 }> = ({ marketTrade, variant }) => {
     const [open, setOpen] = useState<boolean>(false)
+    const { handleCancelMarketTrade } = useEventContext()
 
     if (!marketTrade) return <></>
 
@@ -85,7 +87,11 @@ const ActiveOrderTooltip: React.FC<{
                                     variant='secondary'
                                     size='icon'
                                     type='button'
-                                    onClick={() => {}}
+                                    onClick={() =>
+                                        handleCancelMarketTrade(
+                                            marketTrade?.orderIds
+                                        )
+                                    }
                                 >
                                     <TooltipIcon
                                         trigger={
