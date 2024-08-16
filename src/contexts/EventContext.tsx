@@ -22,7 +22,6 @@ import RequestFactory from '@/services/RequestFactory.ts'
 import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
-import { setAddressToRequest } from '@/lib/authenticate.ts'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { useToast } from '@/components/ui/use-toast.ts'
 
@@ -167,7 +166,6 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
 
         if (currentMarket) {
-            setAddressToRequest(userAddress)
             fetchActiveOrder({
                 assetId:
                     betOption === EBetOption.YES
@@ -235,7 +233,6 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     const handleOrder = async (payload: OrderRequestBody) => {
         try {
-            setAddressToRequest(userAddress)
             const response = await request.order(payload)
             if (response) {
                 toast({
