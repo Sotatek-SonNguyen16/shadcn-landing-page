@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { LogoIcon } from '@/components/Icons.tsx'
+import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
+import SearchBar from '@/components/layout/SearchBar.tsx'
+import { ModeToggle } from '@/components/mode-toggle.tsx'
+import { buttonVariants } from '@/components/ui/button.tsx'
 import {
     NavigationMenu,
     NavigationMenuItem
@@ -10,14 +14,11 @@ import {
     SheetTitle,
     SheetTrigger
 } from '@/components/ui/sheet'
-import { Activity, Flag, Grip, Menu, Trophy } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button.tsx'
-import { ModeToggle } from '@/components/mode-toggle.tsx'
-import { LogoIcon } from '@/components/Icons.tsx'
-import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
-import SearchBar from '@/components/layout/SearchBar.tsx'
-import { clsx } from 'clsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import { TonConnectButton } from '@tonconnect/ui-react'
+import { clsx } from 'clsx'
+import { Activity, Flag, Grip, Menu, Trophy } from 'lucide-react'
+import { useState } from 'react'
 
 interface RouteProps {
     icon: JSX.Element
@@ -203,6 +204,8 @@ export const Header = () => {
                     </div>
                 </div>
             </NavigationMenu>
+
+            <TonConnectButton />
         </header>
     )
 }
