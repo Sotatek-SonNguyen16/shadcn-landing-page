@@ -7,19 +7,18 @@ import React, {
     useState
 } from 'react'
 import {
-    ActiveOrder,
     EBetOption,
     EFormType,
     EMarketDepth,
     ESide,
     Market,
     MarketDetail,
+    MarketTrade,
     Order,
     OrderFormValues,
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { ActiveOrdersRequestBody, OrderRequestBody } from '@/types/request.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
@@ -43,9 +42,11 @@ interface EventContextType {
     selectedMarketId: string
     selectedOrder: Order | null
     handleSelectOrder: (order: Order | null) => void
-    handleOrder: (payload: OrderRequestBody) => Promise<void>
+    handleOrder: (data: OrderFormValues) => Promise<void>
     resolver: Resolver<OrderFormValues>
-    activeOrders: ActiveOrder[] | null
+    tradeYes: MarketTrade[] | null
+    tradeNo: MarketTrade[] | null
+    handleCancelMarketTrade: (orderIds: string[]) => Promise<void>
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -74,12 +75,13 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
     const [formType, setFormType] = useState<EFormType>(EFormType.LIMIT)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(
-        EMarketDepth.GRAPH
+        EMarketDepth.ORDER_BOOK
     )
     const [betOption, setBetOption] = useState<EBetOption>(EBetOption.YES)
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-    const [activeOrders, setActiveOrders] = useState<ActiveOrder[] | null>(null)
+    const [tradeYes, setTradeYes] = useState<MarketTrade[] | null>(null)
+    const [tradeNo, setTradeNo] = useState<MarketTrade[] | null>(null)
 
     const { orderBookEvent, subscribe } = useEventWebSocket()
     const { userAddress } = useAuthContext()
@@ -153,30 +155,26 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         if (selectedMarketId) fetchMarket(selectedMarketId)
     }, [request, selectedMarketId])
 
-    useEffect(() => {
-        const fetchActiveOrder = async (payload: ActiveOrdersRequestBody) => {
+    const fetchActiveOrder = useCallback(
+        async (marketId: string) => {
             try {
-                const response = await request.getActiveOrders(payload)
+                const response = await request.getActiveTrades(marketId)
                 if (response) {
-                    setActiveOrders(response.docs)
+                    setTradeYes(response.tradeYes)
+                    setTradeNo(response.tradeNo)
                 }
             } catch (err) {
                 console.error(err)
             }
-        }
+        },
+        [request]
+    )
 
+    useEffect(() => {
         if (currentMarket) {
-            fetchActiveOrder({
-                assetId:
-                    betOption === EBetOption.YES
-                        ? (currentMarket?.clobTokenIds[0] ?? '')
-                        : (currentMarket?.clobTokenIds[1] ?? ''),
-                limit: 20,
-                page: 1,
-                side: formStatus
-            })
+            fetchActiveOrder(currentMarket.id)
         }
-    }, [betOption, currentMarket, formStatus, request, userAddress])
+    }, [currentMarket, fetchActiveOrder, userAddress])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
@@ -231,7 +229,18 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
     }
 
-    const handleOrder = async (payload: OrderRequestBody) => {
+    const handleOrder = async (data: OrderFormValues) => {
+        const payload = {
+            marketId: currentMarket?.id ?? '',
+            assetId:
+                betOption === EBetOption.YES
+                    ? (currentMarket?.clobTokenIds[0] ?? '')
+                    : (currentMarket?.clobTokenIds[1] ?? ''),
+            side: formStatus,
+            price: Number(data.amount / 100),
+            size: Number(data.size)
+        }
+
         try {
             const response = await request.order(payload)
             if (response) {
@@ -239,11 +248,43 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                     variant: 'success',
                     title: 'Successful purchase!'
                 })
+                if (currentMarket?.id) {
+                    await fetchActiveOrder(currentMarket?.id)
+                }
             }
         } catch (err: any) {
             toast({
                 variant: 'destructive',
                 title: 'Purchase failed!',
+                description: JSON.parse(err.message)
+                    .map((item: string | { message: string }) => {
+                        if (typeof item === 'string') {
+                            return item
+                        } else if (typeof item === 'object' && item !== null) {
+                            const parsedMessage = JSON.parse(item['message'])
+                            return Object.values(parsedMessage).join(', ')
+                        }
+                        return ''
+                    })
+                    .join(', ')
+            })
+        }
+    }
+
+    const handleCancelMarketTrade = async (orderIds: string[]) => {
+        try {
+            await request.deleteOrders({ orderIds: orderIds })
+            toast({
+                variant: 'success',
+                title: 'Delete order success!'
+            })
+            if (currentMarket?.id) {
+                await fetchActiveOrder(currentMarket?.id)
+            }
+        } catch (err: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Delete order failure!',
                 description: JSON.parse(err.message)
                     .map((item: string | { message: string }) => {
                         if (typeof item === 'string') {
@@ -281,7 +322,9 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 handleSelectOrder,
                 handleOrder,
                 resolver,
-                activeOrders
+                tradeNo,
+                tradeYes,
+                handleCancelMarketTrade
             }}
         >
             {children}

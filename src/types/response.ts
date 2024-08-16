@@ -1,3 +1,5 @@
+import { MarketTrade } from '@/types/index.ts'
+
 type DocsResponse<T> = {
     totalDocs: number
     totalPages: number
@@ -10,4 +12,9 @@ type OrderResponse = {
     result: string
 }
 
-export type { DocsResponse, OrderResponse }
+type MarketTradesResponse = {
+    tradeYes: MarketTrade[]
+    tradeNo: MarketTrade[]
+}
+
+export type { DocsResponse, OrderResponse, MarketTradesResponse }
