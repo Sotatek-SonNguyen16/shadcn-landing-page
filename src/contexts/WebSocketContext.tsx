@@ -68,7 +68,29 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         connector.on('disconnect', handleDisconnect)
         connector.on('market', handleMarketUpdate)
 
+        const intervalId = setInterval(() => {
+            setOrderBookEvent((prevState) => {
+                if (!prevState) return prevState
+
+                return {
+                    ...prevState,
+                    asks: [
+                        ...prevState.asks,
+                        {
+                            price:
+                                prevState.asks[prevState.asks.length - 1]
+                                    .price + 0.1,
+                            size:
+                                prevState.asks[prevState.asks.length - 1].size +
+                                10
+                        }
+                    ]
+                }
+            })
+        }, 2000)
+
         return () => {
+            clearInterval(intervalId)
             connector.off('connect', handleConnect)
             connector.off('disconnect', handleDisconnect)
             connector.off('market', handleMarketUpdate)
