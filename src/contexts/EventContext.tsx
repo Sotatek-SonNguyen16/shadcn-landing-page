@@ -21,7 +21,6 @@ import {
 import RequestFactory from '@/services/RequestFactory.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
-import { setAddressToRequest } from '@/lib/authenticate.ts'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { useToast } from '@/components/ui/use-toast.ts'
 
@@ -173,7 +172,6 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     useEffect(() => {
         if (currentMarket) {
-            setAddressToRequest(userAddress)
             fetchActiveOrder(currentMarket.id)
         }
     }, [currentMarket, fetchActiveOrder, userAddress])
@@ -244,7 +242,6 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
 
         try {
-            setAddressToRequest(userAddress)
             const response = await request.order(payload)
             if (response) {
                 toast({

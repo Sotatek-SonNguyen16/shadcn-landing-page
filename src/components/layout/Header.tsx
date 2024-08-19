@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { LogoIcon } from '@/components/Icons.tsx'
+import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
+import SearchBar from '@/components/layout/SearchBar.tsx'
+import { ModeToggle } from '@/components/mode-toggle.tsx'
+import { Button, buttonVariants } from '@/components/ui/button.tsx'
 import {
     NavigationMenu,
     NavigationMenuItem
@@ -6,18 +10,21 @@ import {
 import {
     Sheet,
     SheetContent,
+    SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger
 } from '@/components/ui/sheet'
-import { Activity, Flag, Grip, Menu, Trophy } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button.tsx'
-import { ModeToggle } from '@/components/mode-toggle.tsx'
-import { LogoIcon } from '@/components/Icons.tsx'
-import { MarketsNavigateMenu } from '@/components/layout/NavigateMenu.tsx'
-import SearchBar from '@/components/layout/SearchBar.tsx'
 import { clsx } from 'clsx'
+import { Activity, Flag, Grip, Menu, Trophy } from 'lucide-react'
+import { useState } from 'react'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu.tsx'
 
 interface RouteProps {
     icon: JSX.Element
@@ -49,8 +56,9 @@ const routeList: RouteProps[] = [
 ]
 
 export const Header = () => {
-    const { isLogin, handleLogin, handleLogout } = useAuthContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
+    const { isLogin, handleLogin, handleLogout, address } = useAuthContext()
+
     return (
         <header
             className={clsx(
@@ -72,9 +80,27 @@ export const Header = () => {
                     </NavigationMenuItem>
 
                     {/* mobile */}
-                    <span className='flex lg:hidden'>
-                        <ModeToggle />
-
+                    <div className='flex lg:hidden items-center gap-2'>
+                        <div className='w-full flex justify-center'>
+                            {!isLogin ? (
+                                <Button
+                                    className='rounded-2xl'
+                                    variant={'primary'}
+                                    onClick={handleLogin}
+                                >
+                                    Connect
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant={'default'}
+                                    className='w-[100px] rounded-2xl'
+                                >
+                                    <span className='overflow-hidden text-ellipsis whitespace-nowrap'>
+                                        {address}
+                                    </span>
+                                </Button>
+                            )}
+                        </div>
                         <Sheet open={isOpen} onOpenChange={setIsOpen}>
                             <SheetTrigger>
                                 <Menu
@@ -85,11 +111,15 @@ export const Header = () => {
                                 </Menu>
                             </SheetTrigger>
 
-                            <SheetContent side={'left'}>
+                            <SheetContent
+                                side={'left'}
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <SheetHeader>
                                     <SheetTitle className='font-bold text-lg'>
                                         Prediction Market
                                     </SheetTitle>
+                                    <SheetDescription></SheetDescription>
                                 </SheetHeader>
                                 <nav className='flex flex-col justify-center items-center gap-2 mt-4'>
                                     {routeList.map(
@@ -107,49 +137,19 @@ export const Header = () => {
                                             </a>
                                         )
                                     )}
-                                    {!isLogin ? (
-                                        <>
-                                            <div
-                                                className={`w-[110px] border ${buttonVariants(
-                                                    {
-                                                        variant: 'secondary'
-                                                    }
-                                                )}`}
-                                                onClick={handleLogin}
-                                            >
-                                                Login
-                                            </div>
-                                            <a
-                                                rel='noreferrer noopener'
-                                                href='#'
-                                                target='_blank'
-                                                className={`w-[110px] border ${buttonVariants(
-                                                    {
-                                                        variant: 'primary'
-                                                    }
-                                                )}`}
-                                            >
-                                                Sign Up
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div
-                                                className={`w-[110px] border ${buttonVariants(
-                                                    {
-                                                        variant: 'outline'
-                                                    }
-                                                )}`}
-                                                onClick={handleLogout}
-                                            >
-                                                Logout
-                                            </div>
-                                        </>
+                                    {address && (
+                                        <Button
+                                            variant={'destructive'}
+                                            onClick={handleLogout}
+                                        >
+                                            Disconnect
+                                        </Button>
                                     )}
+                                    <ModeToggle />
                                 </nav>
                             </SheetContent>
                         </Sheet>
-                    </span>
+                    </div>
 
                     {/* desktop */}
                     <div className='hidden lg:block w-full px-4'>
@@ -161,43 +161,38 @@ export const Header = () => {
 
                     <div className='hidden lg:flex gap-2 items-center'>
                         {!isLogin ? (
-                            <>
-                                <div
-                                    className={`w-[110px] border ${buttonVariants(
-                                        {
-                                            variant: 'secondary'
-                                        }
-                                    )}`}
+                            <div className='w-full flex justify-center'>
+                                <Button
+                                    variant={'primary'}
                                     onClick={handleLogin}
                                 >
-                                    Login
-                                </div>
-                                <a
-                                    rel='noreferrer noopener'
-                                    href='#'
-                                    target='_blank'
-                                    className={`w-[110px] border ${buttonVariants(
-                                        {
-                                            variant: 'primary'
-                                        }
-                                    )}`}
-                                >
-                                    Sign Up
-                                </a>
-                            </>
+                                    Connect Wallet
+                                </Button>
+                            </div>
                         ) : (
-                            <>
-                                <div
-                                    className={`w-[110px] border ${buttonVariants(
-                                        {
-                                            variant: 'outline'
-                                        }
-                                    )}`}
-                                    onClick={handleLogout}
-                                >
-                                    Logout
-                                </div>
-                            </>
+                            <div className='w-full flex justify-center'>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant={'default'}
+                                            className='w-[130px]'
+                                        >
+                                            <span className='overflow-hidden text-ellipsis whitespace-nowrap'>
+                                                {address}
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align='end'>
+                                        <DropdownMenuItem
+                                            onClick={handleLogout}
+                                        >
+                                            <span className='text-destructive'>
+                                                Disconnect
+                                            </span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         )}
                         <ModeToggle />
                     </div>

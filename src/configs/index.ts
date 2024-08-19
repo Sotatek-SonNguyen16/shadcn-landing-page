@@ -1,12 +1,18 @@
 import dev from './dev.json'
 import prod from './prod.json'
+import { WalletsListConfiguration } from '@tonconnect/ui-react'
+import { ActionConfiguration } from '@tonconnect/ui'
+
+interface App {
+    apiUrl: string
+    wws: string
+}
 
 export interface Config {
-    app: {
-        apiUrl: string
-        wws: string
-    }
-    address: string
+    app: App
+    walletsListConfiguration: WalletsListConfiguration
+    twaReturnUrl: ActionConfiguration
+    manifestUrl: string
 }
 
 const env = import.meta.env.VITE_NODE_ENV as 'dev' | 'prod'
