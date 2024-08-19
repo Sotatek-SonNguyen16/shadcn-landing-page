@@ -19,7 +19,6 @@ import {
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { FieldErrors, Resolver } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { useToast } from '@/components/ui/use-toast.ts'
@@ -83,7 +82,6 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [tradeYes, setTradeYes] = useState<MarketTrade[] | null>(null)
     const [tradeNo, setTradeNo] = useState<MarketTrade[] | null>(null)
 
-    const { orderBookEvent, subscribe } = useEventWebSocket()
     const { userAddress } = useAuthContext()
     const { toast } = useToast()
 
@@ -175,36 +173,6 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
             fetchActiveOrder(currentMarket.id)
         }
     }, [currentMarket, fetchActiveOrder, userAddress])
-
-    const subscribeToMarket = useCallback(() => {
-        if (currentMarket?.clobTokenIds) {
-            subscribe([
-                betOption === EBetOption.YES
-                    ? (currentMarket.clobTokenIds[0] ?? '')
-                    : (currentMarket.clobTokenIds[1] ?? '')
-            ])
-        }
-    }, [betOption, currentMarket?.clobTokenIds])
-
-    useEffect(() => {
-        subscribeToMarket()
-    }, [subscribeToMarket])
-
-    useEffect(() => {
-        if (betOption === EBetOption.YES) {
-            handleSelectOrder(
-                orderBookEvent?.asks.length
-                    ? orderBookEvent.asks[orderBookEvent.asks.length - 1]
-                    : null
-            )
-        } else {
-            handleSelectOrder(
-                orderBookEvent?.bids.length
-                    ? orderBookEvent.bids[orderBookEvent.bids.length - 1]
-                    : null
-            )
-        }
-    }, [formStatus, orderBookEvent])
 
     const resolver: Resolver<OrderFormValues> = async (values) => {
         const errors: FieldErrors<OrderFormValues> = {}

@@ -188,7 +188,8 @@ const SellForm: React.FC = () => {
         changeBetOption,
         selectedOrder,
         handleOrder,
-        resolver
+        resolver,
+        formStatus
     } = useEventContext()
     const { isLogin } = useAuthContext()
     const {
@@ -200,12 +201,10 @@ const SellForm: React.FC = () => {
     } = useForm<OrderFormValues>({ resolver })
 
     useEffect(() => {
-        setValue(
-            'amount',
-            Number(((selectedOrder?.price ?? 0) * 100).toFixed(1))
-        )
-        setValue('size', selectedOrder?.size ?? 0)
-    }, [selectedOrder?.price, selectedOrder?.size, setValue])
+        if (selectedOrder) {
+            setValue('size', selectedOrder?.size ?? 0)
+        }
+    }, [selectedOrder, formStatus])
 
     const updateValue = useCallback(
         (field: keyof OrderFormValues, delta: number) => {
@@ -301,7 +300,14 @@ const SellForm: React.FC = () => {
                                 name={'amount'}
                                 onChange={(val) => updateValue('amount', val)}
                                 error={errors?.amount}
-                                value={watch('amount', 0)}
+                                value={watch(
+                                    'amount',
+                                    Number(
+                                        (
+                                            (selectedOrder?.price ?? 0) * 100
+                                        ).toFixed(1)
+                                    )
+                                )}
                             />
                         </div>
                         <div>
@@ -408,7 +414,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.YES)}
                 >
-                    {`${currentMarket?.outcomes[0]} ${formatToCents(Number(currentMarket?.outcomePrices[0]))}`}
+                    {`${currentMarket?.outcomes[0]} ${formatToCents(Number(currentMarket?.outcomePrices[0]), 1)}`}
                 </Button>
                 <Button
                     className={`flex-1 py-6`}
@@ -419,7 +425,7 @@ const SellForm: React.FC = () => {
                     }
                     onClick={() => changeBetOption(EBetOption.NO)}
                 >
-                    {`${currentMarket?.outcomes[1]} ${formatToCents(Number(currentMarket?.outcomePrices[1]))}`}
+                    {`${currentMarket?.outcomes[1]} ${formatToCents(Number(currentMarket?.outcomePrices[1]), 1)}`}
                 </Button>
             </div>
             {_renderFormField}

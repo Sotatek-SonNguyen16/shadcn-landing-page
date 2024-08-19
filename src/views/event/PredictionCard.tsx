@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo, useMemo } from 'react'
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
 import { clsx } from 'clsx'
 import { Tab, UnderlineTabs } from '@/components/ui/tabs.tsx'
@@ -26,6 +26,7 @@ const PredictionCard: React.FC = () => {
     const { currentMarket, changeForm, changeType, formType, formStatus } =
         useEventContext()
     const formTypeList: EFormType[] = [EFormType.LIMIT]
+    const memoizedTabs = useMemo(() => tabs, [])
 
     if (!currentMarket) {
         return <PredictionCardSkeleton />
@@ -69,7 +70,7 @@ const PredictionCard: React.FC = () => {
                 </div>
                 <UnderlineTabs<ESide>
                     active={formStatus}
-                    tabs={tabs}
+                    tabs={memoizedTabs}
                     onClick={changeForm}
                 />
             </div>
@@ -77,4 +78,4 @@ const PredictionCard: React.FC = () => {
     )
 }
 
-export default PredictionCard
+export default memo(PredictionCard)

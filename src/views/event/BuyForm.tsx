@@ -186,9 +186,10 @@ const BuyForm: React.FC = () => {
         betOption,
         currentMarket,
         changeBetOption,
-        selectedOrder,
         handleOrder,
-        resolver
+        resolver,
+        selectedOrder,
+        formStatus
     } = useEventContext()
     const { isLogin } = useAuthContext()
     const {
@@ -213,12 +214,10 @@ const BuyForm: React.FC = () => {
     const amount = Number(watch('amount'))
 
     useEffect(() => {
-        setValue(
-            'amount',
-            Number(((selectedOrder?.price ?? 0) * 100).toFixed(1))
-        )
-        setValue('size', selectedOrder?.size ?? 0)
-    }, [selectedOrder?.price, selectedOrder?.size, setValue])
+        if (selectedOrder) {
+            setValue('size', selectedOrder?.size ?? 0)
+        }
+    }, [selectedOrder, formStatus])
 
     const updateValue = useCallback(
         (field: keyof OrderFormValues, delta: number) => {
@@ -314,7 +313,14 @@ const BuyForm: React.FC = () => {
                                 name={'amount'}
                                 onChange={(val) => updateValue('amount', val)}
                                 error={errors?.amount}
-                                value={watch('amount', 0)}
+                                value={watch(
+                                    'amount',
+                                    Number(
+                                        (
+                                            (selectedOrder?.price ?? 0) * 100
+                                        ).toFixed(1)
+                                    )
+                                )}
                             />
                         </div>
                         <div>
