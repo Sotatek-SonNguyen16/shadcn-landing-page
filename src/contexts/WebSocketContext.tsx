@@ -27,7 +27,7 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
     const [isConnected, setIsConnected] = useState(false)
     const connector = useMemo(() => new EventsWebSocket(config.app.wws, ''), [])
-
+    const [lastAssetIds, setLastAssetIds] = useState<string[]>([])
     const [priceChangeEvent, setPriceChangeEvent] =
         useState<PriceChangeEvent | null>(null)
     const [orderBookEvent, setOrderBookEvent] = useState<OrderBookEvent | null>(
@@ -39,7 +39,9 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const handleSubscribe = (assetsIds: string[]) => {
+        connector.send('unsubscribe', { assetsIds: lastAssetIds })
         connector.send('subscribe', { assetsIds })
+        setLastAssetIds(assetsIds)
     }
 
     const clearOrderBookEvent = () => {

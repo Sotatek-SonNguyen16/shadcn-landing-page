@@ -10,6 +10,7 @@ type EventsServerToClientEvents = {
 
 type EventsClientToServerEvents = {
     subscribe: EventHandlerArgs<{ assetsIds: string[] }>
+    unsubscribe: EventHandlerArgs<{ assetsIds: string[] }>
 }
 
 export class EventsWebSocket extends BaseWebSocketImpl<

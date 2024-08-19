@@ -186,6 +186,7 @@ const SaleDrawer: React.FC = () => {
                             variant={
                                 formStatus === ESide.BUY ? 'default' : 'outline'
                             }
+                            type='button'
                             onClick={() => changeForm(ESide.BUY)}
                         >
                             Buy
@@ -197,6 +198,7 @@ const SaleDrawer: React.FC = () => {
                                     ? 'default'
                                     : 'outline'
                             }
+                            type='button'
                             onClick={() => changeForm(ESide.SELL)}
                         >
                             Sell
@@ -211,6 +213,7 @@ const SaleDrawer: React.FC = () => {
                         <Button
                             variant={'outline'}
                             size={`icon`}
+                            type='button'
                             onClick={() => {
                                 openDrawer({
                                     content: <div>Trade Settings</div>
@@ -234,6 +237,7 @@ const SaleDrawer: React.FC = () => {
                                     ? 'successGhost'
                                     : 'accentGhost'
                             }
+                            type='button'
                             size={`iconGroup`}
                             onClick={() =>
                                 changeBetOption(
