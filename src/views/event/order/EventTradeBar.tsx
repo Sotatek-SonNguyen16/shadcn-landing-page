@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui/badge.tsx'
 import { EFormType, ESide, MarketTrade, Order } from '@/types'
@@ -74,28 +74,63 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
         )
     }, [calculatedOrders])
 
-    const handleClickEventTradeBar = (order: Order) => {
-        handleSelectOrder(order)
-        changeForm(variant === 'accent' ? ESide.SELL : ESide.BUY)
-        changeType(EFormType.LIMIT)
-        if (!isLargerThan('lg')) {
-            openDrawer({
-                content: <SaleDrawer />
-            })
+    const handleClickEventTradeBar = useCallback(
+        (order: Order) => {
+            handleSelectOrder(order)
+            changeForm(variant === 'accent' ? ESide.SELL : ESide.BUY)
+            changeType(EFormType.LIMIT)
+            if (!isLargerThan('lg')) {
+                openDrawer({
+                    content: <SaleDrawer />
+                })
+            }
+        },
+        [
+            variant,
+            handleSelectOrder,
+            changeForm,
+            changeType,
+            isLargerThan,
+            openDrawer
+        ]
+    )
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (containerRef.current) {
+            const container = containerRef.current
+
+            setTimeout(() => {
+                if (variant === 'accent') {
+                    container.scrollTo({
+                        top: container.scrollHeight,
+                        behavior: 'instant'
+                    })
+                } else if (variant === 'success') {
+                    container.scrollTo({
+                        top: -99999,
+                        behavior: 'instant'
+                    })
+                }
+            }, 0)
         }
-    }
+    }, [calculatedOrders, variant])
 
     return (
         <div
-            className={clsx('flex', {
-                'flex-col': variant === 'accent',
-                'flex-col-reverse': variant === 'success'
-            })}
+            ref={containerRef}
+            className={clsx(
+                'flex h-[200px] overflow-y-scroll scrollbar-hidden',
+                {
+                    'flex-col': variant === 'accent',
+                    'flex-col-reverse': variant === 'success'
+                }
+            )}
         >
             {calculatedOrders &&
                 calculatedOrders
-                    // .filter((_, index) => index >= calculatedOrders.length - 10)
-                    .map(({ size, price, total }, index) => {
+                    // .filter((_, index, array) => index >= array.length - 10)
+                    .map(({ size, price, total }, index, array) => {
                         const width = Math.round(
                             (Number(total) / maxTotal) * 100 * 3
                         )
@@ -126,9 +161,8 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                         'col-span-2 ps-[2px]',
                                         `flex items-center`,
                                         {
-                                            'duration-300 animate-fadeIn':
-                                                index ===
-                                                calculatedOrders.length - 1
+                                            'duration-100 animate-fadeIn':
+                                                index === array.length - 1
                                         },
                                         {
                                             'bg-green-100 group-hover:bg-green-200 dark:bg-green-500/30 group-hover:dark:bg-green-500/30':
@@ -138,7 +172,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                         }
                                     )}
                                 >
-                                    {index === calculatedOrders.length - 1 && (
+                                    {index === array.length - 1 && (
                                         <Badge variant={`${variant}Solid`}>
                                             {variant === 'accent'
                                                 ? 'Asks'
