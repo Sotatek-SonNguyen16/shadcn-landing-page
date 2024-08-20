@@ -1,7 +1,9 @@
+import AuthRequest from './AuthRequest'
 import MarketRequest from './MarketRequest'
 
 type RequestClasses = {
     MarketRequest: typeof MarketRequest
+    AuthRequest: typeof AuthRequest
 }
 
 type RequestInstances = {
@@ -25,7 +27,9 @@ class RequestFactory {
     ): RequestInstances[K] {
         switch (classname) {
             case 'MarketRequest':
-                return new MarketRequest()
+                return new MarketRequest() as RequestInstances[K]
+            case 'AuthRequest':
+                return new AuthRequest() as RequestInstances[K]
             default:
                 throw new Error(`Unknown request class: ${classname}`)
         }

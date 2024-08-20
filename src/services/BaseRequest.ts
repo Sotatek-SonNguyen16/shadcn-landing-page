@@ -11,7 +11,12 @@ interface RequestParams {
 }
 
 interface RequestData {
-    [key: string]: number | string | string[] | number[]
+    [key: string]:
+        | number
+        | string
+        | string[]
+        | number[]
+        | Record<string, unknown>
 }
 
 interface ErrorResponse {
