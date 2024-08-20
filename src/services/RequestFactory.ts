@@ -27,9 +27,9 @@ class RequestFactory {
     ): RequestInstances[K] {
         switch (classname) {
             case 'MarketRequest':
-                return new MarketRequest()
+                return new MarketRequest() as RequestInstances[K]
             case 'AuthRequest':
-                return new AuthRequest()
+                return new AuthRequest() as RequestInstances[K]
             default:
                 throw new Error(`Unknown request class: ${classname}`)
         }

@@ -5,6 +5,7 @@ const CHAIN = {
     '-239': 'MAINNET',
     '-3': 'TESTNET'
 }
+
 export default class AuthRequest extends BaseRequest {
     async generatePayload(): Promise<{ payload: string }> {
         const url = `/auth/generate-payload`
