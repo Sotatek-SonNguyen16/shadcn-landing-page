@@ -1,14 +1,25 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState
+} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import {
     useTonAddress,
     useTonConnectModal,
-    useTonConnectUI
+    useTonConnectUI,
+    useIsConnectionRestored,
+    useTonWallet
 } from '@tonconnect/ui-react'
+
 import TonConnectProvider from '@/provider/tonConnectProvider.ts'
 import { setUser } from '@/store/userSlice.ts'
 import Storage from '@/lib/storage.ts'
+import RequestFactory from '@/services/RequestFactory'
+import { setAccessToken } from '@/store/authSlice'
 
 interface AuthContextProps {
     isLogin: boolean
@@ -18,6 +29,8 @@ interface AuthContextProps {
     address: string
 }
 
+const payloadTTLMS = 1000 * 60 * 20
+
 const AuthContext = createContext<AuthContextProps | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -26,23 +39,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const { open } = useTonConnectModal()
     const address = useTonAddress()
     const [tonConnectUI] = useTonConnectUI()
+    const isConnectionRestored = useIsConnectionRestored()
+    const wallet = useTonWallet()
 
     const dispatch = useDispatch()
     const userAddress = useSelector((state: RootState) => state.user?.address)
     const [isLogin, setIsLogin] = useState<boolean>(!!Storage.getAccessToken())
+    const interval = useRef<ReturnType<typeof setInterval> | undefined>()
 
     const handleLogin = async () => {
         open()
     }
 
-    useEffect(() => {
-        if (tonConnectUI) {
-            TonConnectProvider.setTonConnectUI(tonConnectUI)
+    const login = async () => {
+        if (
+            !wallet?.connectItems?.tonProof ||
+            'error' in wallet.connectItems.tonProof
+        ) {
+            return
         }
-    }, [tonConnectUI])
 
-    useEffect(() => {
-        if (address) {
+        try {
+            const authService = RequestFactory.getRequest('AuthRequest')
+            const result = await authService.login(
+                wallet.connectItems.tonProof.proof,
+                wallet.account
+            )
+
             dispatch(
                 setUser({
                     id: '',
@@ -50,17 +73,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     address: address
                 })
             )
+            dispatch(setAccessToken({ accessToken: result.accessToken }))
             setIsLogin(true)
-            Storage.setAccessToken(address)
+        } catch (e) {
+            console.debug('login error', e)
+            handleLogout()
         }
-    }, [address, dispatch])
+    }
+
+    useEffect(() => {
+        if (!isConnectionRestored) {
+            return
+        }
+        const authService = RequestFactory.getRequest('AuthRequest')
+
+        clearInterval(interval.current)
+        if (!wallet) {
+            Storage.clearAccessToken()
+
+            const refreshPayload = async () => {
+                tonConnectUI.setConnectRequestParameters({ state: 'loading' })
+
+                const value = await authService.generatePayload()
+                if (!value) {
+                    tonConnectUI.setConnectRequestParameters(null)
+                } else {
+                    tonConnectUI.setConnectRequestParameters({
+                        state: 'ready',
+                        value: {
+                            tonProof: value.payload
+                        }
+                    })
+                }
+            }
+
+            refreshPayload()
+            setInterval(refreshPayload, payloadTTLMS)
+            return
+        }
+
+        login()
+    }, [wallet, isConnectionRestored, tonConnectUI])
+
+    useEffect(() => {
+        if (tonConnectUI) {
+            TonConnectProvider.setTonConnectUI(tonConnectUI)
+        }
+    }, [tonConnectUI])
 
     const handleLogout = async () => {
         setIsLogin(false)
         await tonConnectUI.disconnect()
         localStorage.clear()
         sessionStorage.clear()
-        window.location.reload()
+        // window.location.reload()
     }
 
     return (
