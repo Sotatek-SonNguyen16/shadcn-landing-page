@@ -130,7 +130,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
             {calculatedOrders &&
                 calculatedOrders
                     // .filter((_, index, array) => index >= array.length - 10)
-                    .map(({ size, price, total }, index, array) => {
+                    .map(({ size, price, total }, index, internalOrders) => {
                         const width = Math.round(
                             (Number(total) / maxTotal) * 100 * 3
                         )
@@ -162,7 +162,8 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                         `flex items-center`,
                                         {
                                             'duration-100 animate-fadeIn':
-                                                index === array.length - 1
+                                                index ===
+                                                internalOrders.length - 1
                                         },
                                         {
                                             'bg-green-100 group-hover:bg-green-200 dark:bg-green-500/30 group-hover:dark:bg-green-500/30':
@@ -172,7 +173,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                         }
                                     )}
                                 >
-                                    {index === array.length - 1 && (
+                                    {index === internalOrders.length - 1 && (
                                         <Badge variant={`${variant}Solid`}>
                                             {variant === 'accent'
                                                 ? 'Asks'
