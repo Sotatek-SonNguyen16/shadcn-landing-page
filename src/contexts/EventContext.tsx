@@ -84,7 +84,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [tradeNo, setTradeNo] = useState<MarketTrade[] | null>(null)
 
     const { orderBookEvent, subscribe } = useEventWebSocket()
-    const { userAddress } = useAuthContext()
+    const { userAddress, isLogin } = useAuthContext()
     const { toast } = useToast()
 
     const changeForm = (status: ESide) => {
@@ -171,10 +171,10 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     )
 
     useEffect(() => {
-        if (currentMarket) {
+        if (currentMarket && isLogin) {
             fetchActiveOrder(currentMarket.id)
         }
-    }, [currentMarket, fetchActiveOrder, userAddress])
+    }, [currentMarket, fetchActiveOrder, userAddress, isLogin])
 
     const subscribeToMarket = useCallback(() => {
         if (currentMarket?.clobTokenIds) {
