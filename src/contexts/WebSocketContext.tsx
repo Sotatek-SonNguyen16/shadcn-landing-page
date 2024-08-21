@@ -1,6 +1,7 @@
 import React, {
     createContext,
     ReactNode,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -8,11 +9,16 @@ import React, {
 } from 'react'
 import { EventsWebSocket } from '@/services/EventsWebSocket.ts'
 import config from '@/configs'
-import { EEventType, OrderBookEvent, PriceChangeEvent } from '@/types'
+import { useEventContext } from '@/contexts/EventContext.tsx'
+import {
+    EBetOption,
+    EEventType,
+    OrderBookEvent,
+    PriceChangeEvent
+} from '@/types'
 
 interface EventWebSocketContextProps {
     isConnected: boolean
-    subscribe: (assetsIds: string[]) => void
     priceChangeEvent: PriceChangeEvent | null
     orderBookEvent: OrderBookEvent | null
     clearOrderBookEvent: () => void
@@ -25,6 +31,8 @@ const EventWebSocketContext = createContext<
 const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
     children
 }) => {
+    const { currentMarket, betOption, handleSelectOrder } = useEventContext()
+
     const [isConnected, setIsConnected] = useState(false)
     const connector = useMemo(() => new EventsWebSocket(config.app.wws, ''), [])
     const [lastAssetIds, setLastAssetIds] = useState<string[]>([])
@@ -33,6 +41,7 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
     const [orderBookEvent, setOrderBookEvent] = useState<OrderBookEvent | null>(
         null
     )
+    const [firstLoading, setFirstLoading] = useState<boolean>(true)
 
     function isOrderBookEvent(data: OrderBookEvent | PriceChangeEvent) {
         return data.event_type === EEventType.BOOK
@@ -42,11 +51,51 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         connector.send('unsubscribe', { assetsIds: lastAssetIds })
         connector.send('subscribe', { assetsIds })
         setLastAssetIds(assetsIds)
+        setFirstLoading(true)
     }
 
     const clearOrderBookEvent = () => {
         setOrderBookEvent(null)
     }
+
+    const subscribeToMarket = useCallback(() => {
+        if (currentMarket?.clobTokenIds) {
+            handleSubscribe([
+                betOption === EBetOption.YES
+                    ? (currentMarket.clobTokenIds[0] ?? '')
+                    : (currentMarket.clobTokenIds[1] ?? '')
+            ])
+        }
+    }, [betOption, currentMarket?.clobTokenIds])
+
+    useEffect(() => {
+        subscribeToMarket()
+    }, [subscribeToMarket])
+
+    useEffect(() => {
+        if (!firstLoading) {
+            return
+        }
+        if (betOption === EBetOption.YES) {
+            handleSelectOrder(
+                orderBookEvent?.asks.length
+                    ? orderBookEvent.asks[orderBookEvent.asks.length - 1]
+                    : null
+            )
+            if (orderBookEvent?.asks.length) {
+                setFirstLoading((prevState) => !prevState)
+            }
+        } else {
+            handleSelectOrder(
+                orderBookEvent?.bids.length
+                    ? orderBookEvent.bids[orderBookEvent.bids.length - 1]
+                    : null
+            )
+            if (orderBookEvent?.bids.length) {
+                setFirstLoading((prevState) => !prevState)
+            }
+        }
+    }, [betOption, orderBookEvent])
 
     useEffect(() => {
         connector.connect()
@@ -80,7 +129,6 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         <EventWebSocketContext.Provider
             value={{
                 isConnected,
-                subscribe: handleSubscribe,
                 orderBookEvent,
                 priceChangeEvent,
                 clearOrderBookEvent

@@ -1,18 +1,16 @@
-import React, { useEffect, useMemo, useRef } from 'react'
-import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
+import React, { useMemo } from 'react'
 import { clsx } from 'clsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { EBetOption, ESide } from '@/types'
 import EventOrderBookSkeleton from '@/components/skeleton/EventOrderBookSkeleton.tsx'
 import { formatToCents } from '@/lib/utils.ts'
+import EventTradeBar from '@/views/event/order/EventTradeBar.tsx'
 
 const EventOrderBook: React.FC = () => {
     const { betOption, currentMarket, selectedMarketId, tradeYes, tradeNo } =
         useEventContext()
     const { orderBookEvent } = useEventWebSocket()
-    const containerRef = useRef<HTMLDivElement>(null)
-    const centerRef = useRef<HTMLDivElement>(null)
 
     const lastPrice = useMemo(
         () =>
@@ -46,28 +44,6 @@ const EventOrderBook: React.FC = () => {
         return tradeNo?.filter((trade) => trade.side === ESide.SELL)
     }, [betOption, tradeNo, tradeYes])
 
-    useEffect(() => {
-        if (containerRef.current && centerRef.current) {
-            const container = containerRef.current
-            const centerElement = centerRef.current
-
-            const containerHeight = container.clientHeight
-            const elementHeight = centerElement.clientHeight
-            const containerOffsetTop = container.offsetTop
-            const elementOffsetTop = centerElement.offsetTop
-            const scrollTop =
-                elementOffsetTop -
-                containerOffsetTop -
-                containerHeight / 2 +
-                elementHeight / 2
-
-            container.scrollTo({
-                top: scrollTop,
-                behavior: 'instant'
-            })
-        }
-    }, [orderBookEvent])
-
     const asks = useMemo(() => orderBookEvent?.asks, [orderBookEvent?.asks])
     const bids = useMemo(() => orderBookEvent?.bids, [orderBookEvent?.bids])
 
@@ -90,9 +66,9 @@ const EventOrderBook: React.FC = () => {
                 <div className='text-center'>Total</div>
             </div>
             <div
-                ref={containerRef}
-                className={`max-h-[300px] overflow-y-scroll scrollbar-hidden duration-200 animate-fadeIn`}
+                className={`flex flex-col max-h-[450px] overflow-y-scroll scrollbar-hidden duration-200`}
             >
+                {' '}
                 {asks && asks?.length > 0 ? (
                     <EventTradeBar
                         variant='accent'
@@ -105,7 +81,6 @@ const EventOrderBook: React.FC = () => {
                     </div>
                 )}
                 <div
-                    ref={centerRef}
                     className={clsx(
                         'grid grid-cols-5',
                         'border-t-[1px] border-b-[1px] border-gray-200 py-2',

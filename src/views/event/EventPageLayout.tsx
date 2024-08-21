@@ -3,31 +3,10 @@ import EventHeader from '@/views/event/EventHeader.tsx'
 import PredictionCard from '@/views/event/PredictionCard.tsx'
 import EventListLayout from '@/views/event/EventListLayout.tsx'
 import { clsx } from 'clsx'
-import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
 import DrawerProvider from '@/contexts/DrawerContext.tsx'
-
-const CheckWebSocketConnection: React.FC<{ isConnected: boolean }> = ({
-    isConnected
-}) => {
-    return (
-        <div
-            className={clsx(
-                'hidden',
-                'border-[1px] rounded-xl px-6 py-4 flex flex-col',
-                {
-                    'border-green-500 bg-green-100': isConnected,
-                    'border-red-500 bg-red-100': !isConnected
-                }
-            )}
-        >
-            <h1>Status: {isConnected ? 'Connected' : 'Disconnected'}</h1>
-        </div>
-    )
-}
+import { EventWebSocketProvider } from '@/contexts/WebSocketContext.tsx'
 
 const EventPageLayout: React.FC = () => {
-    const { isConnected } = useEventWebSocket()
-
     return (
         <div className={`h-screen w-full lg:flex pt-3 lg:pt-5`}>
             <div
@@ -36,11 +15,12 @@ const EventPageLayout: React.FC = () => {
                     'lg:w-[70%]'
                 )}
             >
-                <CheckWebSocketConnection isConnected={isConnected} />
                 <EventHeader />
-                <DrawerProvider>
-                    <EventListLayout />
-                </DrawerProvider>
+                <EventWebSocketProvider>
+                    <DrawerProvider>
+                        <EventListLayout />
+                    </DrawerProvider>
+                </EventWebSocketProvider>
             </div>
             <div className={`relative`}>
                 <aside
