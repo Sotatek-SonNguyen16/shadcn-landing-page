@@ -169,8 +169,13 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     )
 
     useEffect(() => {
-        if (currentMarket && isLogin) {
-            fetchActiveOrder(currentMarket.id)
+        if (currentMarket) {
+            if (isLogin) {
+                fetchActiveOrder(currentMarket.id)
+            } else {
+                setTradeNo(null)
+                setTradeYes(null)
+            }
         }
     }, [currentMarket, fetchActiveOrder, userAddress, isLogin])
 

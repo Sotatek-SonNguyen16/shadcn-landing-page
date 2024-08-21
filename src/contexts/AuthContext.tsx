@@ -8,10 +8,10 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import {
+    useIsConnectionRestored,
     useTonAddress,
     useTonConnectModal,
     useTonConnectUI,
-    useIsConnectionRestored,
     useTonWallet
 } from '@tonconnect/ui-react'
 
