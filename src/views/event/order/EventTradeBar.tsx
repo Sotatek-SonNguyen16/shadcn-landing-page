@@ -120,7 +120,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
         <div
             ref={containerRef}
             className={clsx(
-                'flex h-[200px] overflow-y-scroll scrollbar-hidden',
+                'flex max-h-[200px] overflow-y-scroll scrollbar-hidden',
                 {
                     'flex-col': variant === 'accent',
                     'flex-col-reverse': variant === 'success'
