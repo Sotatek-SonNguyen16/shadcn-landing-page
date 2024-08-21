@@ -82,7 +82,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [tradeYes, setTradeYes] = useState<MarketTrade[] | null>(null)
     const [tradeNo, setTradeNo] = useState<MarketTrade[] | null>(null)
 
-    const { userAddress } = useAuthContext()
+    const { userAddress, isLogin } = useAuthContext()
     const { toast } = useToast()
 
     const changeForm = (status: ESide) => {
@@ -169,10 +169,10 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     )
 
     useEffect(() => {
-        if (currentMarket) {
+        if (currentMarket && isLogin) {
             fetchActiveOrder(currentMarket.id)
         }
-    }, [currentMarket, fetchActiveOrder, userAddress])
+    }, [currentMarket, fetchActiveOrder, userAddress, isLogin])
 
     const resolver: Resolver<OrderFormValues> = async (values) => {
         const errors: FieldErrors<OrderFormValues> = {}
