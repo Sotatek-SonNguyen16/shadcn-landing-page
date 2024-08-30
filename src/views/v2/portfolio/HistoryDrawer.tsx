@@ -17,6 +17,8 @@ import DateTimePicker from '@/components/DateTimePicker.tsx'
 import RequestFactory from '@/services/RequestFactory'
 import { filterParams, formatUnixTime } from '@/lib/utils'
 import moment from 'moment'
+import { LoadingSpinner } from '@/components/ui/spinner'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
 const DurationDateTimeInput = () => {
     const [date, setDate] = useState<Date | undefined>(undefined)
@@ -415,8 +417,8 @@ const HistoryDrawer: React.FC = () => {
     const [tradesHistory, setTradesHistory] = useState<ITrade[]>([])
     const [params, setParams] = useState<any>({})
     const [page] = useState<number>(1)
-    const [limit] = useState<number>(10)
-
+    const [limit, setLimit] = useState<number>(10)
+    const [totalDocs, setTotalDocs] = useState<number>(0)
     const { closeDrawer } = useDrawerContext()
 
     const requestTrade = RequestFactory.getRequest('TradeRequest')
@@ -426,8 +428,8 @@ const HistoryDrawer: React.FC = () => {
         try {
             const dataTrade = (await requestTrade.getTradesHistory(
                 filterParams({
-                    page: page,
-                    limit: limit,
+                    page,
+                    limit,
                     ...params
                 })
             )) as any
@@ -457,6 +459,7 @@ const HistoryDrawer: React.FC = () => {
             })
 
             setTradesHistory(data || [])
+            setTotalDocs(dataTrade?.totalDocs)
         } catch (e) {
             console.error(e)
         }
@@ -464,7 +467,13 @@ const HistoryDrawer: React.FC = () => {
 
     useEffect(() => {
         getTradesHistory().then()
-    }, [page, params])
+    }, [limit, params])
+
+    const fetchMoreData = () => {
+        setTimeout(() => {
+            setLimit(limit + 10)
+        }, 1000)
+    }
 
     return (
         <div className='h-full w-full flex flex-col px-4'>
@@ -532,12 +541,29 @@ const HistoryDrawer: React.FC = () => {
                         />
                     </div>
                 </div>
-                <div className='overflow-y-scroll scrollbar-hidden flex flex-col gap-4'>
-                    {tradesHistory?.map((trade: ITrade, index: number) => (
-                        <Fragment key={index}>
-                            <HistoryListItem trade={trade} />
-                        </Fragment>
-                    ))}
+                <div className='overflow-auto' id='scrollableHistory'>
+                    <InfiniteScroll
+                        scrollableTarget='scrollableHistory'
+                        dataLength={tradesHistory.length}
+                        next={fetchMoreData}
+                        hasMore={totalDocs > limit}
+                        loader={
+                            <div className='flex justify-center items-center bg-background/10 gap-1 m-3'>
+                                <LoadingSpinner />
+                                Loading more...
+                            </div>
+                        }
+                    >
+                        <div className='flex flex-col gap-4'>
+                            {tradesHistory?.map(
+                                (trade: ITrade, index: number) => (
+                                    <Fragment key={index}>
+                                        <HistoryListItem trade={trade} />
+                                    </Fragment>
+                                )
+                            )}
+                        </div>
+                    </InfiniteScroll>
                 </div>
             </div>
         </div>
