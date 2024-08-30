@@ -7,7 +7,7 @@ import {
 import Storage from '@/lib/storage'
 
 interface RequestParams {
-    [key: string]: number | string
+    [key: string]: number | string | string[] | number[]
 }
 
 interface RequestData {

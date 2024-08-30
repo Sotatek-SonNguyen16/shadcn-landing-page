@@ -46,6 +46,7 @@ interface EventContextType {
     tradeYes: MarketTrade[] | null
     tradeNo: MarketTrade[] | null
     handleCancelMarketTrade: (orderIds: string[]) => Promise<void>
+    reloadEvent: () => void
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -108,6 +109,33 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
 
     const handleSelectOrder = (order: Order | null) => {
         setSelectedOrder(order)
+    }
+
+    const reloadEvent = () => {
+        const fetchPolyMarket = async (eId: string) => {
+            setLoading(true)
+            try {
+                const response = await request.getEventsById(eId)
+                if (response) {
+                    setMarket(response)
+                    const maxPriceItem = response.markets.reduce(
+                        (max, item) => {
+                            return Number(item.outcomePrices[0]) >
+                                Number(max.outcomePrices[0])
+                                ? item
+                                : max
+                        },
+                        response.markets[0]
+                    )
+                    setSelectedMarketId(maxPriceItem.id)
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        if (id) fetchPolyMarket(id)
     }
 
     useEffect(() => {
@@ -297,7 +325,8 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 resolver,
                 tradeNo,
                 tradeYes,
-                handleCancelMarketTrade
+                handleCancelMarketTrade,
+                reloadEvent
             }}
         >
             {children}

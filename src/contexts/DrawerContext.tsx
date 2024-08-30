@@ -14,7 +14,10 @@ interface DrawerContextReturnValue {
         description?: JSX.Element
         content: JSX.Element
         footer?: JSX.Element
+        background?: string
+        transparent?: boolean
     }) => void
+    closeDrawer: () => void
 }
 
 interface DrawerProviderProps {
@@ -32,6 +35,8 @@ interface DrawerProps {
     description?: JSX.Element
     content?: JSX.Element
     footer?: JSX.Element
+    background?: string
+    transparent?: boolean
 }
 
 const initialDrawer: DrawerProps = {
@@ -46,18 +51,26 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
         description?: JSX.Element
         content: JSX.Element
         footer?: JSX.Element
+        background?: string
+        transparent?: boolean
     }) => {
         setDrawer({
             open: true,
             title: data.title,
             description: data.description,
             content: data.content,
-            footer: data.footer
+            footer: data.footer,
+            background: data.background,
+            transparent: data.transparent
         })
     }
 
+    const closeDrawer = () => {
+        setDrawer({ ...initialDrawer, open: false })
+    }
+
     return (
-        <DrawerContext.Provider value={{ openDrawer }}>
+        <DrawerContext.Provider value={{ openDrawer, closeDrawer }}>
             {children}
             <Drawer
                 open={drawer.open}
@@ -68,7 +81,10 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
                 shouldScaleBackground={true}
                 disablePreventScroll={true}
             >
-                <DrawerContent>
+                <DrawerContent
+                    transparent={drawer.transparent}
+                    background={drawer.background}
+                >
                     <div
                         className={clsx(
                             'max-h-screen',
