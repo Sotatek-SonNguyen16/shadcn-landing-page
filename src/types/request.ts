@@ -1,4 +1,4 @@
-import { ESide } from '@/types/index.ts'
+import { ESide, OrderStatus } from '@/types/index.ts'
 
 type OrderRequestBody = {
     marketId: string
@@ -8,19 +8,29 @@ type OrderRequestBody = {
     price: number
 }
 
-type ActiveOrdersRequestBody = {
-    assetId: string
-    side: ESide
-    page: number
-    limit: number
+type ActiveOrdersRequestParams = {
+    marketId?: string
+    assetId?: string
+    side?: ESide
+    page?: number
+    limit?: number
 }
 
 type DeleteOrdersRequestBody = {
     orderIds: string[]
 }
 
+export type OrdersRequestParam = {
+    marketId?: string
+    assetId?: string
+    side?: ESide
+    status?: OrderStatus
+    page?: number
+    limit?: number
+}
+
 export type {
     OrderRequestBody,
-    ActiveOrdersRequestBody,
+    ActiveOrdersRequestParams,
     DeleteOrdersRequestBody
 }

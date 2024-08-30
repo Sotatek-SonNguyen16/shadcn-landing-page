@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import moment from 'moment'
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -46,4 +47,39 @@ export function formatToCents(value: number, digit: number = 5): string {
 
     const formattedValue = formatterCents.format(value * 100)
     return formattedValue.replace('€', '¢')
+}
+
+export function truncateString(
+    str: string,
+    maxLength: number,
+    keepStart: number,
+    keepEnd: number
+): string {
+    if (str.length <= maxLength) {
+        return str
+    }
+
+    if (keepStart + keepEnd >= maxLength) {
+        return str.substring(0, maxLength)
+    }
+
+    const start = str.substring(0, keepStart)
+    const end = str.substring(str.length - keepEnd)
+
+    return `${start}...${end}`
+}
+
+export const formatUnixTime = (
+    unixTime: string | number | undefined,
+    formatTime = 'YYYY-MM-DD HH:mm:ss',
+    defaultValue = '--'
+) => {
+    if (!unixTime) {
+        return defaultValue
+    }
+    return moment(+unixTime).format(formatTime)
+}
+
+export const filterParams = (params: any) => {
+    return Object.fromEntries(Object.entries(params).filter(([_, v]) => v))
 }

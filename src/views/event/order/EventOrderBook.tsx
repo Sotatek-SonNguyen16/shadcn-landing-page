@@ -51,68 +51,29 @@ const EventOrderBook: React.FC = () => {
         return <EventOrderBookSkeleton />
 
     return (
-        <div className='w-full'>
+        <div className='w-full flex flex-col gap-2'>
             <div
                 className={clsx(
-                    'grid grid-cols-5',
-                    'text-gray-500 uppercase text-[12px] font-semibold my-3'
+                    'grid grid-cols-3',
+                    'uppercase text-color-neutral-250 text-xs font-light leading-3'
                 )}
             >
-                <div className={clsx('px-4 col-span-2')}>
-                    Trade {betOption === EBetOption.YES ? 'Yes' : 'No'}
-                </div>
-                <div className='text-center'>Price</div>
-                <div className='text-center'>Shares</div>
-                <div className='text-center'>Total</div>
+                <div className='text-start'>PRICE (¢)</div>
+                <div className='text-center'>SHARES</div>
+                <div className='text-end'>TOTAL ($)</div>
             </div>
-            <div
-                className={`flex flex-col max-h-[450px] overflow-y-scroll scrollbar-hidden duration-200`}
-            >
-                {' '}
-                {asks && asks?.length > 0 ? (
-                    <EventTradeBar
-                        variant='accent'
-                        data={asks}
-                        trades={tradeSell}
-                    />
-                ) : (
-                    <div className='text-center p-2'>
-                        <span className='text-gray-300'>No asks</span>
-                    </div>
-                )}
-                <div
-                    className={clsx(
-                        'grid grid-cols-5',
-                        'border-t-[1px] border-b-[1px] border-gray-200 py-2',
-                        'hover:bg-gray-200 hover:dark:bg-gray-800'
-                    )}
-                >
-                    <div
-                        className={clsx(
-                            'col-span-2 px-4',
-                            'font-semibold text-gray-500'
-                        )}
-                    >
-                        Last: {formatToCents(lastPrice)}
-                    </div>
-                    <div className='text-center font-semibold text-gray-500 text-nowrap'>
-                        Spread: {formatToCents(spread)}
-                    </div>
-                    <div className='text-center font-semibold text-gray-600'></div>
-                    <div className='text-center font-semibold text-gray-600'></div>
+
+            <EventTradeBar variant='accent' data={asks} trades={tradeSell} />
+
+            <div className='flex gap-6 items-center'>
+                <div className='text-color-neutral-700 text-sm font-light leading-tight'>
+                    Last: {formatToCents(lastPrice)}
                 </div>
-                {bids && bids?.length > 0 ? (
-                    <EventTradeBar
-                        variant='success'
-                        data={bids}
-                        trades={tradeBuy}
-                    />
-                ) : (
-                    <div className='text-center p-2'>
-                        <span className='text-gray-300'>No bids</span>
-                    </div>
-                )}
+                <div className='text-color-neutral-700 text-sm font-light leading-tight'>
+                    Spread: {formatToCents(spread)}
+                </div>
             </div>
+            <EventTradeBar variant='success' data={bids} trades={tradeBuy} />
         </div>
     )
 }

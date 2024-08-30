@@ -1,18 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { clsx } from 'clsx'
-import { Badge } from '@/components/ui/badge.tsx'
 import { EFormType, ESide, MarketTrade, Order } from '@/types'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import SaleDrawer from '@/views/event/SaleDrawer.tsx'
 import useScreenSize from '@/hooks/useScreenSize.ts'
 import { useEventContext } from '@/contexts/EventContext.tsx'
-import ActiveOrderTooltip from '@/views/event/order/ActiveOrderTooltip.tsx'
 import { formatToCents } from '@/lib/utils.ts'
 
 interface EventTradeBarProps {
     variant: 'success' | 'accent'
     trades: MarketTrade[] | undefined
-    data: Order[] | null
+    data: Order[] | undefined
 }
 
 interface OrderWithTotal extends Order {
@@ -20,7 +18,7 @@ interface OrderWithTotal extends Order {
 }
 
 const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
-    const { variant, data, trades } = props
+    const { variant, data } = props
     const { handleSelectOrder, changeType, changeForm } = useEventContext()
     const { openDrawer } = useDrawerContext()
     const { isLargerThan } = useScreenSize()
@@ -81,6 +79,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
             changeType(EFormType.LIMIT)
             if (!isLargerThan('lg')) {
                 openDrawer({
+                    background: 'bg-color-neutral-alpha-800',
                     content: <SaleDrawer />
                 })
             }
@@ -116,11 +115,21 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
         }
     }, [calculatedOrders, variant])
 
+    if (!data || !Array.isArray(data) || data.length === 0)
+        return (
+            <div className='text-center p-2 border-[1px] border-color-neutral-50 rounded-xl'>
+                <span className='text-color-neutral-250'>
+                    No {variant === 'success' ? 'bids' : 'asks'}
+                </span>
+            </div>
+        )
+
     return (
         <div
             ref={containerRef}
             className={clsx(
                 'flex max-h-[200px] overflow-y-scroll scrollbar-hidden',
+                'border-[1px] border-color-neutral-50 rounded-xl',
                 {
                     'flex-col': variant === 'accent',
                     'flex-col-reverse': variant === 'success'
@@ -132,22 +141,17 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                     // .filter((_, index, array) => index >= array.length - 10)
                     .map(({ size, price, total }, index, internalOrders) => {
                         const width = Math.round(
-                            (Number(total) / maxTotal) * 100 * 3
+                            (Number(total) / maxTotal) * 100
                         )
-                        const marketTrade =
-                            trades?.find(
-                                (ac) => Number(ac.price) === Number(price)
-                            ) ?? null
+                        // const marketTrade =
+                        //     trades?.find(
+                        //         (ac) => Number(ac.price) === Number(price)
+                        //     ) ?? null
 
                         return (
                             <div
                                 key={`${price}-${index}`}
-                                className={clsx('group grid grid-cols-5', {
-                                    'hover:bg-green-100 hover:dark:bg-green-500/30':
-                                        variant === 'success',
-                                    'hover:bg-red-100 hover:dark:bg-red-500/30':
-                                        variant === 'accent'
-                                })}
+                                className='group grid grid-cols-3 relative px-2 py-1 gap-2'
                                 onClick={() =>
                                     handleClickEventTradeBar({ size, price })
                                 }
@@ -155,56 +159,41 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
                                 <div
                                     style={{
                                         width: `${width}%`,
+                                        height: '100%',
                                         maxWidth: `100%`
                                     }}
                                     className={clsx(
-                                        'col-span-2 ps-[2px]',
-                                        `flex items-center`,
+                                        'absolute top-0 left-0',
                                         {
                                             'duration-100 animate-fadeIn':
                                                 index ===
                                                 internalOrders.length - 1
                                         },
                                         {
-                                            'bg-green-100 group-hover:bg-green-200 dark:bg-green-500/30 group-hover:dark:bg-green-500/30':
+                                            'bg-color-accent-green-200':
                                                 variant === 'success',
-                                            'bg-red-100 group-hover:bg-red-200 dark:bg-red-500/30 group-hover:dark:bg-red-500/30':
+                                            'bg-color-accent-red-200':
                                                 variant === 'accent'
                                         }
                                     )}
-                                >
-                                    {index === internalOrders.length - 1 && (
-                                        <Badge variant={`${variant}Solid`}>
-                                            {variant === 'accent'
-                                                ? 'Asks'
-                                                : 'Bids'}
-                                        </Badge>
-                                    )}
-                                </div>
+                                />
                                 <div
                                     className={clsx(
-                                        'flex justify-center gap-2 items-center',
-                                        'text-center font-semibold py-2 text-[14px] lg:text-[16px]',
+                                        'text-start font-semibold text-[14px] lg:text-[16px]',
                                         {
-                                            'text-green-500':
+                                            'text-color-accent-green-900':
                                                 variant === 'success',
-                                            'text-orange-500':
+                                            'text-color-accent-red-900':
                                                 variant === 'accent'
                                         }
                                     )}
                                 >
-                                    <div className='h-auto'>
-                                        <ActiveOrderTooltip
-                                            marketTrade={marketTrade}
-                                            variant={variant}
-                                        />
-                                    </div>
                                     {formatToCents(price)}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
+                                <div className='text-center font-semibold text-color-neutral-500 text-[12px] lg:text-[16px]'>
                                     {formatterDecimal.format(Number(size))}
                                 </div>
-                                <div className='text-center font-semibold text-gray-600 dark:text-primary py-2 text-[12px] lg:text-[16px]'>
+                                <div className='text-end font-semibold text-color-neutral-500 text-[12px] lg:text-[16px]'>
                                     {formatterUSD.format(total)}
                                 </div>
                             </div>
