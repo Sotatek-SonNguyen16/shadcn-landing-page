@@ -26,7 +26,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Overlay
         ref={ref}
-        className={cn('fixed inset-0 z-50', className)}
+        className={cn('fixed inset-0 z-50 bg-black/80', className)}
         {...props}
     />
 ))
@@ -34,25 +34,20 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
 const DrawerContent = React.forwardRef<
     React.ElementRef<typeof DrawerPrimitive.Content>,
-    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
-        transparent?: boolean
-        background?: string
-    }
->(({ className, children, transparent, background, ...props }, ref) => (
+    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
     <DrawerPortal>
-        <DrawerOverlay className={transparent ? '' : 'bg-black/80'} />
+        <DrawerOverlay />
         <DrawerPrimitive.Content
             ref={ref}
             className={cn(
-                'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-color-neutral-alpha-900',
+                'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background',
                 className
             )}
             {...props}
         >
-            <div className={`${background ?? ''} rounded-t-[10px] w-full`}>
-                <div className='mx-auto mt-2 mb-4 w-12 h-1 rounded-full bg-color-neutral-500' />
-                {children}
-            </div>
+            <div className='mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted' />
+            {children}
         </DrawerPrimitive.Content>
     </DrawerPortal>
 ))

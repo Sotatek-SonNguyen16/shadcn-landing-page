@@ -23,7 +23,7 @@ import { setAccessToken } from '@/store/authSlice'
 
 interface AuthContextProps {
     isLogin: boolean
-    handleLogin: () => void
+    handleLogin: () => Promise<void>
     handleLogout: () => Promise<void>
     userAddress: string | null
     address: string
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const [isLogin, setIsLogin] = useState<boolean>(!!Storage.getAccessToken())
     const interval = useRef<ReturnType<typeof setInterval> | undefined>()
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         open()
     }
 

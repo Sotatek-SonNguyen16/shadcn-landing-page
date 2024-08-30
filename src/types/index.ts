@@ -25,15 +25,6 @@ enum EEventType {
     BOOK = 'book'
 }
 
-export enum EInterval {
-    _1H = '1h',
-    _6H = '6h',
-    _1D = '1d',
-    _1W = '1w',
-    _1M = '1m',
-    ALL = 'max'
-}
-
 type PriceChangeEvent = {
     asset_id: string
     event_type: EEventType
@@ -112,11 +103,6 @@ interface Market {
     clobTokenIds: string[]
     icon: string
     volume: number
-}
-
-interface MarketPriceHistory {
-    value: number
-    time: number
 }
 
 interface MarketDetail {
@@ -259,22 +245,18 @@ type OrderStatus =
     | 'Accepted'
     | 'Rejected'
     | 'Cancelling'
-    | 'Cancelled'
     | 'Filled'
     | 'Partially Filled'
 
 type ActiveOrder = {
     orderId: string
-    marketId: string
     assetId: string
     price: number
     side: ESide
     size: number
-    sizeMatched: number
     orderType: string
     userAddress: string
     status: OrderStatus
-    createdAt: string
 }
 
 type MarketTrade = {
@@ -286,39 +268,17 @@ type MarketTrade = {
     sizeMatched: number
 }
 
-export type ITrade = {
-    assetId: string
-    marketId: string
-    price: number
-    shares: number
-    timestamp: number
-    totalValue: number
-    type: string
-    userAddress: string
-    name?: string
-    image?: string
-    positionType?: string
-}
-
-type MyActiveOrder = {
-    activeOrder: ActiveOrder
-    marketDetail?: MarketDetail
-}
-
 export type {
-    ActiveOrder,
-    Market,
-    MarketDetail,
-    MarketPriceHistory,
-    MarketTrade,
-    MyActiveOrder,
+    PriceChangeEvent,
     Order,
     OrderBookEvent,
-    OrderFormValues,
-    OrderStatus,
-    PolyMarketDetail,
     PredictionMarket,
-    PriceChangeEvent
+    MarketDetail,
+    Market,
+    PolyMarketDetail,
+    OrderFormValues,
+    ActiveOrder,
+    MarketTrade
 }
 
-export { EBetOption, EEventType, EFormType, EMarketDepth, ESide }
+export { EFormType, EMarketDepth, ESide, EBetOption, EEventType }

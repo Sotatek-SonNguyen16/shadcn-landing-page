@@ -49,47 +49,7 @@ module.exports = {
                 card: {
                     DEFAULT: 'hsl(var(--card))',
                     foreground: 'hsl(var(--card-foreground))'
-                },
-                brand01: '#dffe0f',
-                brand02: '#69770d',
-                brand: {
-                    400: '#D8E881'
-                },
-                neutral: {
-                    100: '#FFFFFF1A'
-                },
-                'color-accent-green-100': 'var(--color-accent-green-100)',
-                'color-accent-green-200': 'var(--color-accent-green-200)',
-                'color-accent-green-300': 'var(--color-accent-green-300)',
-                'color-accent-green-500': 'var(--color-accent-green-500)',
-                'color-accent-green-700': 'var(--color-accent-green-700)',
-                'color-accent-green-900': 'var(--color-accent-green-900)',
-                'color-accent-red-100': 'var(--color-accent-red-100)',
-                'color-accent-red-200': 'var(--color-accent-red-200)',
-                'color-accent-red-300': 'var(--color-accent-red-300)',
-                'color-accent-red-500': 'var(--color-accent-red-500)',
-                'color-accent-red-700': 'var(--color-accent-red-700)',
-                'color-accent-red-900': 'var(--color-accent-red-900)',
-                'color-brand-400': 'var(--color-brand-400)',
-                'color-brand-500': 'var(--color-brand-500)',
-                'color-brand-700': 'var(--color-brand-700)',
-                'color-decorate-bronze': 'var(--color-decorate-bronze)',
-                'color-decorate-gold': 'var(--color-decorate-gold)',
-                'color-decorate-silver': 'var(--color-decorate-silver)',
-                'color-neutral-100': 'var(--color-neutral-100)',
-                'color-neutral-250': 'var(--color-neutral-250)',
-                'color-neutral-50': 'var(--color-neutral-50)',
-                'color-neutral-500': 'var(--color-neutral-500)',
-                'color-neutral-700': 'var(--color-neutral-700)',
-                'color-neutral-800': 'var(--color-neutral-800)',
-                'color-neutral-900': 'var(--color-neutral-900)',
-                'color-neutral-alpha-100': 'var(--color-neutral-alpha-100)',
-                'color-neutral-alpha-250': 'var(--color-neutral-alpha-250)',
-                'color-neutral-alpha-50': 'var(--color-neutral-alpha-50)',
-                'color-neutral-alpha-500': 'var(--color-neutral-alpha-500)',
-                'color-neutral-alpha-700': 'var(--color-neutral-alpha-700)',
-                'color-neutral-alpha-800': 'var(--color-neutral-alpha-800)',
-                'color-neutral-alpha-900': 'var(--color-neutral-alpha-900)'
+                }
             },
             borderRadius: {
                 lg: 'var(--radius)',

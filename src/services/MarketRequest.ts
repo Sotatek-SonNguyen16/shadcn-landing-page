@@ -1,23 +1,20 @@
 import BaseRequest from '@/services/BaseRequest.ts'
 import {
     ActiveOrder,
-    EInterval,
     MarketDetail,
-    MarketPriceHistory,
     PolyMarketDetail,
     PredictionMarket
 } from '@/types'
-import {
-    ActiveOrdersRequestParams,
-    DeleteOrdersRequestBody,
-    OrderRequestBody,
-    OrdersRequestParam
-} from '@/types/request.ts'
 import {
     DocsResponse,
     MarketTradesResponse,
     OrderResponse
 } from '@/types/response.ts'
+import {
+    ActiveOrdersRequestBody,
+    DeleteOrdersRequestBody,
+    OrderRequestBody
+} from '@/types/request.ts'
 
 export default class MarketRequest extends BaseRequest {
     async getTopEvents(params: { page: number; limit: number }) {
@@ -35,29 +32,14 @@ export default class MarketRequest extends BaseRequest {
         return await this.get<MarketDetail>(url)
     }
 
-    async getMarketPriceHistoryById(interval: EInterval, asset: string) {
-        const url = `/polymarket/markets/prices-history?interval=${interval}&asset=${asset}`
-        return await this.get<{ history: MarketPriceHistory[] }>(url)
-    }
-
-    async getMarketsByListId(params: { id: string[] }) {
-        const url = `/polymarket/markets`
-        return await this.get<DocsResponse<MarketDetail>>(url, params)
-    }
-
     async order(payload: OrderRequestBody) {
         const url = `/orders`
         return await this.post<OrderResponse>(url, payload)
     }
 
-    async getOrders(params: OrdersRequestParam) {
-        const url = `/orders`
-        return await this.get<OrderResponse>(url, params)
-    }
-
-    async getActiveOrders(params: ActiveOrdersRequestParams) {
+    async getActiveOrders(payload: ActiveOrdersRequestBody) {
         const url = `/orders/active-orders`
-        return await this.get<DocsResponse<ActiveOrder>>(url, params)
+        return await this.get<DocsResponse<ActiveOrder>>(url, payload)
     }
 
     async getActiveTrades(marketId: string) {

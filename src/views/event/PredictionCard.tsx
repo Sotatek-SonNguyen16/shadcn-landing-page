@@ -69,7 +69,7 @@ const PredictionCard: React.FC = () => {
                     />
                 </div>
                 <UnderlineTabs<ESide>
-                    defaultValue={formStatus}
+                    active={formStatus}
                     tabs={memoizedTabs}
                     onClick={changeForm}
                 />

@@ -1,25 +1,20 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@/components/layout/AppLayout.tsx'
 import { lazy } from 'react'
-import MiniAppLayout from '@/components/layout/MiniAppLayout.tsx'
 
+const DashboardPage = lazy(() => import('@/views/dashboard/DashboardPage.tsx'))
 const EventPage = lazy(() => import('@/views/event/EventPage.tsx'))
 const MarketPage = lazy(() => import('@/views/market/MarketPage.tsx'))
 const NotMatch = lazy(() => import('@/views/404/NotMatch.tsx'))
 
-// ui version 2
-const HomePage = lazy(() => import('@/views/v2/home/HomePage.tsx'))
-const MarketDetailPage = lazy(
-    () => import('@/views/v2/detail/MarketDetailPage.tsx')
-)
-const PortfolioPage = lazy(
-    () => import('@/views/v2/portfolio/PortfolioPage.tsx')
-)
-
 export const router = createBrowserRouter([
     {
         path: '',
-        element: <Navigate to={`/v2/home`} />
+        element: <Navigate to={`/markets`} />
+    },
+    {
+        path: '/dashboard',
+        element: <DashboardPage />
     },
     {
         path: '',
@@ -36,32 +31,6 @@ export const router = createBrowserRouter([
             {
                 path: 'markets',
                 element: <MarketPage />
-            }
-        ]
-    },
-    {
-        path: '/v2',
-        element: <MiniAppLayout />,
-        children: [
-            {
-                path: '/v2',
-                element: <Navigate to={`/v2/home`} />
-            },
-            {
-                path: 'event/:id',
-                element: <MarketDetailPage />
-            },
-            {
-                path: 'home',
-                element: <HomePage />
-            },
-            {
-                path: 'portfolio',
-                element: <PortfolioPage />
-            },
-            {
-                path: '*',
-                element: <NotMatch />
             }
         ]
     },

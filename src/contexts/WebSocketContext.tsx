@@ -22,7 +22,6 @@ interface EventWebSocketContextProps {
     priceChangeEvent: PriceChangeEvent | null
     orderBookEvent: OrderBookEvent | null
     clearOrderBookEvent: () => void
-    resetOrderBook: () => void
 }
 
 const EventWebSocketContext = createContext<
@@ -43,7 +42,6 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
         null
     )
     const [firstLoading, setFirstLoading] = useState<boolean>(true)
-    const [reset, setReset] = useState<boolean>(false)
 
     function isOrderBookEvent(data: OrderBookEvent | PriceChangeEvent) {
         return data.event_type === EEventType.BOOK
@@ -73,14 +71,6 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
     useEffect(() => {
         subscribeToMarket()
     }, [subscribeToMarket])
-
-    const resetOrderBook = () => {
-        setReset((prevState) => !prevState)
-    }
-
-    useEffect(() => {
-        subscribeToMarket()
-    }, [reset])
 
     useEffect(() => {
         if (!firstLoading) {
@@ -141,8 +131,7 @@ const EventWebSocketProvider: React.FC<{ children: ReactNode }> = ({
                 isConnected,
                 orderBookEvent,
                 priceChangeEvent,
-                clearOrderBookEvent,
-                resetOrderBook
+                clearOrderBookEvent
             }}
         >
             {children}

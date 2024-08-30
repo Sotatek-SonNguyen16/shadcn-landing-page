@@ -34,7 +34,7 @@ const Content = memo(() => {
     const { changeMarketDepth, marketDepth } = useEventContext()
     return (
         <UnderlineTabs<EMarketDepth>
-            defaultValue={marketDepth}
+            active={marketDepth}
             tabs={tabs}
             onClick={changeMarketDepth}
         />
@@ -127,7 +127,6 @@ const EventListItem: React.FC<{ data: Market }> = memo(({ data }) => {
 
     const onClickBetButton = () => {
         openDrawer({
-            background: 'bg-color-neutral-alpha-800',
             content: <SaleDrawer />
         })
     }

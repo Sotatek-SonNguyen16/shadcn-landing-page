@@ -4,7 +4,8 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectTrigger
+    SelectTrigger,
+    SelectValue
 } from '@/components/ui/select.tsx'
 
 interface FormSelectProps<T extends string> {
@@ -24,11 +25,8 @@ const FormSelect = <T extends string>({
                 onSelect(value as T)
             }}
         >
-            <SelectTrigger className='w-auto h-5 gap-1 pl-2 pr-1 py-1 rounded-3xl border '>
-                {/*<SelectValue placeholder={selected} />*/}
-                <div className='self-stretch text-center text-color-neutral-900 text-xs font-normal leading-3'>
-                    {selected}
-                </div>
+            <SelectTrigger className='w-auto gap-1 rounded-full font-semibold'>
+                <SelectValue placeholder={selected} />
             </SelectTrigger>
             <SelectContent>
                 <SelectGroup>
