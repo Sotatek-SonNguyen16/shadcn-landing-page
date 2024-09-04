@@ -19,6 +19,13 @@ import { filterParams, formatUnixTime } from '@/lib/utils'
 import moment from 'moment'
 import { LoadingSpinner } from '@/components/ui/spinner'
 import InfiniteScroll from 'react-infinite-scroll-component'
+import {
+    Drawer,
+    DrawerContent,
+    DrawerFooter,
+    DrawerTitle
+} from '@/components/ui/drawer'
+import { clsx } from 'clsx'
 
 const DurationDateTimeInput = () => {
     const [date, setDate] = useState<Date | undefined>(undefined)
@@ -95,7 +102,7 @@ const FilterDrawerContent = ({
         }
 
         return ''
-    }, [params])
+    }, [params.sortBy, params.sortOrder])
 
     const onSelectTime = (value: string) => {
         switch (value) {
@@ -186,63 +193,63 @@ const FilterDrawerContent = ({
     }
 
     const valueTime = useMemo(() => {
-        if (params.fromTs === moment().startOf('day').valueOf()) {
+        const startTime = params.fromTs
+        const endTime = params.toTs
+
+        if (startTime === moment().startOf('day').valueOf()) {
             return 'today'
         }
 
         if (
-            params.fromTs ===
+            startTime ===
                 moment().subtract(1, 'day').startOf('day').valueOf() &&
-            params.toTs === moment().subtract(1, 'day').endOf('day').valueOf()
+            endTime === moment().subtract(1, 'day').endOf('day').valueOf()
         ) {
             return 'yesterday'
         }
 
         if (
-            params.fromTs ===
+            startTime ===
                 moment().subtract(1, 'week').startOf('week').valueOf() &&
-            params.toTs === moment().subtract(1, 'week').endOf('week').valueOf()
+            endTime === moment().subtract(1, 'week').endOf('week').valueOf()
         ) {
             return 'lastWeek'
         }
 
         if (
-            params.fromTs ===
+            startTime ===
                 moment().subtract(1, 'month').startOf('month').valueOf() &&
-            params.toTs ===
-                moment().subtract(1, 'month').endOf('month').valueOf()
+            endTime === moment().subtract(1, 'month').endOf('month').valueOf()
         ) {
             return 'lastMonth'
         }
 
         if (
-            params.fromTs ===
-            moment().subtract(3, 'month').startOf('day').valueOf()
+            startTime === moment().subtract(3, 'month').startOf('day').valueOf()
         ) {
             return 'last3Months'
         }
 
         if (
-            params.fromTs ===
-            moment().subtract(1, 'year').startOf('day').valueOf()
+            startTime === moment().subtract(1, 'year').startOf('day').valueOf()
         ) {
             return 'yearToDate'
         }
 
         if (
-            params.fromTs ===
+            startTime ===
                 moment().subtract(1, 'year').startOf('year').valueOf() &&
-            params.toTs === moment().subtract(1, 'year').endOf('year').valueOf()
+            endTime === moment().subtract(1, 'year').endOf('year').valueOf()
         ) {
             return 'lastYear'
         }
 
-        if (!!params.fromTs || !!params.toTs) {
+        if (!!startTime || !!endTime) {
             return 'custom'
         }
 
         return ''
-    }, [params])
+    }, [params.fromTs, params.toTs])
 
     return (
         <div className='flex flex-col gap-4 px-4'>
@@ -388,28 +395,49 @@ const HistoryFilterButton = ({
     setParams: (value: any) => void
     params: any
 }) => {
-    const { openDrawer } = useDrawerContext()
-
-    const onClickFilterButton = () => {
-        openDrawer({
-            background: 'bg-color-neutral-alpha-700',
-            content: (
-                <FilterDrawerContent setParams={setParams} params={params} />
-            )
-        })
-    }
+    const [isShowFilter, setIsShowFilter] = useState<boolean>(false)
 
     return (
-        <Button
-            variant={'transparent'}
-            size={'sm'}
-            onClick={onClickFilterButton}
-        >
-            <Filter size={20} />
-            {(!!params.sortBy || !!params.fromTs || !!params.toTs) && (
-                <Badge variant={'brand'} size={'default'} />
+        <>
+            <Button
+                variant={'transparent'}
+                size={'sm'}
+                onClick={() => setIsShowFilter(true)}
+            >
+                <Filter size={20} />
+                {(!!params.sortBy || !!params.fromTs || !!params.toTs) && (
+                    <Badge variant={'brand'} size={'default'} />
+                )}
+            </Button>
+
+            {isShowFilter && (
+                <Drawer
+                    open={isShowFilter}
+                    onOpenChange={() => {
+                        setIsShowFilter(!isShowFilter)
+                    }}
+                    modal={true}
+                    shouldScaleBackground={true}
+                    disablePreventScroll={true}
+                >
+                    <DrawerContent background={'bg-color-neutral-alpha-700'}>
+                        <div
+                            className={clsx(
+                                'max-h-screen',
+                                'overflow-y-scroll scrollbar-hidden'
+                            )}
+                        >
+                            <DrawerTitle />
+                            <FilterDrawerContent
+                                setParams={setParams}
+                                params={params}
+                            />
+                            <DrawerFooter />
+                        </div>
+                    </DrawerContent>
+                </Drawer>
             )}
-        </Button>
+        </>
     )
 }
 
