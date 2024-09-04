@@ -73,7 +73,7 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [selectedMarketId, setSelectedMarketId] = useState<string>('')
     const [selectedEvent, setSelectedEvent] = useState<Market | null>(null)
     const [formStatus, setFormStatus] = useState<ESide>(ESide.BUY)
-    const [formType, setFormType] = useState<EFormType>(EFormType.LIMIT)
+    const [formType, setFormType] = useState<EFormType>(EFormType.MARKET)
     const [marketDepth, setMarketDepth] = useState<EMarketDepth>(
         EMarketDepth.ORDER_BOOK
     )

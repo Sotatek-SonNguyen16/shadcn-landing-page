@@ -16,6 +16,11 @@ type ActiveOrdersRequestParams = {
     limit?: number
 }
 
+type PositionRequestParams = {
+    page?: number
+    limit?: number
+}
+
 type DeleteOrdersRequestBody = {
     orderIds: string[]
 }
@@ -32,5 +37,6 @@ export type OrdersRequestParam = {
 export type {
     OrderRequestBody,
     ActiveOrdersRequestParams,
-    DeleteOrdersRequestBody
+    DeleteOrdersRequestBody,
+    PositionRequestParams
 }

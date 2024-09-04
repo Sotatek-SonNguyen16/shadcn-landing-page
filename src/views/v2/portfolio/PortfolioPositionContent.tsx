@@ -1,12 +1,13 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 import { ChevronDown, Filter, RefreshCcw } from 'lucide-react'
-import { ActiveOrder, MarketDetail } from '@/types'
+import { MarketDetail, TPosition } from '@/types'
 import { Button } from '@/components/ui/button.tsx'
 import useThrottle from '@/hooks/useThrottle.ts'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import CheckboxGroup from '@/components/CheckBoxGroup.tsx'
 import { usePortfolioContext } from '@/contexts/PortfolioContext.tsx'
 import { formatToCents } from '@/lib/utils.ts'
+import RequestFactory from '@/services/RequestFactory'
 
 const FilterDrawerContent = () => {
     return (
@@ -143,11 +144,24 @@ const PositionFilter = () => {
 }
 
 const PositionListItem: React.FC<{
-    activeOrder: ActiveOrder
+    position: TPosition
     marketDetail: MarketDetail
-}> = ({ activeOrder, marketDetail }) => {
-    const { size, price } = activeOrder
+}> = ({ position, marketDetail }) => {
     const { icon, question } = marketDetail
+
+    const currentPrice =
+        +marketDetail.outcomePrices[
+            marketDetail.clobTokenIds.findIndex(
+                (id) => id === position.positionId
+            )
+        ]
+
+    const isYes =
+        marketDetail.clobTokenIds.findIndex(
+            (id) => id === position.positionId
+        ) === 0
+
+    const pl = ((currentPrice - position.avgPrice) * 100) / position.avgPrice
 
     return (
         <div className='w-full rounded-xl bg-color-neutral-50 flex flex-col p-3 gap-3'>
@@ -168,14 +182,16 @@ const PositionListItem: React.FC<{
                         </div>
                     </div>
                     <div className='h-3 rounded-lg justify-start items-center gap-1 inline-flex'>
-                        <div className='text-color-accent-green-900 text-xs font-light leading-3'>
-                            YES {formatToCents(price)}
+                        <div
+                            className={`text-color-accent-${isYes ? 'green' : 'red'}-900 text-xs font-light leading-3`}
+                        >
+                            {isYes ? 'YES' : 'NO'} {formatToCents(currentPrice)}
                         </div>
                         <div className='text-color-neutral-250 text-xs font-light leading-3'>
                             •
                         </div>
                         <div className='text-color-neutral-800 text-xs font-light leading-3'>
-                            {size} shares
+                            {position.size} shares
                         </div>
                     </div>
                 </div>
@@ -188,11 +204,13 @@ const PositionListItem: React.FC<{
                         </div>
                     </div>
                     <div className='self-stretch h-10 rounded-lg flex-col justify-center items-start flex'>
-                        <div className='self-stretch text-color-accent-green-900 text-base font-semibold leading-normal'>
-                            +132%
+                        <div
+                            className={`self-stretch text-color-accent-${pl >= 0 ? 'green' : 'red'}-900 text-base font-semibold leading-normal`}
+                        >
+                            {pl.toFixed(2)}%
                         </div>
                         <div className='self-stretch text-color-neutral-700 text-xs font-light leading-none'>
-                            $5.25
+                            ${currentPrice}
                         </div>
                     </div>
                 </div>
@@ -206,7 +224,7 @@ const PositionListItem: React.FC<{
                             Bet:
                         </div>
                         <div className='text-color-neutral-800 text-xs font-light leading-3'>
-                            $7.6
+                            ${position.avgPrice * position.size}
                         </div>
                     </div>
                     <div className='h-3 rounded-lg justify-start items-center gap-1 inline-flex'>
@@ -214,13 +232,14 @@ const PositionListItem: React.FC<{
                             To win:
                         </div>
                         <div className='text-color-neutral-800 text-xs font-light leading-3'>
-                            $3.60
+                            ${position.size}
                         </div>
                     </div>
                 </div>
                 <Button
                     variant={'default'}
                     className='self-stretch text-center text-color-neutral-alpha-900 text-xs font-semibold leading-none'
+                    disabled={true}
                 >
                     Claim
                 </Button>
@@ -266,7 +285,32 @@ const ClaimAllButtonLayout = () => {
 }
 
 const PortfolioPositionContent: React.FC = () => {
-    const { myActiveOrders } = usePortfolioContext()
+    const { fetchPositions, positions } = usePortfolioContext()
+    const [positionMarkets, setPositionMarkets] = useState<
+        (TPosition & { market?: MarketDetail })[]
+    >([])
+
+    useEffect(() => {
+        fetchPositions({ page: 1, limit: 9 })
+    }, [fetchPositions])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const request = RequestFactory.getRequest('MarketRequest')
+            const marketRes = await request.getMarketsByListId({
+                id: positions?.map((positions) => positions.marketId) ?? []
+            })
+            const data =
+                positions?.map((p) => ({
+                    ...p,
+                    market: marketRes?.docs.find((mk) => mk.id === p.marketId)
+                })) ?? []
+
+            setPositionMarkets(data)
+        }
+
+        fetchData()
+    }, [positions])
 
     return (
         <div className='max-h-[70vh] flex flex-col gap-4 my-4 relative'>
@@ -274,14 +318,12 @@ const PortfolioPositionContent: React.FC = () => {
                 <PositionFilter />
             </DrawerProvider>
             <div className='overflow-y-scroll scrollbar-hidden min-h-[50vh] flex flex-col gap-4'>
-                {myActiveOrders?.map((myAO) => (
-                    <Fragment key={myAO.activeOrder.assetId}>
-                        {myAO.marketDetail && (
-                            <PositionListItem
-                                marketDetail={myAO.marketDetail}
-                                activeOrder={myAO.activeOrder}
-                            />
-                        )}
+                {positionMarkets?.map((myAO) => (
+                    <Fragment key={myAO.positionId}>
+                        <PositionListItem
+                            marketDetail={myAO.market as any}
+                            position={myAO}
+                        />
                     </Fragment>
                 ))}
             </div>

@@ -8,8 +8,11 @@ import React, {
 } from 'react'
 import RequestFactory from '@/services/RequestFactory.ts'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
-import { ActiveOrdersRequestParams } from '@/types/request.ts'
-import { ActiveOrder, MarketDetail, MyActiveOrder } from '@/types'
+import {
+    ActiveOrdersRequestParams,
+    PositionRequestParams
+} from '@/types/request.ts'
+import { ActiveOrder, MarketDetail, MyActiveOrder, TPosition } from '@/types'
 import { useToast } from '@/components/ui/use-toast.ts'
 
 interface PortfolioContextType {
@@ -17,10 +20,12 @@ interface PortfolioContextType {
     markets: MarketDetail[] | null
     myActiveOrders: MyActiveOrder[] | undefined
     fetchMoreData: () => void
+    fetchPositions: (param: PositionRequestParams) => void
     totalItems: number
     totalPages: number
     hasMore: boolean
     handleCancelActiveOrder: (orderIds: string[]) => Promise<void>
+    positions: TPosition[] | null
 }
 
 const PortfolioContext = createContext<PortfolioContextType | undefined>(
@@ -44,6 +49,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
     const [myActiveOrders, setMyActiveMarkets] = useState<
         MyActiveOrder[] | undefined
     >(undefined)
+    const [positions, setPositions] = useState<TPosition[] | null>([])
 
     const [hasMore, setHasMore] = useState<boolean>(false)
     const { toast } = useToast()
@@ -91,6 +97,31 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
                     setTotalPages(response.totalPages)
 
                     setHasMore(page < response.totalPages)
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        },
+        [request]
+    )
+
+    const fetchPositions = useCallback(
+        async (params: PositionRequestParams) => {
+            try {
+                const response = await request.getPositions(params)
+                if (response) {
+                    if (params.page === 1) {
+                        setPositions(response.docs)
+                    } else {
+                        setPositions((prevState) => [
+                            ...(prevState ?? []),
+                            ...response.docs
+                        ])
+                    }
+                    // setTotalItems(response.totalDocs)
+                    // setTotalPages(response.totalPages)
+
+                    // setHasMore(page < response.totalPages)
                 }
             } catch (err) {
                 console.error(err)
@@ -161,7 +192,9 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
                 totalItems,
                 totalPages,
                 hasMore,
-                handleCancelActiveOrder
+                handleCancelActiveOrder,
+                positions,
+                fetchPositions
             }}
         >
             {children}

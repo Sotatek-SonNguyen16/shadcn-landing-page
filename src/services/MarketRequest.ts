@@ -5,13 +5,15 @@ import {
     MarketDetail,
     MarketPriceHistory,
     PolyMarketDetail,
-    PredictionMarket
+    PredictionMarket,
+    TPosition
 } from '@/types'
 import {
     ActiveOrdersRequestParams,
     DeleteOrdersRequestBody,
     OrderRequestBody,
-    OrdersRequestParam
+    OrdersRequestParam,
+    PositionRequestParams
 } from '@/types/request.ts'
 import {
     DocsResponse,
@@ -58,6 +60,11 @@ export default class MarketRequest extends BaseRequest {
     async getActiveOrders(params: ActiveOrdersRequestParams) {
         const url = `/orders/active-orders`
         return await this.get<DocsResponse<ActiveOrder>>(url, params)
+    }
+
+    async getPositions(params: PositionRequestParams) {
+        const url = `/users/portfolio?status=LIVE`
+        return await this.get<DocsResponse<TPosition>>(url, params)
     }
 
     async getActiveTrades(marketId: string) {

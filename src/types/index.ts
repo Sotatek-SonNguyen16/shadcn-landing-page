@@ -133,7 +133,7 @@ interface MarketDetail {
     icon: string
     description: string
     outcomes: string // JSON-encoded string
-    outcomePrices: string // JSON-encoded string
+    outcomePrices: string[] // JSON-encoded string
     volume: number // consider converting to number if appropriate
     active: boolean
     marketType: string
@@ -305,6 +305,17 @@ type MyActiveOrder = {
     marketDetail?: MarketDetail
 }
 
+type TPosition = {
+    userAddress: string
+    positionId: string
+    marketId: string
+    avgPrice: number
+    currentPrice: number
+    size: number
+    expiredAt: number
+    status: string
+}
+
 export type {
     ActiveOrder,
     Market,
@@ -318,7 +329,8 @@ export type {
     OrderStatus,
     PolyMarketDetail,
     PredictionMarket,
-    PriceChangeEvent
+    PriceChangeEvent,
+    TPosition
 }
 
 export { EBetOption, EEventType, EFormType, EMarketDepth, ESide }

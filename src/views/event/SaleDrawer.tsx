@@ -274,7 +274,8 @@ const SaleDrawer: React.FC = () => {
         currentMarket,
         handleOrder,
         selectedOrder,
-        resolver
+        resolver,
+        formType
     } = useEventContext()
     const { closeDrawer } = useDrawerContext()
     const { isLogin } = useAuthContext()
@@ -300,9 +301,21 @@ const SaleDrawer: React.FC = () => {
         const parsedValue = Number(newValue)
         if (!isNaN(parsedValue)) {
             setInput(newValue)
-            setValue('size', Number(selectedOrder?.size))
             setValue('amount', parsedValue)
+
+            switch (formType) {
+                case EFormType.MARKET:
+                    setValue('size', getSize(newValue))
+                    break
+                case EFormType.LIMIT:
+                    setValue('size', getSize(newValue))
+                    break
+            }
         }
+    }
+
+    const getSize = (amountSize: string) => {
+        return (Number(amountSize) ?? 0) / (selectedOrder?.price ?? 0.001)
     }
 
     return (
@@ -376,7 +389,12 @@ const SaleDrawer: React.FC = () => {
                 <form
                     className='flex flex-col gap-4'
                     id='saleForm'
-                    onSubmit={handleSubmit(handleOrder)}
+                    onSubmit={handleSubmit((order) =>
+                        handleOrder({
+                            ...order,
+                            amount: Number(order.amount) * 100
+                        })
+                    )}
                 >
                     <BuyBetInput
                         value={input}
@@ -398,9 +416,7 @@ const SaleDrawer: React.FC = () => {
                                     now
                                 </div>
                                 <div className='self-stretch text-color-neutral-alpha-700 text-xs font-light leading-3'>
-                                    {Number(selectedOrder?.size ?? 0) *
-                                        Number(input)}{' '}
-                                    shares
+                                    {getSize(input)} shares
                                 </div>
                             </div>
                         }
