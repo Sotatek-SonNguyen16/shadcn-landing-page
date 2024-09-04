@@ -21,14 +21,6 @@ const SettingGroup: React.FC<{
         setSelectedValue(valueSingle)
     }, [valueSingle])
 
-    useEffect(() => {
-        if (single) {
-            onChange && onChange(selectedValue)
-            return
-        }
-        onChange && onChange(selectedValues)
-    }, [selectedValue, selectedValues])
-
     if (single)
         return (
             <div className='w-full flex-col justify-start items-start gap-2 inline-flex'>
@@ -43,6 +35,7 @@ const SettingGroup: React.FC<{
                     value={selectedValue}
                     onValueChange={(value: string) => {
                         setSelectedValue(value)
+                        onChange && onChange(value)
                     }}
                 >
                     {items.map(({ name, value }) => (
@@ -84,6 +77,7 @@ const SettingGroup: React.FC<{
                 value={selectedValues}
                 onValueChange={(value: string[]) => {
                     setSelectedValues(value)
+                    onChange && onChange(value)
                 }}
             >
                 {items.map(({ name, value }) => (
