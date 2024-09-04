@@ -15,10 +15,6 @@ const CheckboxGroup: React.FC<{
     const [selectedValue, setSelectedValue] = useState<string>('')
 
     useEffect(() => {
-        onChange && onChange(selectedValue)
-    }, [selectedValue])
-
-    useEffect(() => {
         setSelectedValue(value)
     }, [value])
 
@@ -35,6 +31,7 @@ const CheckboxGroup: React.FC<{
                 value={selectedValue}
                 onValueChange={(value: string) => {
                     setSelectedValue(value)
+                    onChange && onChange(value)
                 }}
             >
                 {items.map(({ name, value }) => (
