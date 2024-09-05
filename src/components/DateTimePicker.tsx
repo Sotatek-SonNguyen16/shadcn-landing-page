@@ -14,8 +14,9 @@ import {
 const DateTimePicker: React.FC<{
     placeholder?: string
     value: Date | undefined
+    disabled: boolean
     onChange: (value: Date | undefined) => void
-}> = ({ onChange, value, placeholder }) => {
+}> = ({ onChange, value, placeholder, disabled }) => {
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -25,6 +26,7 @@ const DateTimePicker: React.FC<{
                         'max-w-[240px] w-full justify-start text-left font-normal overflow-hidden',
                         !value && 'text-muted-foreground'
                     )}
+                    disabled={disabled}
                 >
                     <CalendarIcon className='mr-2 h-4 w-4' />
                     {value ? (

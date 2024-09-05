@@ -287,6 +287,7 @@ type MarketTrade = {
 }
 
 export type ITrade = {
+    eventId: string
     assetId: string
     marketId: string
     price: number
@@ -316,6 +317,60 @@ type TPosition = {
     status: string
 }
 
+interface ITelegramUser {
+    id: number
+    first_name: string
+    last_name?: string
+    username?: string
+    language_code?: string
+    photo_url?: string
+}
+
+interface IWebApp {
+    ready: () => void
+    initData: string
+    initDataUnsafe: {
+        query_id: string
+        user: ITelegramUser
+        auth_date: string
+        hash: string
+    }
+    version: string
+    platform: string
+    colorScheme: string
+    themeParams: {
+        link_color: string
+        button_color: string
+        button_text_color: string
+        secondary_bg_color: string
+        hint_color: string
+        bg_color: string
+        text_color: string
+    }
+    isExpanded: boolean
+    viewportHeight: number
+    viewportStableHeight: number
+    isClosingConfirmationEnabled: boolean
+    headerColor: string
+    backgroundColor: string
+    BackButton: {
+        isVisible: boolean
+    }
+    MainButton: {
+        text: string
+        color: string
+        textColor: string
+        isVisible: boolean
+        isProgressVisible: boolean
+        isActive: boolean
+    }
+    HapticFeedback: any
+}
+
+type TradeType = 'BUY' | 'SELL' | 'REDEEM'
+type SortByType = 'timestamp' | 'shares' | 'totalValue' | 'price'
+type SortOrderType = 'asc' | 'desc'
+
 export type {
     ActiveOrder,
     Market,
@@ -330,7 +385,12 @@ export type {
     PolyMarketDetail,
     PredictionMarket,
     PriceChangeEvent,
-    TPosition
+    TPosition,
+    ITelegramUser,
+    IWebApp,
+    TradeType,
+    SortByType,
+    SortOrderType
 }
 
 export { EBetOption, EEventType, EFormType, EMarketDepth, ESide }

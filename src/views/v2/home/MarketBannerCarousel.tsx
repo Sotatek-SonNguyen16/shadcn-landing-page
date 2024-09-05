@@ -23,7 +23,7 @@ const MarketBanner: React.FC<{ banner: Banner }> = ({ banner }) => {
     return (
         <div
             className={clsx(
-                'w-full h-[164px] px-6 py-6 rounded-2xl flex-col justify-center items-start gap-4 inline-flex relative',
+                'w-full h-[164px] px-6 py-6 rounded-2xl flex-col justify-center items-start gap-4 inline-flex relative overflow-hidden',
                 'bg-gradient-to-r ' + banner.color
             )}
         >

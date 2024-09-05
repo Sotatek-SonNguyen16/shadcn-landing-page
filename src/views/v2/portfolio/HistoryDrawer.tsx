@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import {
     ChevronLeft,
     ExternalLink,
@@ -9,7 +9,13 @@ import {
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { UnderlineTabs } from '@/components/ui/tabs.tsx'
-import { ITrade, MarketDetail } from '@/types'
+import {
+    ITrade,
+    MarketDetail,
+    SortByType,
+    SortOrderType,
+    TradeType
+} from '@/types'
 import { Badge } from '@/components/ui/badge.tsx'
 import CheckboxGroup from '@/components/CheckBoxGroup.tsx'
 import SettingGroup from '@/components/SettingGroup.tsx'
@@ -26,85 +32,49 @@ import {
     DrawerTitle
 } from '@/components/ui/drawer'
 import { clsx } from 'clsx'
-
-const DurationDateTimeInput = () => {
-    const [date, setDate] = useState<Date | undefined>(undefined)
-    return (
-        <div className='flex justify-center items-center gap-2'>
-            <DateTimePicker
-                placeholder='Due date'
-                value={date}
-                onChange={setDate}
-            />
-            <div>-</div>
-            <DateTimePicker
-                placeholder='To date'
-                value={date}
-                onChange={setDate}
-            />
-        </div>
-    )
-}
+import { TradesRequestParam } from '@/types/request.ts'
+import { useNavigate } from 'react-router-dom'
 
 const FilterDrawerContent = ({
     setParams,
     params
 }: {
-    setParams: (value: any) => void
-    params: any
+    setParams: (value: TradesRequestParam) => void
+    params: TradesRequestParam
 }) => {
-    const onSort = (value: string) => {
+    const [customFromTs, setCustomFromTs] = useState<Date | undefined>(
+        undefined
+    )
+    const [customToTs, setCustomToTs] = useState<Date | undefined>(undefined)
+    const [selectedCustom, setSelectedCustom] = useState<string>('')
+
+    const onSortBy = (value: string | SortByType | '') => {
         if (value === '') {
             setParams({
                 ...params,
-                sortBy: '',
-                sortOrder: ''
+                sortBy: undefined
             })
             return
         }
 
-        if (value === 'newest') {
-            setParams({
-                ...params,
-                sortBy: 'timestamp',
-                sortOrder: 'desc'
-            })
-            return
-        }
-
-        if (value === 'oldest') {
-            setParams({
-                ...params,
-                sortBy: 'timestamp',
-                sortOrder: 'asc'
-            })
-            return
-        }
-
-        setParams({
-            ...params,
-            sortBy: value,
-            sortOrder: 'desc'
-        })
+        setParams({ ...params, sortBy: value as SortByType })
     }
 
-    const valueSort = useMemo(() => {
-        if (params.sortBy === 'timestamp') {
-            if (params.sortOrder === 'desc') return 'newest'
+    const onSortOrder = (value: string | SortOrderType | '') => {
+        if (value === '') {
+            setParams({
+                ...params,
+                sortOrder: undefined
+            })
+            return
         }
 
-        if (params.sortBy === 'timestamp') {
-            if (params.sortOrder === 'asc') return 'oldest'
-        }
-
-        if (params.sortBy === 'totalValue' || params.sortBy === 'shares') {
-            return params.sortBy
-        }
-
-        return ''
-    }, [params.sortBy, params.sortOrder])
+        setParams({ ...params, sortOrder: value as SortOrderType })
+    }
 
     const onSelectTime = (value: string) => {
+        setSelectedCustom(value)
+
         switch (value) {
             case 'today': {
                 setParams({
@@ -181,75 +151,30 @@ const FilterDrawerContent = ({
                 break
             }
 
+            case 'custom': {
+                break
+            }
+
             default: {
                 setParams({
                     ...params,
-                    fromTs: '',
-                    toTs: ''
+                    fromTs: undefined,
+                    toTs: undefined
                 })
                 break
             }
         }
     }
 
-    const valueTime = useMemo(() => {
-        const startTime = params.fromTs
-        const endTime = params.toTs
-
-        if (startTime === moment().startOf('day').valueOf()) {
-            return 'today'
+    useEffect(() => {
+        if (customFromTs && customToTs) {
+            setParams({
+                ...params,
+                fromTs: customFromTs?.getTime(),
+                toTs: customToTs?.getTime()
+            })
         }
-
-        if (
-            startTime ===
-                moment().subtract(1, 'day').startOf('day').valueOf() &&
-            endTime === moment().subtract(1, 'day').endOf('day').valueOf()
-        ) {
-            return 'yesterday'
-        }
-
-        if (
-            startTime ===
-                moment().subtract(1, 'week').startOf('week').valueOf() &&
-            endTime === moment().subtract(1, 'week').endOf('week').valueOf()
-        ) {
-            return 'lastWeek'
-        }
-
-        if (
-            startTime ===
-                moment().subtract(1, 'month').startOf('month').valueOf() &&
-            endTime === moment().subtract(1, 'month').endOf('month').valueOf()
-        ) {
-            return 'lastMonth'
-        }
-
-        if (
-            startTime === moment().subtract(3, 'month').startOf('day').valueOf()
-        ) {
-            return 'last3Months'
-        }
-
-        if (
-            startTime === moment().subtract(1, 'year').startOf('day').valueOf()
-        ) {
-            return 'yearToDate'
-        }
-
-        if (
-            startTime ===
-                moment().subtract(1, 'year').startOf('year').valueOf() &&
-            endTime === moment().subtract(1, 'year').endOf('year').valueOf()
-        ) {
-            return 'lastYear'
-        }
-
-        if (!!startTime || !!endTime) {
-            return 'custom'
-        }
-
-        return ''
-    }, [params.fromTs, params.toTs])
+    }, [customFromTs, customToTs])
 
     return (
         <div className='flex flex-col gap-4 px-4'>
@@ -267,7 +192,12 @@ const FilterDrawerContent = ({
                 <div className='col-span-2 py-0.5 flex justify-end'>
                     <div
                         className='w-fit justify-center items-center gap-2 inline-flex cursor-pointer'
-                        onClick={() => setParams({})}
+                        onClick={() => {
+                            setSelectedCustom('')
+                            setCustomFromTs(undefined)
+                            setCustomToTs(undefined)
+                            setParams({})
+                        }}
                     >
                         <div className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight'>
                             Reset
@@ -282,19 +212,30 @@ const FilterDrawerContent = ({
                 </div>
             </div>
             <CheckboxGroup
-                name='Sort by'
-                value={valueSort}
-                onChange={(value: string) => onSort(value)}
+                name='Sort order'
+                value={params.sortOrder ?? ''}
+                onChange={(value: string | (SortOrderType | '')) =>
+                    onSortOrder(value)
+                }
                 items={[
-                    { name: 'Newest', value: 'newest' },
-                    { name: 'Oldest', value: 'oldest' },
+                    { name: 'Newest', value: 'desc' },
+                    { name: 'Oldest', value: 'asc' }
+                ]}
+            />
+            <CheckboxGroup
+                name='Sort by'
+                value={params.sortBy ?? ''}
+                onChange={(value: string | SortByType | '') => onSortBy(value)}
+                items={[
+                    { name: 'Time', value: 'timestamp' },
                     { name: 'Value', value: 'totalValue' },
-                    { name: 'Shares', value: 'shares' }
+                    { name: 'Shares', value: 'shares' },
+                    { name: 'Price', value: 'price' }
                 ]}
             />
             <SettingGroup
                 name='Time'
-                valueSingle={valueTime}
+                valueSingle={selectedCustom}
                 onChange={(value: any) => onSelectTime(value)}
                 single
                 items={[
@@ -309,12 +250,32 @@ const FilterDrawerContent = ({
                     { name: 'Custom time', value: 'custom' }
                 ]}
             />
-            <DurationDateTimeInput />
+            <div className='flex justify-center items-center gap-2'>
+                <DateTimePicker
+                    placeholder='Due date'
+                    value={customFromTs}
+                    onChange={setCustomFromTs}
+                    disabled={selectedCustom !== 'custom'}
+                />
+                <div>-</div>
+                <DateTimePicker
+                    placeholder='To date'
+                    value={customToTs}
+                    onChange={setCustomToTs}
+                    disabled={selectedCustom != 'custom'}
+                />
+            </div>
         </div>
     )
 }
 
 const HistoryListItem = ({ trade }: { trade: ITrade }) => {
+    const navigate = useNavigate()
+
+    const goToDetailEvent = (id: string) => {
+        navigate(`/v2/event/${id}`)
+    }
+
     return (
         <div className='w-full rounded-xl bg-color-neutral-50 flex flex-col p-3 gap-3'>
             <div className='w-full rounded-lg justify-start items-center gap-3 inline-flex'>
@@ -328,7 +289,10 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
                     </div>
                 </div>
                 <div className='grow shrink basis-0 flex-col justify-start items-start inline-flex'>
-                    <div className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex '>
+                    <div
+                        className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
+                        onClick={() => goToDetailEvent(trade.eventId)}
+                    >
                         <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-normal leading-tight text-wrap'>
                             {trade?.name}
                         </div>
@@ -392,8 +356,8 @@ const HistoryFilterButton = ({
     setParams,
     params
 }: {
-    setParams: (value: any) => void
-    params: any
+    setParams: (value: TradesRequestParam) => void
+    params: TradesRequestParam
 }) => {
     const [isShowFilter, setIsShowFilter] = useState<boolean>(false)
 
@@ -443,7 +407,7 @@ const HistoryFilterButton = ({
 
 const HistoryDrawer: React.FC = () => {
     const [tradesHistory, setTradesHistory] = useState<ITrade[]>([])
-    const [params, setParams] = useState<any>({})
+    const [params, setParams] = useState<TradesRequestParam>({})
     const [page] = useState<number>(1)
     const [limit, setLimit] = useState<number>(10)
     const [totalDocs, setTotalDocs] = useState<number>(0)
@@ -454,20 +418,20 @@ const HistoryDrawer: React.FC = () => {
 
     const getTradesHistory = async () => {
         try {
-            const dataTrade = (await requestTrade.getTradesHistory(
+            const dataTrade = await requestTrade.getTradesHistory(
                 filterParams({
                     page,
                     limit,
                     ...params
                 })
-            )) as any
+            )
 
             const marketIds =
                 dataTrade?.docs?.map((trade: ITrade) => trade.marketId) ?? []
 
-            const dataMarket = (await requestMarkets.getMarketsByListId({
+            const dataMarket = await requestMarkets.getMarketsByListId({
                 id: marketIds
-            })) as any
+            })
 
             const data = dataTrade?.docs?.map((trade: ITrade) => {
                 const market = dataMarket?.docs?.find(
@@ -487,7 +451,7 @@ const HistoryDrawer: React.FC = () => {
             })
 
             setTradesHistory(data || [])
-            setTotalDocs(dataTrade?.totalDocs)
+            setTotalDocs(dataTrade?.totalDocs ?? 0)
         } catch (e) {
             console.error(e)
         }
@@ -534,13 +498,13 @@ const HistoryDrawer: React.FC = () => {
                         />
                     </DrawerProvider>
                     <div className='flex-1'>
-                        <UnderlineTabs<'' | 'BUY' | 'SELL' | 'MERGE' | 'REDEEM'>
+                        <UnderlineTabs<TradeType | ''>
                             className='w-[calc(100vw-70px)]'
                             defaultValue={''}
                             onClick={(value) =>
                                 setParams({
                                     ...params,
-                                    type: value
+                                    type: value === '' ? undefined : value
                                 })
                             }
                             tabs={[
@@ -556,11 +520,6 @@ const HistoryDrawer: React.FC = () => {
                                     content: <></>
                                 },
                                 {
-                                    title: 'Merge',
-                                    value: 'MERGE',
-                                    content: <></>
-                                },
-                                {
                                     title: 'Redeem',
                                     value: 'REDEEM',
                                     content: <></>
@@ -569,7 +528,10 @@ const HistoryDrawer: React.FC = () => {
                         />
                     </div>
                 </div>
-                <div className='overflow-auto' id='scrollableHistory'>
+                <div
+                    className='overflow-auto scrollbar-hidden'
+                    id='scrollableHistory'
+                >
                     <InfiniteScroll
                         scrollableTarget='scrollableHistory'
                         dataLength={tradesHistory.length}

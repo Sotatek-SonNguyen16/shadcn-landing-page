@@ -40,7 +40,7 @@ const TabBarItem: React.FC<BarItem> = ({ icon, name, href }) => {
                         <div className='relative self-stretch font-small-regular-12 font-[number:var(--small-regular-12-font-weight)] text-variable-collection-neutral-900-duplicate text-[length:var(--small-regular-12-font-size)] text-center tracking-[var(--small-regular-12-letter-spacing)] leading-[var(--small-regular-12-line-height)] [font-style:var(--small-regular-12-font-style)]'>
                             {name}
                         </div>
-                        <div className='absolute w-[35px] h-[18px] top-2.5 left-[50%] transform -translate-x-1/2 bg-[#dffe0f] rounded-[9px] blur-[22.4px] opacity-50' />
+                        <div className='absolute w-[35px] h-[18px] top-2.5 left-[50%] transform -translate-x-1/2 bg-[#dffe0f] rounded-[9px] blur-[22.4px] opacity-100' />
                         <div className='absolute w-8 h-[4px] top-[45px] left-[50%] transform -translate-x-1/2 bg-brand-400 rounded-t-full' />
                     </>
                 )}

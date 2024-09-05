@@ -80,6 +80,6 @@ export const formatUnixTime = (
     return moment(+unixTime).format(formatTime)
 }
 
-export const filterParams = (params: any) => {
+export const filterParams = (params: Record<string, string | number>) => {
     return Object.fromEntries(Object.entries(params).filter(([_, v]) => v))
 }

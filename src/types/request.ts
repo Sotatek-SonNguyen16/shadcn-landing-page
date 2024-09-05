@@ -1,4 +1,10 @@
-import { ESide, OrderStatus } from '@/types/index.ts'
+import {
+    ESide,
+    OrderStatus,
+    SortByType,
+    SortOrderType,
+    TradeType
+} from '@/types/index.ts'
 
 type OrderRequestBody = {
     marketId: string
@@ -25,7 +31,7 @@ type DeleteOrdersRequestBody = {
     orderIds: string[]
 }
 
-export type OrdersRequestParam = {
+type OrdersRequestParam = {
     marketId?: string
     assetId?: string
     side?: ESide
@@ -34,9 +40,21 @@ export type OrdersRequestParam = {
     limit?: number
 }
 
+type TradesRequestParam = {
+    fromTs?: number
+    toTs?: number
+    type?: TradeType
+    sortBy?: SortByType
+    sortOrder?: SortOrderType
+    page?: number
+    limit?: number
+}
+
 export type {
     OrderRequestBody,
     ActiveOrdersRequestParams,
     DeleteOrdersRequestBody,
-    PositionRequestParams
+    PositionRequestParams,
+    OrdersRequestParam,
+    TradesRequestParam
 }

@@ -1,39 +1,18 @@
 import React from 'react'
 import { clsx } from 'clsx'
-import { ArrowUp, History } from 'lucide-react'
+import { ArrowUp } from 'lucide-react'
 import { UnderlineTabs } from '@/components/ui/tabs.tsx'
 import PortfolioPositionContent from '@/views/v2/portfolio/PortfolioPositionContent.tsx'
 import PortfolioOpenOrdersContent from '@/views/v2/portfolio/PortfolioOpenOrdersContent.tsx'
-import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
-import HistoryDrawer from '@/views/v2/portfolio/HistoryDrawer.tsx'
+import DrawerProvider from '@/contexts/DrawerContext.tsx'
 import { PortfolioProvider } from '@/contexts/PortfolioContext.tsx'
 
 const PortfolioTitle = () => {
-    const { openDrawer } = useDrawerContext()
-
-    const onClickHistory = () => {
-        openDrawer({
-            background: 'color-neutral-alpha-900',
-            content: <HistoryDrawer />
-        })
-    }
-
     return (
         <div className='flex-1 px-4 rounded-lg justify-start items-center gap-2 inline-flex'>
             <div className='grow shrink basis-0 rounded-lg flex-col justify-center items-start inline-flex'>
                 <div className='self-stretch text-color-color-neutral-900 text-2xl font-semibold leading-loose'>
                     Portfolio
-                </div>
-            </div>
-            <div
-                className='justify-center items-center gap-1 flex cursor-pointer'
-                onClick={onClickHistory}
-            >
-                <History size={16} />
-                <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
-                    <div className='self-stretch text-center text-color-color-neutral-900 text-sm font-normal leading-tight'>
-                        History
-                    </div>
                 </div>
             </div>
         </div>

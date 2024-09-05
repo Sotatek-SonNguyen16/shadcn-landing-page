@@ -8,6 +8,7 @@ import CheckboxGroup from '@/components/CheckBoxGroup.tsx'
 import { usePortfolioContext } from '@/contexts/PortfolioContext.tsx'
 import { formatToCents } from '@/lib/utils.ts'
 import RequestFactory from '@/services/RequestFactory'
+import { useNavigate } from 'react-router-dom'
 
 const FilterDrawerContent = () => {
     return (
@@ -147,7 +148,8 @@ const PositionListItem: React.FC<{
     position: TPosition
     marketDetail: MarketDetail
 }> = ({ position, marketDetail }) => {
-    const { icon, question } = marketDetail
+    const { icon, question, id } = marketDetail
+    const navigate = useNavigate()
 
     const currentPrice =
         +marketDetail.outcomePrices[
@@ -163,6 +165,10 @@ const PositionListItem: React.FC<{
 
     const pl = ((currentPrice - position.avgPrice) * 100) / position.avgPrice
 
+    const goToDetailEvent = (id: string) => {
+        navigate(`/v2/event/${id}`)
+    }
+
     return (
         <div className='w-full rounded-xl bg-color-neutral-50 flex flex-col p-3 gap-3'>
             <div className='w-full rounded-lg justify-start items-center gap-3 inline-flex'>
@@ -176,7 +182,10 @@ const PositionListItem: React.FC<{
                     </div>
                 </div>
                 <div className='grow shrink basis-0 flex-col justify-start items-start inline-flex'>
-                    <div className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex '>
+                    <div
+                        className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
+                        onClick={() => goToDetailEvent(id)}
+                    >
                         <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-normal leading-tight text-nowrap truncate'>
                             {question}
                         </div>

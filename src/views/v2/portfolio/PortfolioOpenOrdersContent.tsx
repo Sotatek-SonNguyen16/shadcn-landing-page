@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { usePortfolioContext } from '@/contexts/PortfolioContext.tsx'
 import { formatToCents, formatUnixTime } from '@/lib/utils.ts'
 import OrderStatusBadge from '@/components/OrderStatus.tsx'
+import { useNavigate } from 'react-router-dom'
 
 const SortByDrawerContent = () => {
     return (
@@ -161,8 +162,9 @@ const OpenOrdersListItem: React.FC<{
         createdAt,
         orderId
     } = activeOrder
-    const { icon, question, clobTokenIds } = marketDetail
+    const { icon, question, clobTokenIds, id } = marketDetail
     const { handleCancelActiveOrder } = usePortfolioContext()
+    const navigate = useNavigate()
 
     const formatterUSD = useMemo(
         () =>
@@ -174,6 +176,10 @@ const OpenOrdersListItem: React.FC<{
             }),
         []
     )
+
+    const goToDetailEvent = (id: string) => {
+        navigate(`/v2/event/${id}`)
+    }
 
     return (
         <div className='w-full rounded-xl bg-color-neutral-50 flex flex-col p-3 gap-3'>
@@ -188,7 +194,10 @@ const OpenOrdersListItem: React.FC<{
                     </div>
                 </div>
                 <div className='grow shrink basis-0 flex-col justify-start items-start inline-flex'>
-                    <div className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex '>
+                    <div
+                        className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
+                        onClick={() => goToDetailEvent(id)}
+                    >
                         <div className='w-[calc(100vw-183px)] text-color-neutral-900 text-sm font-normal leading-tight text-nowrap truncate'>
                             {question}
                         </div>

@@ -15,6 +15,7 @@ const MarketDetailPage = lazy(
 const PortfolioPage = lazy(
     () => import('@/views/v2/portfolio/PortfolioPage.tsx')
 )
+const ProfilePage = lazy(() => import('@/views/v2/profile/ProfilePage.tsx'))
 
 export const router = createBrowserRouter([
     {
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
             {
                 path: 'portfolio',
                 element: <PortfolioPage />
+            },
+            {
+                path: 'profile',
+                element: <ProfilePage />
             },
             {
                 path: '*',
