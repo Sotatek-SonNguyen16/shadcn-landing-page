@@ -1,4 +1,4 @@
-const PREFERENCES = 'poly-market'
+const PREFERENCES = 'ton-market'
 
 interface Preferences {
     accessToken?: string

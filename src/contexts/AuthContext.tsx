@@ -20,6 +20,7 @@ import { setUser } from '@/store/userSlice.ts'
 import Storage from '@/lib/storage.ts'
 import RequestFactory from '@/services/RequestFactory'
 import { setAccessToken } from '@/store/authSlice'
+import { jwtDecode } from 'jwt-decode'
 
 interface AuthContextProps {
     isLogin: boolean
@@ -51,6 +52,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         open()
     }
 
+    const handleTokenExpiration = async (token: string) => {
+        try {
+            const decodedToken = jwtDecode<{ exp: number }>(token)
+            const expirationTime = decodedToken.exp * 1000
+
+            const currentTime = Date.now()
+            const timeUntilExpiration = expirationTime - currentTime
+            console.log(timeUntilExpiration <= 0)
+            if (timeUntilExpiration <= 0) {
+                await handleLogout()
+                handleLogin()
+            } else {
+                setTimeout(() => {
+                    handleLogout()
+                    handleLogin()
+                }, timeUntilExpiration)
+            }
+        } catch (error) {
+            console.debug('Error handling token expiration', error)
+            handleLogout()
+        }
+    }
+
     const login = async () => {
         if (
             !wallet?.connectItems?.tonProof ||
@@ -75,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             )
             dispatch(setAccessToken({ accessToken: result.accessToken }))
             setIsLogin(true)
+            handleTokenExpiration(result.accessToken)
         } catch (e) {
             console.debug('login error', e)
             handleLogout()
@@ -111,9 +136,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             setInterval(refreshPayload, payloadTTLMS)
             return
         }
-
         login()
     }, [wallet, isConnectionRestored, tonConnectUI])
+
+    useEffect(() => {
+        const token = Storage.getAccessToken()
+        if (token) {
+            handleTokenExpiration(token)
+        }
+    }, [])
 
     useEffect(() => {
         if (tonConnectUI) {
@@ -123,7 +154,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handleLogout = async () => {
         setIsLogin(false)
-        await tonConnectUI.disconnect()
+        if (tonConnectUI.connected) {
+            await tonConnectUI.disconnect()
+        }
         localStorage.clear()
         sessionStorage.clear()
         // window.location.reload()
