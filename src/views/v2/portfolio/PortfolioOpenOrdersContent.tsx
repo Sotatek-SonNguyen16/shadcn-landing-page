@@ -162,7 +162,7 @@ const OpenOrdersListItem: React.FC<{
         createdAt,
         orderId
     } = activeOrder
-    const { icon, question, clobTokenIds, id } = marketDetail
+    const { icon, question, clobTokenIds, eventId } = marketDetail
     const { handleCancelActiveOrder } = usePortfolioContext()
     const navigate = useNavigate()
 
@@ -196,7 +196,7 @@ const OpenOrdersListItem: React.FC<{
                 <div className='grow shrink basis-0 flex-col justify-start items-start inline-flex'>
                     <div
                         className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
-                        onClick={() => goToDetailEvent(id)}
+                        onClick={() => goToDetailEvent(eventId)}
                     >
                         <div className='w-[calc(100vw-183px)] text-color-neutral-900 text-sm font-normal leading-tight text-nowrap truncate'>
                             {question}

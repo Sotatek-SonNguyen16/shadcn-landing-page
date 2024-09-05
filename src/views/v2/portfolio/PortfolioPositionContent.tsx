@@ -148,7 +148,7 @@ const PositionListItem: React.FC<{
     position: TPosition
     marketDetail: MarketDetail
 }> = ({ position, marketDetail }) => {
-    const { icon, question, id } = marketDetail
+    const { icon, question, eventId } = marketDetail
     const navigate = useNavigate()
 
     const currentPrice =
@@ -184,7 +184,7 @@ const PositionListItem: React.FC<{
                 <div className='grow shrink basis-0 flex-col justify-start items-start inline-flex'>
                     <div
                         className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
-                        onClick={() => goToDetailEvent(id)}
+                        onClick={() => goToDetailEvent(eventId)}
                     >
                         <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-normal leading-tight text-nowrap truncate'>
                             {question}

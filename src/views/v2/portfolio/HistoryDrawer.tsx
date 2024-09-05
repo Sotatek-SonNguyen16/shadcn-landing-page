@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useMemo, useState } from 'react'
 import {
     ChevronLeft,
     ExternalLink,
@@ -21,7 +21,7 @@ import CheckboxGroup from '@/components/CheckBoxGroup.tsx'
 import SettingGroup from '@/components/SettingGroup.tsx'
 import DateTimePicker from '@/components/DateTimePicker.tsx'
 import RequestFactory from '@/services/RequestFactory'
-import { filterParams, formatUnixTime } from '@/lib/utils'
+import { filterParams, formatToCents, formatUnixTime } from '@/lib/utils'
 import moment from 'moment'
 import { LoadingSpinner } from '@/components/ui/spinner'
 import InfiniteScroll from 'react-infinite-scroll-component'
@@ -272,6 +272,17 @@ const FilterDrawerContent = ({
 const HistoryListItem = ({ trade }: { trade: ITrade }) => {
     const navigate = useNavigate()
 
+    const formatterUSD = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 5
+            }),
+        []
+    )
+
     const goToDetailEvent = (id: string) => {
         navigate(`/v2/event/${id}`)
     }
@@ -291,9 +302,9 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
                 <div className='grow shrink basis-0 flex-col justify-start items-start inline-flex'>
                     <div
                         className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
-                        onClick={() => goToDetailEvent(trade.eventId)}
+                        onClick={() => goToDetailEvent(trade.eventId ?? '')}
                     >
-                        <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-normal leading-tight text-wrap'>
+                        <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-semibold leading-tight text-wrap'>
                             {trade?.name}
                         </div>
                     </div>
@@ -323,14 +334,14 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
                             shares at
                         </div>
                         <div className='text-color-neutral-700 text-xs font-light leading-3'>
-                            {trade?.price}¢
+                            {formatToCents(trade?.price)}
                         </div>
                     </div>
                 </div>
                 <div className='rounded-lg flex-col justify-center items-end gap-0.5 inline-flex'>
                     <div className='self-stretch h-5 rounded-lg flex-col justify-center items-end flex'>
                         <div className='self-stretch text-right text-color-neutral-900 text-sm font-normal leading-tight'>
-                            ${trade?.totalValue}
+                            {formatterUSD.format(trade?.totalValue)}
                         </div>
                     </div>
                     <div className='self-stretch rounded-lg justify-end items-center gap-0.5 inline-flex'>
@@ -410,7 +421,9 @@ const HistoryDrawer: React.FC = () => {
     const [params, setParams] = useState<TradesRequestParam>({})
     const [page, setPage] = useState<number>(1)
     const [limit] = useState<number>(10)
-    const [totalPage, setTotalPage] = useState<number>(0)
+    const [totalPages, setTotalPages] = useState<number>(
+        Number.MAX_SAFE_INTEGER
+    )
     const { closeDrawer } = useDrawerContext()
 
     const requestTrade = RequestFactory.getRequest('TradeRequest')
@@ -450,8 +463,8 @@ const HistoryDrawer: React.FC = () => {
                 }
             })
 
-            setTradesHistory(tradesHistory.concat(data) || [])
-            setTotalPage(dataTrade?.totalPages ?? 0)
+            setTradesHistory(data || [])
+            setTotalPages(dataTrade?.totalPages ?? 0)
         } catch (e) {
             console.error(e)
         }
@@ -463,7 +476,7 @@ const HistoryDrawer: React.FC = () => {
 
     const fetchMoreData = () => {
         setTimeout(() => {
-            setPage(page + 1)
+            setPage((prevState) => prevState + 1)
         }, 1000)
     }
 
@@ -536,7 +549,7 @@ const HistoryDrawer: React.FC = () => {
                         scrollableTarget='scrollableHistory'
                         dataLength={tradesHistory.length}
                         next={fetchMoreData}
-                        hasMore={totalPage > page}
+                        hasMore={totalPages > page}
                         loader={
                             <div className='flex justify-center items-center bg-background/10 gap-1 m-3'>
                                 <LoadingSpinner />

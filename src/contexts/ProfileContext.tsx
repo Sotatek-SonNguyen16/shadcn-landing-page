@@ -12,7 +12,7 @@ import { filterParams } from '@/lib/utils.ts'
 interface ProfileContextType {
     tradesHistory: ITrade[]
     fetchMoreData: () => void
-    totalDocs: number
+    totalPages: number
     limit: number
     page: number
 }
@@ -26,7 +26,9 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
     const [params] = useState<any>({})
     const [page] = useState<number>(1)
     const [limit, setLimit] = useState<number>(10)
-    const [totalDocs, setTotalDocs] = useState<number>(0)
+    const [totalPages, setTotalPages] = useState<number>(
+        Number.MAX_SAFE_INTEGER
+    )
 
     const requestTrade = RequestFactory.getRequest('TradeRequest')
     const requestMarkets = RequestFactory.getRequest('MarketRequest')
@@ -54,7 +56,7 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
                 )
                 return {
                     ...trade,
-                    eventId: market.id || '',
+                    eventId: market?.eventId || '',
                     name: market?.question || '',
                     image: market?.image || '',
                     positionType:
@@ -67,7 +69,7 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
             })
 
             setTradesHistory(data || [])
-            setTotalDocs(dataTrade?.totalDocs)
+            setTotalPages(dataTrade?.totalPages)
         } catch (e) {
             console.error(e)
         }
@@ -79,13 +81,13 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
 
     const fetchMoreData = () => {
         setTimeout(() => {
-            setLimit(limit + 10)
+            setLimit((prevState) => prevState + 10)
         }, 1000)
     }
 
     return (
         <ProfileContext.Provider
-            value={{ tradesHistory, fetchMoreData, limit, page, totalDocs }}
+            value={{ tradesHistory, fetchMoreData, limit, page, totalPages }}
         >
             {children}
         </ProfileContext.Provider>

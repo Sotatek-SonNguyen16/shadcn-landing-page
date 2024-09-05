@@ -16,7 +16,7 @@ import {
 } from '@/contexts/ProfileContext.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
-import { formatUnixTime, truncateString } from '@/lib/utils.ts'
+import { formatToCents, formatUnixTime, truncateString } from '@/lib/utils.ts'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard.ts'
 import { Button } from '@/components/ui/button.tsx'
 import {
@@ -201,12 +201,23 @@ const ProfileAnalyze = () => {
 const HistoryListItem = ({ trade }: { trade: ITrade }) => {
     const navigate = useNavigate()
 
+    const formatterUSD = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 5
+            }),
+        []
+    )
+
     const goToDetailEvent = (id: string) => {
         navigate(`/v2/event/${id}`)
     }
 
     return (
-        <div className='w-full rounded-xl bg-color-neutral-50 flex flex-col p-3 gap-3'>
+        <div className='w-full rounded-xl bg-color-neutral-alpha-900 flex flex-col p-3 border-b border-color-neutral-50 gap-2.5'>
             <div className='w-full rounded-lg justify-start items-center gap-3 inline-flex'>
                 <div className='relative'>
                     <div className='size-12 rounded-[0.375rem] opacity-100'>
@@ -222,7 +233,7 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
                         className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex cursor-pointer'
                         onClick={() => goToDetailEvent(trade.eventId)}
                     >
-                        <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-normal leading-tight text-wrap'>
+                        <div className='w-[calc(100vw-132px)] text-color-neutral-900 text-sm font-semibold leading-tight text-wrap'>
                             {trade?.name}
                         </div>
                     </div>
@@ -252,14 +263,14 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
                             shares at
                         </div>
                         <div className='text-color-neutral-700 text-xs font-light leading-3'>
-                            {trade?.price}¢
+                            {formatToCents(trade?.price)}
                         </div>
                     </div>
                 </div>
                 <div className='rounded-lg flex-col justify-center items-end gap-0.5 inline-flex'>
                     <div className='self-stretch h-5 rounded-lg flex-col justify-center items-end flex'>
                         <div className='self-stretch text-right text-color-neutral-900 text-sm font-normal leading-tight'>
-                            ${trade?.totalValue}
+                            {formatterUSD.format(trade?.totalValue)}
                         </div>
                     </div>
                     <div className='self-stretch rounded-lg justify-end items-center gap-0.5 inline-flex'>
@@ -330,7 +341,7 @@ const ProfilePage: React.FC = () => {
         <ProfileProvider>
             <div
                 className={clsx(
-                    'bg-background',
+                    'bg-color-neutral-alpha-900',
                     'w-full flex flex-col',
                     'pt-4 gap-4'
                 )}

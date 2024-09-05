@@ -195,6 +195,7 @@ interface MarketDetail {
     lastTradePrice: number
     bestBid: number
     bestAsk: number
+    eventId: string
 }
 
 interface ClobReward {
