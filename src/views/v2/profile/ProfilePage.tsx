@@ -312,10 +312,7 @@ const RecentActivities = () => {
                     <MoveRight size={16} className='text-color-brand-500' />
                 </div>
             </div>
-            <div
-                className='overflow-auto scrollbar-hidden'
-                id='scrollableHistory'
-            >
+            <div className='overflow-auto scrollbar-hidden'>
                 <div className='flex flex-col gap-4'>
                     {tradesHistory?.map((trade: ITrade, index: number) => (
                         <Fragment key={index}>

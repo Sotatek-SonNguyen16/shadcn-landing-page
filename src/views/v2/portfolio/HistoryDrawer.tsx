@@ -408,9 +408,9 @@ const HistoryFilterButton = ({
 const HistoryDrawer: React.FC = () => {
     const [tradesHistory, setTradesHistory] = useState<ITrade[]>([])
     const [params, setParams] = useState<TradesRequestParam>({})
-    const [page] = useState<number>(1)
-    const [limit, setLimit] = useState<number>(10)
-    const [totalDocs, setTotalDocs] = useState<number>(0)
+    const [page, setPage] = useState<number>(1)
+    const [limit] = useState<number>(10)
+    const [totalPage, setTotalPage] = useState<number>(0)
     const { closeDrawer } = useDrawerContext()
 
     const requestTrade = RequestFactory.getRequest('TradeRequest')
@@ -450,8 +450,8 @@ const HistoryDrawer: React.FC = () => {
                 }
             })
 
-            setTradesHistory(data || [])
-            setTotalDocs(dataTrade?.totalDocs ?? 0)
+            setTradesHistory(tradesHistory.concat(data) || [])
+            setTotalPage(dataTrade?.totalPages ?? 0)
         } catch (e) {
             console.error(e)
         }
@@ -459,11 +459,11 @@ const HistoryDrawer: React.FC = () => {
 
     useEffect(() => {
         getTradesHistory().then()
-    }, [limit, params])
+    }, [page, params])
 
     const fetchMoreData = () => {
         setTimeout(() => {
-            setLimit(limit + 10)
+            setPage(page + 1)
         }, 1000)
     }
 
@@ -536,7 +536,7 @@ const HistoryDrawer: React.FC = () => {
                         scrollableTarget='scrollableHistory'
                         dataLength={tradesHistory.length}
                         next={fetchMoreData}
-                        hasMore={totalDocs > limit}
+                        hasMore={totalPage > page}
                         loader={
                             <div className='flex justify-center items-center bg-background/10 gap-1 m-3'>
                                 <LoadingSpinner />
