@@ -219,7 +219,7 @@ const PositionListItem: React.FC<{
                             {pl.toFixed(2)}%
                         </div>
                         <div className='self-stretch text-color-neutral-700 text-xs font-light leading-none'>
-                            ${currentPrice}
+                            ${(currentPrice * position.size).toFixed(2)}
                         </div>
                     </div>
                 </div>
@@ -233,7 +233,7 @@ const PositionListItem: React.FC<{
                             Bet:
                         </div>
                         <div className='text-color-neutral-800 text-xs font-light leading-3'>
-                            ${position.avgPrice * position.size}
+                            ${(position.avgPrice * position.size).toFixed(2)}
                         </div>
                     </div>
                     <div className='h-3 rounded-lg justify-start items-center gap-1 inline-flex'>
