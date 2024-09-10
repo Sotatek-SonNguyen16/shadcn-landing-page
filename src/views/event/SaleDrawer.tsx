@@ -191,7 +191,7 @@ const BuyBetInput: React.FC<{
     setInput: (value: string) => void
     handleChange: (value: string) => void
 }> = ({ input, setInput, handleChange, errors }) => {
-    const { selectedOrder } = useEventContext()
+    const { currentMarket, betOption } = useEventContext()
     const { resetOrderBook } = useEventWebSocket()
     const [focus, setFocus] = useState<'amount' | 'size' | 'none'>('amount')
     const { balance } = useBalance()
@@ -268,7 +268,13 @@ const BuyBetInput: React.FC<{
             <div className='h-4 rounded-lg justify-center items-center gap-1 inline-flex'>
                 <div className='rounded-lg flex-col justify-center items-start inline-flex'>
                     <div className='text-color-neutral-700 text-xs font-light leading-none'>
-                        {formatToCents(selectedOrder?.price ?? 0)}
+                        {formatToCents(
+                            Number(
+                                currentMarket?.outcomePrices[
+                                    betOption === EBetOption.YES ? 0 : 1
+                                ] ?? '0'
+                            )
+                        )}
                         /share
                     </div>
                 </div>
@@ -296,7 +302,7 @@ const LimitInput: React.FC<{
     handleChangeSize: (value: string) => void
 }> = ({ input, setInput, handleChangeSize, handleChangeAmount, errors }) => {
     const { openDrawer } = useDrawerContext()
-    const { selectedOrder } = useEventContext()
+    const { currentMarket, betOption } = useEventContext()
     const [amountS, setAmountS] = useState<string>('')
     const [sizeS, setSizeS] = useState<string>('')
     const [focus, setFocus] = useState<'amount' | 'size' | 'none'>('amount')
@@ -342,7 +348,15 @@ const LimitInput: React.FC<{
 
     const onClickAutoFillLimitPrice = () => {
         setFocus('amount')
-        setInput(`${(Number(selectedOrder?.price || 0) * 100).toFixed(1)}`)
+        setInput(
+            `${(
+                Number(
+                    currentMarket?.outcomePrices[
+                        betOption === EBetOption.YES ? 0 : 1
+                    ] || 0
+                ) * 100
+            ).toFixed(1)}`
+        )
     }
 
     const onClickExpirationTimeButton = () => {
@@ -688,11 +702,11 @@ const SaleDrawer: React.FC = () => {
         betOption,
         changeBetOption,
         handleOrder,
-        selectedOrder,
         createOrderResult,
         setCreateOrderResult,
         keyPadOptions,
-        updateKeyPadOptions
+        updateKeyPadOptions,
+        currentMarket
     } = useEventContext()
     const { closeDrawer } = useDrawerContext()
     const { isLogin, handleLogin } = useAuthContext()
@@ -735,7 +749,7 @@ const SaleDrawer: React.FC = () => {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 2
+                maximumFractionDigits: 4
             }),
         []
     )
@@ -747,7 +761,14 @@ const SaleDrawer: React.FC = () => {
         updateKeyPadOptions({ decimal: false })
 
         if (!isNaN(parsedValue)) {
-            setValue('size', Number(selectedOrder?.size))
+            setValue(
+                'size',
+                Number(
+                    currentMarket?.outcomePrices[
+                        betOption === EBetOption.YES ? 0 : 1
+                    ]
+                )
+            )
             setValue('amount', parsedValue)
             clearErrors('size')
             if (isSubmitted) validateForm('amount', parsedValue)
@@ -778,18 +799,32 @@ const SaleDrawer: React.FC = () => {
         const amount = Number(watch('amount')) || 0
         const size = Number(watch('size')) || 0
         return formType === EFormType.MARKET
-            ? `${(amount / (selectedOrder?.price ?? 1)).toFixed(4)} shares`
+            ? `${(
+                  amount /
+                  Number(
+                      currentMarket?.outcomePrices[
+                          betOption === EBetOption.YES ? 0 : 1
+                      ] ?? '1'
+                  )
+              ).toFixed(4)} shares`
             : `${formatterUSD.format((amount / 100) * size)}`
-    }, [watch('amount'), watch('size'), formType, selectedOrder])
+    }, [watch('amount'), watch('size'), formType, currentMarket])
 
     const toWin = useMemo(() => {
         const amount = Number(watch('amount')) || 0
         const size = Number(watch('size')) || 0
 
         return formType === EFormType.MARKET
-            ? formatterUSD.format(amount / (selectedOrder?.price ?? 1))
+            ? formatterUSD.format(
+                  amount /
+                      Number(
+                          currentMarket?.outcomePrices[
+                              betOption === EBetOption.YES ? 0 : 1
+                          ] ?? '1'
+                      )
+              )
             : formatterUSD.format(size)
-    }, [watch('amount'), watch('size'), formType, selectedOrder])
+    }, [watch('amount'), watch('size'), formType, currentMarket])
 
     useEffect(() => {
         if (createOrderResult === 'success') {

@@ -241,7 +241,10 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                     ? (currentMarket?.clobTokenIds[0] ?? '')
                     : (currentMarket?.clobTokenIds[1] ?? ''),
             side: formStatus,
-            price: Number(data.amount / 100),
+            price:
+                formType === EFormType.MARKET
+                    ? Number(data.amount)
+                    : Number(data.amount / 100),
             size: Number(data.size)
         }
 
