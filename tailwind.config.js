@@ -148,6 +148,9 @@ module.exports = {
                         transform:
                             'translateX(calc(100% + var(--viewport-padding)))'
                     }
+                },
+                blink: {
+                    '50%': { opacity: '0' }
                 }
             },
             animation: {
@@ -165,7 +168,8 @@ module.exports = {
                     'slideRightAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)',
                 hide: 'hide 100ms ease-in',
                 slideIn: 'slideIn 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-                swipeOut: 'swipeOut 100ms ease-out'
+                swipeOut: 'swipeOut 100ms ease-out',
+                blink: 'blink 1s steps(1) infinite'
             }
         }
     },

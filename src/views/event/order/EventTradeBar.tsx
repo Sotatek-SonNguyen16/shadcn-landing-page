@@ -76,7 +76,7 @@ const EventTradeBar: React.FC<EventTradeBarProps> = React.memo((props) => {
         (order: Order) => {
             handleSelectOrder(order)
             changeForm(variant === 'accent' ? ESide.SELL : ESide.BUY)
-            changeType(EFormType.LIMIT)
+            changeType(EFormType.MARKET)
             if (!isLargerThan('lg')) {
                 openDrawer({
                     background: 'bg-color-neutral-alpha-800',

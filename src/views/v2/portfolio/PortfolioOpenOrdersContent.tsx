@@ -117,7 +117,7 @@ const MarketSearchDrawer: React.FC = () => {
         <div className='p-4 bg-color-neutral-alpha-90 h-full'>
             <div className='flex flex-wrap items-center justify-between gap-2 mb-4 relative'>
                 <input
-                    className='ps-10 flex-1 w-full bg-color-neutral-50 p-2.5 rounded-lg'
+                    className='ps-10 flex-1 w-full bg-color-neutral-50 p-2.5 rounded-lg caret-color-brand-500'
                     placeholder='Search order...'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -278,7 +278,7 @@ const PortfolioOpenOrdersContent: React.FC = () => {
             </DrawerProvider>
             <div className='overflow-y-scroll scrollbar-hidden min-h-[50vh] flex flex-col gap-4'>
                 {myActiveOrders?.map((myAO) => (
-                    <Fragment key={myAO.activeOrder.assetId}>
+                    <Fragment key={myAO.activeOrder.orderId}>
                         {myAO.marketDetail && (
                             <OpenOrdersListItem
                                 marketDetail={myAO.marketDetail}

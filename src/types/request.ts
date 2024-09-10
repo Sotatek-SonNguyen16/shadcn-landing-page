@@ -50,11 +50,20 @@ type TradesRequestParam = {
     limit?: number
 }
 
+type PortfolioRequestParam = {
+    status?: string
+    page?: number
+    limit?: number
+    sortParams?: string
+    order?: string
+}
+
 export type {
     OrderRequestBody,
     ActiveOrdersRequestParams,
     DeleteOrdersRequestBody,
     PositionRequestParams,
     OrdersRequestParam,
-    TradesRequestParam
+    TradesRequestParam,
+    PortfolioRequestParam
 }

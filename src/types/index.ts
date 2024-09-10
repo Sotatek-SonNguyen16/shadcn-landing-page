@@ -372,6 +372,22 @@ type TradeType = 'BUY' | 'SELL' | 'REDEEM'
 type SortByType = 'timestamp' | 'shares' | 'totalValue' | 'price'
 type SortOrderType = 'asc' | 'desc'
 
+type Portfolio = {
+    userAddress: string
+    positionId: string
+    marketId: string
+    avgPrice: number
+    size: number
+    currentPrice: number
+    totalBought: number
+    expiredAt: number
+    status: string
+}
+
+type KeyPadOptions = {
+    decimal: boolean
+}
+
 export type {
     ActiveOrder,
     Market,
@@ -386,12 +402,14 @@ export type {
     PolyMarketDetail,
     PredictionMarket,
     PriceChangeEvent,
+    Portfolio,
     TPosition,
     ITelegramUser,
     IWebApp,
     TradeType,
     SortByType,
-    SortOrderType
+    SortOrderType,
+    KeyPadOptions
 }
 
 export { EBetOption, EEventType, EFormType, EMarketDepth, ESide }

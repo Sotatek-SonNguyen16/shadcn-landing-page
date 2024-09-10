@@ -8,6 +8,7 @@ import React, {
 import RequestFactory from '@/services/RequestFactory.ts'
 import { ITrade, MarketDetail } from '@/types'
 import { filterParams } from '@/lib/utils.ts'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
 interface ProfileContextType {
     tradesHistory: ITrade[]
@@ -22,6 +23,7 @@ const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
 export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
     children
 }) => {
+    const { isLogin } = useAuthContext()
     const [tradesHistory, setTradesHistory] = useState<ITrade[]>([])
     const [params] = useState<any>({})
     const [page] = useState<number>(1)
@@ -76,8 +78,10 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     useEffect(() => {
-        getTradesHistory().then()
-    }, [limit, params])
+        if (isLogin) {
+            getTradesHistory().then()
+        }
+    }, [isLogin, limit, params])
 
     const fetchMoreData = () => {
         setTimeout(() => {

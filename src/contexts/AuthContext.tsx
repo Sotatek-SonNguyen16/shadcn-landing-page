@@ -17,6 +17,7 @@ import TonConnectProvider from '@/provider/tonConnectProvider.ts'
 import Storage from '@/lib/storage.ts'
 import RequestFactory from '@/services/RequestFactory'
 import { jwtDecode } from 'jwt-decode'
+import { setDefaultAuthorizationToRequest } from '@/lib/authenticate.ts'
 
 interface AuthContextProps {
     isLogin: boolean
@@ -146,6 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (tonConnectUI.connected) {
             await tonConnectUI.disconnect()
         }
+        setDefaultAuthorizationToRequest()
         localStorage.clear()
         sessionStorage.clear()
     }

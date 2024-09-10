@@ -187,7 +187,6 @@ const BuyForm: React.FC = () => {
         currentMarket,
         changeBetOption,
         handleOrder,
-        resolver,
         selectedOrder,
         formStatus
     } = useEventContext()
@@ -198,7 +197,7 @@ const BuyForm: React.FC = () => {
         formState: { errors, isSubmitting },
         setValue,
         watch
-    } = useForm<OrderFormValues>({ resolver })
+    } = useForm<OrderFormValues>()
 
     const formatterUSD = useMemo(
         () =>
@@ -236,10 +235,7 @@ const BuyForm: React.FC = () => {
             [EFormType.MARKET]: (
                 <>
                     <div className='mb-3'>
-                        <form
-                            id='marketForm'
-                            onSubmit={handleSubmit(handleOrder)}
-                        >
+                        <form id='marketForm'>
                             <div className='flex justify-between items-center mb-1'>
                                 <div className='mb-2 font-semibold'>Amount</div>
                                 <div className='flex gap-1 items-center justify-center'>
@@ -298,11 +294,7 @@ const BuyForm: React.FC = () => {
             ),
             [EFormType.LIMIT]: (
                 <>
-                    <form
-                        className='flex flex-col gap-3 mb-3'
-                        id='limitForm'
-                        onSubmit={handleSubmit(handleOrder)}
-                    >
+                    <form className='flex flex-col gap-3 mb-3' id='limitForm'>
                         <div>
                             <div className='mb-2 font-semibold'>
                                 Limit Price

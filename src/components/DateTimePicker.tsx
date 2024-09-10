@@ -14,9 +14,9 @@ import {
 const DateTimePicker: React.FC<{
     placeholder?: string
     value: Date | undefined
-    disabled: boolean
+    disabled?: boolean
     onChange: (value: Date | undefined) => void
-}> = ({ onChange, value, placeholder, disabled }) => {
+}> = ({ onChange, value, placeholder, disabled = false }) => {
     return (
         <Popover>
             <PopoverTrigger asChild>

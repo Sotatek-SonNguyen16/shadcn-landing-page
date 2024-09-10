@@ -12,6 +12,7 @@ import MarketCategories from '@/views/v2/home/MarketCategories.tsx'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import MarketFilterDrawer from '@/views/market/MarketFilterDrawer.tsx'
 import MarketSearchDrawer from '@/views/market/MarketSearchDrawer.tsx'
+import MarketCardListItemSkeleton from '@/components/skeleton/MarketCardListItemSkeleton.tsx'
 
 interface MarketListLayoutProps {
     layout: 'grid' | 'list'
@@ -40,7 +41,11 @@ const MarketListLayout: React.FC<MarketListLayoutProps> = ({
     }
 
     if (!polyMarkets) {
-        return <MarketCardGridItemSkeleton />
+        return layout === 'grid' ? (
+            <MarketCardGridItemSkeleton />
+        ) : (
+            <MarketCardListItemSkeleton />
+        )
     }
 
     if (layout === 'grid')

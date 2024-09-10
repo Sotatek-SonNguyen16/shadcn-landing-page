@@ -9,6 +9,7 @@ import { usePortfolioContext } from '@/contexts/PortfolioContext.tsx'
 import { formatToCents } from '@/lib/utils.ts'
 import RequestFactory from '@/services/RequestFactory'
 import { useNavigate } from 'react-router-dom'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
 
 const FilterDrawerContent = () => {
     return (
@@ -295,13 +296,16 @@ const ClaimAllButtonLayout = () => {
 
 const PortfolioPositionContent: React.FC = () => {
     const { fetchPositions, positions } = usePortfolioContext()
+    const { isLogin } = useAuthContext()
     const [positionMarkets, setPositionMarkets] = useState<
         (TPosition & { market?: MarketDetail })[]
     >([])
 
     useEffect(() => {
-        fetchPositions({ page: 1, limit: 9 })
-    }, [fetchPositions])
+        if (isLogin) {
+            fetchPositions({ page: 1, limit: 9 })
+        }
+    }, [isLogin, fetchPositions])
 
     useEffect(() => {
         const fetchData = async () => {

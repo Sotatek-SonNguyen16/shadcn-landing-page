@@ -380,7 +380,10 @@ const HistoryFilterButton = ({
                 onClick={() => setIsShowFilter(true)}
             >
                 <Filter size={20} />
-                {(!!params.sortBy || !!params.fromTs || !!params.toTs) && (
+                {(!!params.sortBy ||
+                    !!params.sortOrder ||
+                    !!params.fromTs ||
+                    !!params.toTs) && (
                     <Badge variant={'brand'} size={'default'} />
                 )}
             </Button>
