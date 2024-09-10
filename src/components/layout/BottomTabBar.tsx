@@ -8,9 +8,8 @@ import {
     NavigationMenuList
 } from '@/components/ui/navigation-menu.tsx'
 import { Archive, CircleUser, History, Sparkles } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { IconSet } from '@/components/IconSet.tsx'
-import { useNavigate } from 'react-router-dom'
 
 type BarItem = {
     icon: (color: string) => JSX.Element
@@ -94,7 +93,7 @@ const BottomTabBar: React.FC = () => {
                                 color={color}
                             />
                         )}
-                        href='/v2/home'
+                        href='/home'
                         name='Discover'
                     />
                     <TabBarItem
@@ -104,7 +103,7 @@ const BottomTabBar: React.FC = () => {
                                 color={color}
                             />
                         )}
-                        href='/v2/portfolio'
+                        href='/portfolio'
                         name='Portfolio'
                     />
                     <TabBarItem
@@ -114,7 +113,7 @@ const BottomTabBar: React.FC = () => {
                                 color={color}
                             />
                         )}
-                        href={'/v2/activities'}
+                        href={'/activities'}
                         name='Activities'
                     />
                     <TabBarItem
@@ -124,7 +123,7 @@ const BottomTabBar: React.FC = () => {
                                 color={color}
                             />
                         )}
-                        href='/v2/profile'
+                        href='/profile'
                         name='Profile'
                     />
                 </NavigationMenuList>

@@ -1,12 +1,15 @@
 import React, { forwardRef, Fragment } from 'react'
 import { Package } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
+import { useMiniAppContext } from '@/contexts/MiniAppContext.tsx'
 
 type Category = {
     name: string
 }
 
 const MarketCategoryItem: React.FC<{ category: Category }> = ({ category }) => {
+    const { showComingSoon } = useMiniAppContext()
+
     return (
         <div className='h-20 min-w-36 w-full px-3 pt-1 pb-2 bg-white/10 rounded-lg flex-col justify-start items-start gap-1 inline-flex cursor-default'>
             <div className='self-stretch rounded-lg justify-end items-center inline-flex'>
@@ -15,7 +18,10 @@ const MarketCategoryItem: React.FC<{ category: Category }> = ({ category }) => {
                 </div>
             </div>
             <div className='self-stretch h-5 rounded-lg flex-col justify-center items-start flex'>
-                <div className='self-stretch text-white text-sm font-normal leading-tight cursor-pointer'>
+                <div
+                    className='self-stretch text-white text-sm font-normal leading-tight cursor-pointer'
+                    onClick={showComingSoon}
+                >
                     {category.name}
                 </div>
             </div>

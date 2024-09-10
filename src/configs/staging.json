@@ -1,7 +1,7 @@
 {
   "app": {
-    "apiUrl": "",
-    "wws": ""
+    "apiUrl": "https://dev.api.betx.sotalabs.io/api/v1",
+    "wws": "wss://dev.ws.betx.sotalabs.io"
   },
   "walletsListConfiguration": {
     "includeWallets": [

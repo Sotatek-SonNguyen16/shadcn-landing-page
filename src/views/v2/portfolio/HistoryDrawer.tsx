@@ -284,7 +284,7 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
     )
 
     const goToDetailEvent = (id: string) => {
-        navigate(`/v2/event/${id}`)
+        navigate(`/event/${id}`)
     }
 
     return (

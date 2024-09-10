@@ -2,6 +2,7 @@ const PREFERENCES = 'ton-market'
 
 interface Preferences {
     accessToken?: string
+    userAddress?: string
     connectorId?: string
 }
 
@@ -43,6 +44,23 @@ class Storage {
         this.setStorage(PREFERENCES, preferences)
     }
 
+    static setUserAddress(userAddress: string): void {
+        const preferences = this.getStorage()
+        preferences.userAddress = userAddress
+        this.setStorage(PREFERENCES, preferences)
+    }
+
+    static getUserAddress(): string | undefined {
+        const { userAddress } = this.getStorage()
+        return userAddress
+    }
+
+    static clearUserAddress(): void {
+        const preferences = this.getStorage()
+        delete preferences.userAddress
+        this.setStorage(PREFERENCES, preferences)
+    }
+
     static getConnectorId(): string {
         const { connectorId } = this.getStorage()
         return connectorId || ''
@@ -50,6 +68,7 @@ class Storage {
 
     static logout(): void {
         this.clearAccessToken()
+        this.clearUserAddress()
     }
 }
 

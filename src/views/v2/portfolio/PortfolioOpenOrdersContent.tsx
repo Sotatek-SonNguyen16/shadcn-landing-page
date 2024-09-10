@@ -178,7 +178,7 @@ const OpenOrdersListItem: React.FC<{
     )
 
     const goToDetailEvent = (id: string) => {
-        navigate(`/v2/event/${id}`)
+        navigate(`/event/${id}`)
     }
 
     return (

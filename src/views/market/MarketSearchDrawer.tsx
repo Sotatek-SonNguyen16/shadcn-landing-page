@@ -37,14 +37,16 @@ const MarketSearchDrawer: React.FC = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Search size={20} className='absolute ms-3' />
-                <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
-                    <div
-                        className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight cursor-pointer'
-                        onClick={onClickCancelButton}
-                    >
-                        Cancel
+                {searchTerm.length > 0 && (
+                    <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
+                        <div
+                            className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight cursor-pointer'
+                            onClick={onClickCancelButton}
+                        >
+                            Cancel
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
             <div className='w-full h-[calc(100vh-124px)] overflow-y-scroll scrollbar-hidden flex flex-col gap-2'>
                 {filteredPolyMarkets.map((market, index) => (

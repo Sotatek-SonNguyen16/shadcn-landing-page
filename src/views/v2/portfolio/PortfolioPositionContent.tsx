@@ -166,7 +166,7 @@ const PositionListItem: React.FC<{
     const pl = ((currentPrice - position.avgPrice) * 100) / position.avgPrice
 
     const goToDetailEvent = (id: string) => {
-        navigate(`/v2/event/${id}`)
+        navigate(`/event/${id}`)
     }
 
     return (

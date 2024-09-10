@@ -30,9 +30,10 @@ import { ITrade } from '@/types'
 import HistoryDrawer from '@/views/v2/portfolio/HistoryDrawer.tsx'
 import useTelegram from '@/hooks/useTelegram.ts'
 import { useNavigate } from 'react-router-dom'
+import { useMiniAppContext } from '@/contexts/MiniAppContext.tsx'
 
 const ProfileTitle = () => {
-    const { address, isLogin } = useAuthContext()
+    const { address, isLogin, handleLogin } = useAuthContext()
     const { copyToClipboard } = useCopyToClipboard()
     const { user } = useTelegram()
 
@@ -65,16 +66,21 @@ const ProfileTitle = () => {
                             {truncateString(address, 20, 3, 3)}
                         </div>
                     ) : (
-                        <div className='text-center text-color-neutral-900 text-sm font-semibold leading-tight'>
+                        <div
+                            className='text-center text-color-neutral-900 text-sm font-semibold leading-tight cursor-pointer'
+                            onClick={handleLogin}
+                        >
                             Connect Wallet
                         </div>
                     )}
                 </div>
-                <Copy
-                    size={16}
-                    className='cursor-pointer'
-                    onClick={() => copyToClipboard(address)}
-                />
+                {isLogin && (
+                    <Copy
+                        size={16}
+                        className='cursor-pointer'
+                        onClick={() => copyToClipboard(address)}
+                    />
+                )}
             </div>
         </div>
     )
@@ -82,6 +88,7 @@ const ProfileTitle = () => {
 
 const BalanceCard = () => {
     const [showBalance, setShowBalance] = useState<boolean>(false)
+    const { showComingSoon } = useMiniAppContext()
 
     const onToggleBalance = () => {
         setShowBalance((prevState) => !prevState)
@@ -134,7 +141,10 @@ const BalanceCard = () => {
             <div className='self-stretch rounded-lg justify-start items-center gap-2 grid grid-cols-2'>
                 <Button variant='default' size='iconGroupLg'>
                     <WithdrawIcon />
-                    <div className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex'>
+                    <div
+                        className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex cursor-pointer'
+                        onClick={showComingSoon}
+                    >
                         <div className='self-stretch text-center text-color-neutral-alpha-900 text-sm font-semibold leading-tight'>
                             Withdraw
                         </div>
@@ -142,7 +152,10 @@ const BalanceCard = () => {
                 </Button>
                 <Button variant='outline' size='iconGroupLg'>
                     <DepositeIcon />
-                    <div className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex'>
+                    <div
+                        className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex cursor-pointer'
+                        onClick={showComingSoon}
+                    >
                         <div className='self-stretch text-center text-color-brand-500 text-sm font-semibold leading-tight'>
                             Deposite
                         </div>
@@ -213,7 +226,7 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
     )
 
     const goToDetailEvent = (id: string) => {
-        navigate(`/v2/event/${id}`)
+        navigate(`/event/${id}`)
     }
 
     return (

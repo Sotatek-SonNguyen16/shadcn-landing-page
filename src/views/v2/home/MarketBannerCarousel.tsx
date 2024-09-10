@@ -3,6 +3,7 @@ import { EmblaOptionsType } from 'embla-carousel'
 import EmblaCarousel from '@/components/EmblaCarousel.tsx'
 import { clsx } from 'clsx'
 import { BrandMask } from '@/components/icon.tsx'
+import { useMiniAppContext } from '@/contexts/MiniAppContext.tsx'
 
 const OPTIONS: EmblaOptionsType = { containScroll: false }
 
@@ -20,6 +21,8 @@ const SLIDES: Banner[] = [
 ]
 
 const MarketBanner: React.FC<{ banner: Banner }> = ({ banner }) => {
+    const { showComingSoon } = useMiniAppContext()
+
     return (
         <div
             className={clsx(
@@ -33,7 +36,10 @@ const MarketBanner: React.FC<{ banner: Banner }> = ({ banner }) => {
             <div className='w-20 text-[#010212] text-xl font-semibold leading-norma text-wrap'>
                 {banner.title}
             </div>
-            <div className='h-7 px-2.5 py-1 bg-color-neutral-900 rounded-md justify-center items-center gap-1 inline-flex cursor-pointer'>
+            <div
+                className='h-7 px-2.5 py-1 bg-color-neutral-900 rounded-md justify-center items-center gap-1 inline-flex cursor-pointer'
+                onClick={showComingSoon}
+            >
                 <div className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex'>
                     <div className='self-stretch text-center text-color-neutral-alpha-900 text-xs font-semibold leading-none'>
                         Discover
