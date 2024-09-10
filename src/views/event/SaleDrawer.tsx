@@ -268,7 +268,8 @@ const BuyBetInput: React.FC<{
             <div className='h-4 rounded-lg justify-center items-center gap-1 inline-flex'>
                 <div className='rounded-lg flex-col justify-center items-start inline-flex'>
                     <div className='text-color-neutral-700 text-xs font-light leading-none'>
-                        {formatToCents(selectedOrder?.price ?? 0)}/share
+                        {formatToCents(selectedOrder?.price ?? 0)}
+                        /share
                     </div>
                 </div>
                 <RefreshCcw
@@ -437,17 +438,19 @@ const LimitInput: React.FC<{
                     </div>
                     <div className='grow shrink basis-0 flex-col justify-start items-start gap-1 flex'>
                         <div className='w-full self-stretch py-2.5 rounded-lg justify-end items-center gap-2 flex'>
-                            <div className='rounded-full justify-center items-center gap-1 flex text-nowrap'>
-                                <Check
-                                    size={16}
-                                    className='text-color-brand-400'
-                                />
-                                <div className='pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
-                                    <div className='self-stretch text-color-brand-400 text-xs font-normal leading-none'>
-                                        0 matching
+                            {size && (
+                                <div className='rounded-full justify-center items-center gap-1 flex text-nowrap'>
+                                    <Check
+                                        size={16}
+                                        className='text-color-brand-400'
+                                    />
+                                    <div className='pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
+                                        <div className='self-stretch text-color-brand-400 text-xs font-normal leading-none'>
+                                            {size} matching
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                             <div className='text-right text-color-neutral-900 text-sm font-light leading-tight'>
                                 <ResponsiveInput
                                     value={size}
@@ -684,7 +687,6 @@ const SaleDrawer: React.FC = () => {
         formStatus,
         betOption,
         changeBetOption,
-        currentMarket,
         handleOrder,
         selectedOrder,
         createOrderResult,
@@ -733,7 +735,7 @@ const SaleDrawer: React.FC = () => {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                maximumFractionDigits: 2
             }),
         []
     )
@@ -776,9 +778,18 @@ const SaleDrawer: React.FC = () => {
         const amount = Number(watch('amount')) || 0
         const size = Number(watch('size')) || 0
         return formType === EFormType.MARKET
-            ? `${amount * size} shares`
-            : `$${amount * size}`
-    }, [watch('amount'), watch('size'), formType])
+            ? `${(amount / (selectedOrder?.price ?? 1)).toFixed(4)} shares`
+            : `${formatterUSD.format((amount / 100) * size)}`
+    }, [watch('amount'), watch('size'), formType, selectedOrder])
+
+    const toWin = useMemo(() => {
+        const amount = Number(watch('amount')) || 0
+        const size = Number(watch('size')) || 0
+
+        return formType === EFormType.MARKET
+            ? formatterUSD.format(amount / (selectedOrder?.price ?? 1))
+            : formatterUSD.format(size)
+    }, [watch('amount'), watch('size'), formType, selectedOrder])
 
     useEffect(() => {
         if (createOrderResult === 'success') {
@@ -843,9 +854,7 @@ const SaleDrawer: React.FC = () => {
                                 To win:{' '}
                             </span>
                             <span className='text-color-accent-green-900 text-xs font-normal leading-none'>
-                                {formatterUSD.format(
-                                    Number(currentMarket?.volumeNum)
-                                )}
+                                {toWin}
                             </span>
                         </div>
                     )}
