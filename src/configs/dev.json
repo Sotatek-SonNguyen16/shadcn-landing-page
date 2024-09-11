@@ -1,6 +1,6 @@
 {
   "app": {
-    "apiUrl": "http://localhost:3000/api/v1",
+    "apiUrl": "https://dev-prediction-market.sotatek.works/api/v1",
     "wws": "wss://dev-prediction-market.sotatek.works"
   },
   "walletsListConfiguration": {
