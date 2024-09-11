@@ -1,4 +1,28 @@
-import React, { Fragment, useEffect, useMemo, useState } from 'react'
+import {
+    BrandMask,
+    ChartIcon,
+    DepositeIcon,
+    TradeIcon,
+    WithdrawIcon
+} from '@/components/icon.tsx'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
+import { Button } from '@/components/ui/button.tsx'
+import { Skeleton } from '@/components/ui/skeleton.tsx'
+import { useAuthContext } from '@/contexts/AuthContext.tsx'
+import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
+import { useMiniAppContext } from '@/contexts/MiniAppContext.tsx'
+import {
+    ProfileProvider,
+    useProfileContext
+} from '@/contexts/ProfileContext.tsx'
+import useBalance from '@/hooks/useBalance.ts'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard.ts'
+import useTelegram from '@/hooks/useTelegram.ts'
+import { formatToCents, formatUnixTime, truncateString } from '@/lib/utils.ts'
+import RequestFactory from '@/services/RequestFactory'
+import { ITrade, UserProfile } from '@/types'
+import HistoryDrawer from '@/views/v2/portfolio/HistoryDrawer.tsx'
+import { useTonWallet } from '@tonconnect/ui-react'
 import { clsx } from 'clsx'
 import {
     Activity,
@@ -9,30 +33,8 @@ import {
     MoveRight,
     TrendingUp
 } from 'lucide-react'
-import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
-import {
-    ProfileProvider,
-    useProfileContext
-} from '@/contexts/ProfileContext.tsx'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
-import { useAuthContext } from '@/contexts/AuthContext.tsx'
-import { formatToCents, formatUnixTime, truncateString } from '@/lib/utils.ts'
-import useCopyToClipboard from '@/hooks/useCopyToClipboard.ts'
-import { Button } from '@/components/ui/button.tsx'
-import {
-    BrandMask,
-    ChartIcon,
-    DepositeIcon,
-    TradeIcon,
-    WithdrawIcon
-} from '@/components/icon.tsx'
-import { ITrade } from '@/types'
-import HistoryDrawer from '@/views/v2/portfolio/HistoryDrawer.tsx'
-import useTelegram from '@/hooks/useTelegram.ts'
+import React, { Fragment, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMiniAppContext } from '@/contexts/MiniAppContext.tsx'
-import useBalance from '@/hooks/useBalance.ts'
-import { Skeleton } from '@/components/ui/skeleton.tsx'
 
 const ProfileTitle = () => {
     const { address, isLogin, handleLogin } = useAuthContext()
@@ -243,32 +245,47 @@ const UnauthorizedBalanceCard = () => {
 }
 
 const ProfileAnalyze = () => {
+    const wallet = useTonWallet()
+    const [profileAnalytic, setProfileAnalytic] = useState<UserProfile>()
+
+    const getUserProfile = async () => {
+        const request = RequestFactory.getRequest('UserRequest')
+        const res = await request.getUserProfile()
+        if (res) {
+            setProfileAnalytic(res)
+        }
+    }
+
+    useEffect(() => {
+        getUserProfile().then()
+    }, [wallet?.account])
+
     const analytics = useMemo(
         () => [
             {
                 icon: <Activity size={20} className='text-color-neutral-500' />,
                 name: 'Position value',
-                value: 32.88
+                value: profileAnalytic?.value
             },
             {
                 icon: (
                     <TrendingUp size={20} className='text-color-neutral-500' />
                 ),
                 name: 'Profit/loss',
-                value: 32.88
+                value: profileAnalytic?.profit
             },
             {
                 icon: <ChartIcon />,
                 name: 'Volume traded',
-                value: 32.88
+                value: profileAnalytic?.volume
             },
             {
                 icon: <TradeIcon />,
                 name: 'Markets traded',
-                value: 32.88
+                value: profileAnalytic?.traded
             }
         ],
-        []
+        [profileAnalytic]
     )
 
     return (

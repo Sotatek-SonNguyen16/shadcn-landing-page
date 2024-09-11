@@ -1,7 +1,7 @@
 import AuthRequest from './AuthRequest'
 import MarketRequest from './MarketRequest'
 import TradeRequest from './TradeRequest'
-import UserRequest from '@/services/UserRequest.ts'
+import UserRequest from './UserRequest'
 
 type RequestClasses = {
     MarketRequest: typeof MarketRequest

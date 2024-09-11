@@ -368,6 +368,13 @@ interface IWebApp {
     HapticFeedback: any
 }
 
+type UserProfile = {
+    profit: number
+    volume: number
+    traded: number
+    value: number
+}
+
 type TradeType = 'BUY' | 'SELL' | 'REDEEM'
 type SortByType = 'timestamp' | 'shares' | 'totalValue' | 'price'
 type SortOrderType = 'asc' | 'desc'
@@ -390,6 +397,9 @@ type KeyPadOptions = {
 
 export type {
     ActiveOrder,
+    ITelegramUser,
+    IWebApp,
+    KeyPadOptions,
     Market,
     MarketDetail,
     MarketPriceHistory,
@@ -400,16 +410,14 @@ export type {
     OrderFormValues,
     OrderStatus,
     PolyMarketDetail,
+    Portfolio,
     PredictionMarket,
     PriceChangeEvent,
-    Portfolio,
-    TPosition,
-    ITelegramUser,
-    IWebApp,
-    TradeType,
     SortByType,
     SortOrderType,
-    KeyPadOptions
+    TPosition,
+    TradeType,
+    UserProfile
 }
 
 export { EBetOption, EEventType, EFormType, EMarketDepth, ESide }
