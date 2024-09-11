@@ -115,17 +115,13 @@ export const IconSet = ({ size, BG, badge, icon }: Props): JSX.Element => {
                             ? '!relative !w-20 !h-20'
                             : !BG && size === 'sixty-four'
                               ? '!relative !w-16 !h-16'
-                              : (BG && size === 'sixty-four') ||
-                                  (!BG && size === 'forty')
+                              : (BG && size === 'sixty-four') || (!BG && size === 'forty')
                                 ? '!relative !w-10 !h-10'
-                                : (BG && size === 'forty-eight') ||
-                                    (!BG && size === 'thirty-two')
+                                : (BG && size === 'forty-eight') || (!BG && size === 'thirty-two')
                                   ? '!relative !w-8 !h-8'
-                                  : size === 'twenty-four' ||
-                                      (BG && size === 'forty')
+                                  : size === 'twenty-four' || (BG && size === 'forty')
                                     ? '!relative !w-6 !h-6'
-                                    : (BG && size === 'thirty-two') ||
-                                        (!BG && size === 'twenty')
+                                    : (BG && size === 'thirty-two') || (!BG && size === 'twenty')
                                       ? '!relative !w-5 !h-5'
                                       : !BG && size === 'twenty-eight'
                                         ? '!relative !w-7 !h-7'
@@ -141,26 +137,20 @@ export const IconSet = ({ size, BG, badge, icon }: Props): JSX.Element => {
                 />
             )}
 
-            {badge &&
-                (BG || size === 'sixteen') &&
-                (!BG || size === 'twenty-four') && (
-                    <div className='!relative !w-4 !h-4'></div>
-                )}
+            {badge && (BG || size === 'sixteen') && (!BG || size === 'twenty-four') && (
+                <div className='!relative !w-4 !h-4'></div>
+            )}
 
             {badge && (
                 <div
                     className={`absolute ${
                         ['eighty', 'sixty-four'].includes(size)
                             ? 'w-6'
-                            : ['forty-eight', 'forty', 'thirty-two'].includes(
-                                    size
-                                )
+                            : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                               ? 'w-4'
                               : size === 'twenty-eight'
                                 ? 'w-3.5'
-                                : ['sixteen', 'twenty-four', 'twenty'].includes(
-                                        size
-                                    )
+                                : ['sixteen', 'twenty-four', 'twenty'].includes(size)
                                   ? 'w-3'
                                   : ''
                     } ${
@@ -194,12 +184,9 @@ export const IconSet = ({ size, BG, badge, icon }: Props): JSX.Element => {
                               ? 'top-1'
                               : ['forty-eight', 'forty'].includes(size)
                                 ? '-top-0.5'
-                                : [
-                                        'thirty-two',
-                                        'twenty-eight',
-                                        'twenty-four',
-                                        'twenty'
-                                    ].includes(size)
+                                : ['thirty-two', 'twenty-eight', 'twenty-four', 'twenty'].includes(
+                                        size
+                                    )
                                   ? '-top-1'
                                   : size === 'sixteen'
                                     ? '-top-1.5'
@@ -207,15 +194,11 @@ export const IconSet = ({ size, BG, badge, icon }: Props): JSX.Element => {
                     } ${
                         ['eighty', 'sixty-four'].includes(size)
                             ? 'h-6'
-                            : ['forty-eight', 'forty', 'thirty-two'].includes(
-                                    size
-                                )
+                            : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                               ? 'h-4'
                               : size === 'twenty-eight'
                                 ? 'h-3.5'
-                                : ['sixteen', 'twenty-four', 'twenty'].includes(
-                                        size
-                                    )
+                                : ['sixteen', 'twenty-four', 'twenty'].includes(size)
                                   ? 'h-3'
                                   : ''
                     }`}
@@ -224,91 +207,53 @@ export const IconSet = ({ size, BG, badge, icon }: Props): JSX.Element => {
                         className={`bg-color-brand-400 relative ${
                             ['eighty', 'sixty-four'].includes(size)
                                 ? 'w-[9px]'
-                                : [
-                                        'forty-eight',
-                                        'forty',
-                                        'thirty-two'
-                                    ].includes(size)
+                                : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                                   ? 'w-1.5'
                                   : size === 'twenty-eight'
                                     ? 'w-[5px]'
-                                    : [
-                                            'sixteen',
-                                            'twenty-four',
-                                            'twenty'
-                                        ].includes(size)
+                                    : ['sixteen', 'twenty-four', 'twenty'].includes(size)
                                       ? 'w-1'
                                       : ''
                         } ${
                             ['eighty', 'sixty-four'].includes(size)
                                 ? 'left-2'
-                                : [
-                                        'forty-eight',
-                                        'forty',
-                                        'thirty-two'
-                                    ].includes(size)
+                                : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                                   ? 'left-[5px]'
-                                  : [
-                                          'sixteen',
-                                          'twenty-eight',
-                                          'twenty-four',
-                                          'twenty'
-                                      ].includes(size)
+                                  : ['sixteen', 'twenty-eight', 'twenty-four', 'twenty'].includes(
+                                          size
+                                      )
                                     ? 'left-1'
                                     : ''
                         } ${
                             ['eighty', 'sixty-four'].includes(size)
                                 ? 'top-2'
-                                : [
-                                        'forty-eight',
-                                        'forty',
-                                        'thirty-two'
-                                    ].includes(size)
+                                : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                                   ? 'top-[5px]'
-                                  : [
-                                          'sixteen',
-                                          'twenty-eight',
-                                          'twenty-four',
-                                          'twenty'
-                                      ].includes(size)
+                                  : ['sixteen', 'twenty-eight', 'twenty-four', 'twenty'].includes(
+                                          size
+                                      )
                                     ? 'top-1'
                                     : ''
                         } ${
                             ['eighty', 'sixty-four'].includes(size)
                                 ? 'h-[9px]'
-                                : [
-                                        'forty-eight',
-                                        'forty',
-                                        'thirty-two'
-                                    ].includes(size)
+                                : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                                   ? 'h-1.5'
                                   : size === 'twenty-eight'
                                     ? 'h-[5px]'
-                                    : [
-                                            'sixteen',
-                                            'twenty-four',
-                                            'twenty'
-                                        ].includes(size)
+                                    : ['sixteen', 'twenty-four', 'twenty'].includes(size)
                                       ? 'h-1'
                                       : ''
                         } ${
                             ['eighty', 'sixty-four'].includes(size)
                                 ? 'rounded-[4.5px]'
-                                : [
-                                        'forty-eight',
-                                        'forty',
-                                        'thirty-two'
-                                    ].includes(size)
+                                : ['forty-eight', 'forty', 'thirty-two'].includes(size)
                                   ? 'rounded-[3px]'
                                   : !BG && size === 'twenty-eight'
                                     ? 'rounded-[2.62px]'
                                     : size === 'twenty-eight' && BG
                                       ? 'rounded-[2.63px]'
-                                      : [
-                                              'sixteen',
-                                              'twenty-four',
-                                              'twenty'
-                                          ].includes(size)
+                                      : ['sixteen', 'twenty-four', 'twenty'].includes(size)
                                         ? 'rounded-[2.25px]'
                                         : ''
                         }`}

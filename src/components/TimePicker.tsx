@@ -10,7 +10,7 @@ const TimePicker: React.FC<{
         <input
             type='time'
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={e => onChange(e.target.value)}
             className={cn(
                 'max-w-[240px] w-full h-10 px-4 py-2',
                 'bg-white/10 rounded-md focus:outline-none',

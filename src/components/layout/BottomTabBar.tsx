@@ -87,42 +87,22 @@ const BottomTabBar: React.FC = () => {
                     )}
                 >
                     <TabBarItem
-                        icon={(color) => (
-                            <Sparkles
-                                className='!relative !w-5 !h-5'
-                                color={color}
-                            />
-                        )}
+                        icon={color => <Sparkles className='!relative !w-5 !h-5' color={color} />}
                         href='/home'
                         name='Discover'
                     />
                     <TabBarItem
-                        icon={(color) => (
-                            <Archive
-                                className='!relative !w-5 !h-5'
-                                color={color}
-                            />
-                        )}
+                        icon={color => <Archive className='!relative !w-5 !h-5' color={color} />}
                         href='/portfolio'
                         name='Portfolio'
                     />
                     <TabBarItem
-                        icon={(color) => (
-                            <History
-                                className='!relative !w-5 !h-5'
-                                color={color}
-                            />
-                        )}
+                        icon={color => <History className='!relative !w-5 !h-5' color={color} />}
                         href={'/activities'}
                         name='Activities'
                     />
                     <TabBarItem
-                        icon={(color) => (
-                            <CircleUser
-                                className='!relative !w-5 !h-5'
-                                color={color}
-                            />
-                        )}
+                        icon={color => <CircleUser className='!relative !w-5 !h-5' color={color} />}
                         href='/profile'
                         name='Profile'
                     />

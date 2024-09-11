@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import Storage from '@/lib/storage.ts'
 import RequestFactory from '@/services/RequestFactory'
 import { jwtDecode } from 'jwt-decode'
-import { setDefaultAuthorizationToRequest } from '@/lib/authenticate.ts'
+import { setAuthorizationToRequest, setDefaultAuthorizationToRequest } from '@/lib/authenticate.ts'
 
 interface AuthContextProps {
     isLogin: boolean
@@ -12,12 +12,8 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined)
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-    children
-}) => {
-    const [isLogin, setIsLogin] = useState<boolean>(
-        !!Storage.getPreference('accessToken')
-    )
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [isLogin, setIsLogin] = useState<boolean>(!!Storage.getPreference('accessToken'))
 
     const handleLogin = async () => {
         await login()
@@ -57,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             await authService.login()
 
             setIsLogin(true)
+            setAuthorizationToRequest('')
             Storage.setPreference('accessToken', '')
             await handleTokenExpiration('')
         } catch (e) {

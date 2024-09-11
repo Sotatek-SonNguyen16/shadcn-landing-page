@@ -1,11 +1,7 @@
 import * as React from 'react'
 import { clsx } from 'clsx'
 import { ChevronDown } from 'lucide-react'
-import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger
-} from '@/components/ui/hover-card.tsx'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card.tsx'
 
 interface HoverCardSelectProps<T extends string> {
     selected: T
@@ -33,11 +29,11 @@ const HoverCardSelect = <T extends string>({
             </HoverCardTrigger>
             <HoverCardContent className='w-fit'>
                 <div className='flex flex-col gap-2'>
-                    {options.map((option) => (
+                    {options.map(option => (
                         <div
                             key={option}
                             className='font-semibold cursor-pointer'
-                            onClick={(e) => {
+                            onClick={e => {
                                 e.preventDefault()
                                 e.stopPropagation()
                                 onSelect(option)

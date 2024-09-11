@@ -4,13 +4,7 @@ import { LoadingSpinner } from '@/components/ui/spinner.tsx'
 
 const AppLayoutSkeleton: React.FC = () => {
     return (
-        <div
-            className={clsx(
-                'bg-gradient-to-b from-brand01/40 via-brand02/20 to-30% h-screen',
-                'w-full flex flex-col',
-                'py-4 gap-4'
-            )}
-        >
+        <div className={clsx('bg-background h-screen w-full flex flex-col', 'py-4 gap-4')}>
             <div className='w-full flex justify-center'>
                 <LoadingSpinner />
             </div>

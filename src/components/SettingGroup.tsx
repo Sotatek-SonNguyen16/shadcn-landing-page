@@ -46,10 +46,8 @@ const SettingGroup: React.FC<{
                             className={clsx(
                                 'h-7 px-2.5 py-1 rounded border justify-start items-center gap-1 inline-flex',
                                 {
-                                    'border-color-neutral-900':
-                                        value === selectedValue,
-                                    'border-color-neutral-250':
-                                        value !== selectedValue
+                                    'border-color-neutral-900': value === selectedValue,
+                                    'border-color-neutral-250': value !== selectedValue
                                 }
                             )}
                         >
@@ -88,10 +86,8 @@ const SettingGroup: React.FC<{
                         className={clsx(
                             'h-7 px-2.5 py-1 rounded border justify-start items-center gap-1 inline-flex',
                             {
-                                'border-color-neutral-900':
-                                    selectedValues.includes(value),
-                                'border-color-neutral-250':
-                                    !selectedValues.includes(value)
+                                'border-color-neutral-900': selectedValues.includes(value),
+                                'border-color-neutral-250': !selectedValues.includes(value)
                             }
                         )}
                     >

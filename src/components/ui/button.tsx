@@ -9,10 +9,8 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                default:
-                    'bg-primary text-primary-foreground hover:bg-primary/90',
-                destructive:
-                    'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+                destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
                 outline:
                     'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
                 secondary:
@@ -23,14 +21,12 @@ const buttonVariants = cva(
                     'bg-blue-600 text-primary-foreground hover:bg-blue-600/90 dark:text-primary',
                 accentGhost:
                     'bg-color-accent-red-100 text-color-accent-red-900 hover:bg-color-accent-red-200',
-                accentSolid:
-                    'bg-color-accent-red-700 text-primary hover:bg-color-accent-red-500',
+                accentSolid: 'bg-color-accent-red-700 text-primary hover:bg-color-accent-red-500',
                 successGhost:
                     'bg-color-accent-green-100 text-color-accent-green-900 hover:bg-color-accent-green-200',
                 successSolid:
                     'bg-color-accent-green-700 text-primary hover:bg-color-accent-green-500',
-                transparent:
-                    'bg-white/10 justify-start items-center gap-1 inline-flex',
+                transparent: 'bg-white/10 justify-start items-center gap-1 inline-flex',
                 brand: 'bg-gradient-to-r from-[#9BDA9D] via-[#F6F46E] to-[#FAF9C6] rounded-3xl shadow-inner justify-center items-center gap-2 inline-flex self-stretch text-center text-color-neutral-alpha-900 text-sm font-semibold leading-tight'
             },
             size: {

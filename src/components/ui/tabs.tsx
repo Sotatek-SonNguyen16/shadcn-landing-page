@@ -24,7 +24,7 @@ const UnderlineTabs = <T extends string>(props: TabsProps<T>) => {
     return (
         <Tabs.Root
             value={active}
-            onValueChange={(value) => {
+            onValueChange={value => {
                 setActive(value as T)
                 if (onClickTab) onClickTab(value as T)
             }}
@@ -53,10 +53,7 @@ const UnderlineTabs = <T extends string>(props: TabsProps<T>) => {
             </Tabs.List>
             <Box pt='3'>
                 {tabs.map(({ value, content }) => (
-                    <Tabs.Content
-                        key={`tab-content-${value}`}
-                        value={`${value}`}
-                    >
+                    <Tabs.Content key={`tab-content-${value}`} value={`${value}`}>
                         {content}
                     </Tabs.Content>
                 ))}

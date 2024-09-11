@@ -20,7 +20,7 @@ const FormSelect = <T extends string>({
 }: FormSelectProps<T>): React.ReactElement => {
     return (
         <Select
-            onValueChange={(value) => {
+            onValueChange={value => {
                 onSelect(value as T)
             }}
         >
@@ -33,10 +33,7 @@ const FormSelect = <T extends string>({
             <SelectContent>
                 <SelectGroup>
                     {options.map((option, index) => (
-                        <SelectItem
-                            key={`${option}-${index}`}
-                            value={`${option}`}
-                        >
+                        <SelectItem key={`${option}-${index}`} value={`${option}`}>
                             {option}
                         </SelectItem>
                     ))}

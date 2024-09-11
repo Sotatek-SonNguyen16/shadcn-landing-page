@@ -5,11 +5,7 @@ import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 const DateTimePicker: React.FC<{
     placeholder?: string
@@ -37,12 +33,7 @@ const DateTimePicker: React.FC<{
                 </Button>
             </PopoverTrigger>
             <PopoverContent className='w-auto p-0' align='start'>
-                <Calendar
-                    mode='single'
-                    selected={value}
-                    onSelect={onChange}
-                    initialFocus
-                />
+                <Calendar mode='single' selected={value} onSelect={onChange} initialFocus />
             </PopoverContent>
         </Popover>
     )
