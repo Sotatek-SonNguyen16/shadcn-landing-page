@@ -11,7 +11,7 @@ const WalletButton: React.FC = () => {
     const { openDrawer } = useDrawerContext()
     const onClickConnectButton = () => {
         if (!isLogin) {
-            handleLogin()
+            handleLogin().then()
         } else {
             openDrawer({
                 background: 'bg-color-neutral-50',

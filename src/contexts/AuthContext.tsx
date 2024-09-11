@@ -5,8 +5,6 @@ import React, {
     useRef,
     useState
 } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/store'
 import {
     useIsConnectionRestored,
     useTonAddress,
@@ -16,17 +14,15 @@ import {
 } from '@tonconnect/ui-react'
 
 import TonConnectProvider from '@/provider/tonConnectProvider.ts'
-import { setUser } from '@/store/userSlice.ts'
 import Storage from '@/lib/storage.ts'
 import RequestFactory from '@/services/RequestFactory'
-import { setAccessToken } from '@/store/authSlice'
 import { jwtDecode } from 'jwt-decode'
+import { setDefaultAuthorizationToRequest } from '@/lib/authenticate.ts'
 
 interface AuthContextProps {
     isLogin: boolean
-    handleLogin: () => void
+    handleLogin: () => Promise<void>
     handleLogout: () => Promise<void>
-    userAddress: string | null
     address: string
 }
 
@@ -43,12 +39,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const isConnectionRestored = useIsConnectionRestored()
     const wallet = useTonWallet()
 
-    const dispatch = useDispatch()
-    const userAddress = useSelector((state: RootState) => state.user?.address)
     const [isLogin, setIsLogin] = useState<boolean>(!!Storage.getAccessToken())
     const interval = useRef<ReturnType<typeof setInterval> | undefined>()
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
+        if (tonConnectUI.connected) {
+            await tonConnectUI.disconnect()
+        }
         open()
     }
 
@@ -59,10 +56,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
             const currentTime = Date.now()
             const timeUntilExpiration = expirationTime - currentTime
-            console.log(timeUntilExpiration <= 0)
             if (timeUntilExpiration <= 0) {
                 await handleLogout()
-                handleLogin()
+                await handleLogin()
             } else {
                 setTimeout(() => {
                     handleLogout()
@@ -71,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         } catch (error) {
             console.debug('Error handling token expiration', error)
-            handleLogout()
+            await handleLogout()
         }
     }
 
@@ -90,19 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 wallet.account
             )
 
-            dispatch(
-                setUser({
-                    id: '',
-                    name: '',
-                    address: address
-                })
-            )
-            dispatch(setAccessToken({ accessToken: result.accessToken }))
             setIsLogin(true)
-            handleTokenExpiration(result.accessToken)
+            Storage.setUserAddress(address)
+            Storage.setAccessToken(result.accessToken)
+            await handleTokenExpiration(result.accessToken)
         } catch (e) {
             console.debug('login error', e)
-            handleLogout()
+            await handleLogout()
         }
     }
 
@@ -132,17 +122,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 }
             }
 
-            refreshPayload()
+            refreshPayload().then()
             setInterval(refreshPayload, payloadTTLMS)
             return
         }
-        login()
+        login().then()
     }, [wallet, isConnectionRestored, tonConnectUI])
 
     useEffect(() => {
         const token = Storage.getAccessToken()
         if (token) {
-            handleTokenExpiration(token)
+            handleTokenExpiration(token).then()
         }
     }, [])
 
@@ -157,14 +147,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (tonConnectUI.connected) {
             await tonConnectUI.disconnect()
         }
+        setDefaultAuthorizationToRequest()
         localStorage.clear()
         sessionStorage.clear()
-        // window.location.reload()
     }
 
     return (
         <AuthContext.Provider
-            value={{ isLogin, handleLogin, handleLogout, userAddress, address }}
+            value={{ isLogin, handleLogin, handleLogout, address }}
         >
             {children}
         </AuthContext.Provider>

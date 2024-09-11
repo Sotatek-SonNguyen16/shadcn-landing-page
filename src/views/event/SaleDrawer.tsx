@@ -1,23 +1,52 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
-import { EBetOption, EFormType, ESide, OrderFormValues } from '@/types'
+import {
+    EBetOption,
+    EFormType,
+    ESide,
+    KeyPadOptions,
+    OrderFormValues
+} from '@/types'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { ArrowRightLeft, ChevronLeft, Delete, RefreshCcw } from 'lucide-react'
+import {
+    ArrowRightLeft,
+    Check,
+    ChevronDown,
+    ChevronLeft,
+    CircleCheck,
+    Delete,
+    Minus,
+    Plus,
+    RefreshCcw
+} from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
-import { useForm } from 'react-hook-form'
+import { FieldErrors, useForm } from 'react-hook-form'
 import { LoadingSpinner } from '@/components/ui/spinner.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { formatToCents } from '@/lib/utils.ts'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
+import DateTimePicker from '@/components/DateTimePicker.tsx'
+import CheckBoxGroup from '@/components/CheckBoxGroup.tsx'
+import TimePicker from '@/components/TimePicker.tsx'
+import ResponsiveInput from '@/views/event/ResponsiveInput.tsx'
+import useBalance from '@/hooks/useBalance.ts'
 
 const ActionButton: React.FC<{
     content: JSX.Element
     formId: string
     isLogin: boolean
+    onClickLogin: () => void
     isPending: boolean
     disabled?: boolean
-}> = ({ content, formId, isLogin, isPending, disabled = false }) => {
+}> = ({
+    content,
+    formId,
+    isLogin,
+    isPending,
+    disabled = false,
+    onClickLogin
+}) => {
     return (
         <div className='flex'>
             <Button
@@ -26,6 +55,7 @@ const ActionButton: React.FC<{
                 variant='default'
                 type={isLogin ? 'submit' : 'button'}
                 disabled={isPending || disabled}
+                onClick={onClickLogin}
             >
                 {isLogin ? isPending ? <LoadingSpinner /> : content : 'Login'}
             </Button>
@@ -113,13 +143,23 @@ const BetEventInfo = () => {
 const KeyPad: React.FC<{
     value: string
     handleChange: (value: string) => void
-}> = ({ value, handleChange }) => {
+    keyPadOptions: KeyPadOptions
+}> = ({ value, handleChange, keyPadOptions }) => {
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'x']
+
+    function hasOneDecimalPlace(value: string | number): boolean {
+        const strValue = value.toString()
+        const parts = strValue.split('.')
+        return parts.length === 2 ? parts[1].length <= 1 : true
+    }
 
     const handleKeyClick = (key: string) => {
         if (key === 'x') {
             handleChange(value.slice(0, -1))
         } else {
+            if (isNaN(Number(value + key))) return
+            if (keyPadOptions.decimal && !hasOneDecimalPlace(value + key))
+                return
             handleChange(value + key)
         }
     }
@@ -146,55 +186,78 @@ const KeyPad: React.FC<{
 }
 
 const BuyBetInput: React.FC<{
-    value: string
+    errors: FieldErrors<OrderFormValues>
+    input: string
+    setInput: (value: string) => void
     handleChange: (value: string) => void
-}> = ({ value, handleChange }) => {
-    const { selectedOrder } = useEventContext()
+}> = ({ input, setInput, handleChange, errors }) => {
+    const { currentMarket, betOption } = useEventContext()
     const { resetOrderBook } = useEventWebSocket()
-    const inputRef = useRef<HTMLInputElement>(null)
+    const [focus, setFocus] = useState<'amount' | 'size' | 'none'>('amount')
+    const { balance } = useBalance()
+    const formatterUSD = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 5
+            }),
+        []
+    )
+
+    const value = useMemo(() => {
+        if (focus === 'amount') {
+            handleChange(input)
+            return input
+        }
+        return ''
+    }, [focus, input])
+
+    const onFocus = (focusType: 'amount' | 'size' | 'none') => {
+        if (value === 'amount') {
+            setInput(value)
+        }
+        setFocus(focusType)
+    }
 
     useEffect(() => {
-        if (inputRef.current) {
-            inputRef.current.scrollLeft = inputRef.current.scrollWidth
-        }
-    }, [value])
+        setInput('')
+    }, [])
+
     return (
         <div className='flex-col justify-start items-center gap-2 inline-flex'>
             <div className='h-40 pt-2 pb-7 flex-col justify-center items-center gap-2 inline-flex'>
                 <div className='self-stretch justify-center items-center gap-1 inline-flex'>
-                    <input
-                        type='string'
+                    <ResponsiveInput
                         value={value}
-                        onChange={(e) => {
-                            handleChange(e.target.value)
-                        }}
-                        readOnly={true}
-                        autoFocus={true}
-                        placeholder='0'
-                        className='text-end w-[25%] text-white text-5xl font-normal leading-10 bg-transparent outline-none caret-color-brand-500'
-                        ref={inputRef}
-                        style={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            direction: 'ltr',
-                            paddingRight: '1px'
-                        }}
+                        name='amount'
+                        focus={focus}
+                        onFocus={onFocus}
+                        className='text-end text-white text-5xl font-normal leading-10'
                     />
                     <div className='text-color-neutral-250 text-3xl font-light leading-10'>
-                        ¢
+                        $
                     </div>
                 </div>
+                {errors?.size && (
+                    <div className='text-center text-color-accent-red-900 text-xs font-normal leading-none'>
+                        {errors.size?.message}
+                    </div>
+                )}
                 <div className='self-stretch rounded-lg justify-center items-center gap-2 inline-flex'>
                     <div className='rounded-lg justify-start items-center gap-1 flex'>
                         <div className='text-color-neutral-700 text-sm font-light leading-tight'>
                             Your balance:
                         </div>
                         <div className='text-color-neutral-700 text-sm font-light leading-tight'>
-                            $22,578.66
+                            {formatterUSD.format(
+                                Number(balance?.cashUsd || '0')
+                            )}
                         </div>
                     </div>
                     <div className='justify-center items-center gap-1 flex'>
-                        <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
+                        <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex cursor-pointer'>
                             <div className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight'>
                                 Max
                             </div>
@@ -205,13 +268,344 @@ const BuyBetInput: React.FC<{
             <div className='h-4 rounded-lg justify-center items-center gap-1 inline-flex'>
                 <div className='rounded-lg flex-col justify-center items-start inline-flex'>
                     <div className='text-color-neutral-700 text-xs font-light leading-none'>
-                        {formatToCents(selectedOrder?.price ?? 0)}/share
+                        {formatToCents(
+                            Number(
+                                currentMarket?.outcomePrices[
+                                    betOption === EBetOption.YES ? 0 : 1
+                                ] ?? '0'
+                            )
+                        )}
+                        /share
                     </div>
                 </div>
                 <RefreshCcw
                     size={16}
                     className='text-color-neutral-700 cursor-pointer'
                     onClick={resetOrderBook}
+                />
+            </div>
+        </div>
+    )
+}
+
+const SplitLine = () => {
+    return (
+        <div className='h-[1px] w-full border border-color-neutral-100'></div>
+    )
+}
+
+const LimitInput: React.FC<{
+    errors: FieldErrors<OrderFormValues>
+    input: string
+    setInput: (value: string) => void
+    handleChangeAmount: (value: string) => void
+    handleChangeSize: (value: string) => void
+}> = ({ input, setInput, handleChangeSize, handleChangeAmount, errors }) => {
+    const { openDrawer } = useDrawerContext()
+    const { currentMarket, betOption } = useEventContext()
+    const [amountS, setAmountS] = useState<string>('')
+    const [sizeS, setSizeS] = useState<string>('')
+    const [focus, setFocus] = useState<'amount' | 'size' | 'none'>('amount')
+    const [expirationTime, setExpirationTime] =
+        useState<string>('Until cancelled')
+    const { balance } = useBalance()
+    const formatterUSD = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 5
+            }),
+        []
+    )
+
+    const amount = useMemo(() => {
+        if (focus === 'amount') {
+            setAmountS(input)
+            handleChangeAmount(input)
+            return input
+        }
+        return amountS
+    }, [focus, input])
+    const size = useMemo(() => {
+        if (focus === 'size') {
+            setSizeS(input)
+            handleChangeSize(input)
+            return input
+        }
+        return sizeS
+    }, [focus, input])
+
+    const onFocus = (value: 'amount' | 'size' | 'none') => {
+        if (value === 'amount') {
+            setInput(amount)
+        } else if (value === 'size') {
+            setInput(size)
+        }
+        setFocus(value)
+    }
+
+    const onClickAutoFillLimitPrice = () => {
+        setFocus('amount')
+        setInput(
+            `${(
+                Number(
+                    currentMarket?.outcomePrices[
+                        betOption === EBetOption.YES ? 0 : 1
+                    ] || 0
+                ) * 100
+            ).toFixed(1)}`
+        )
+    }
+
+    const onClickExpirationTimeButton = () => {
+        openDrawer({
+            background: 'bg-color-neutral-alpha-800',
+            content: (
+                <ExpirationTimeDrawer setExpirationTime={setExpirationTime} />
+            )
+        })
+    }
+
+    useEffect(() => {
+        setInput('')
+        handleChangeSize('')
+    }, [])
+
+    return (
+        <>
+            <div className='pt-2 pb-7 flex-col justify-center items-center gap-2 inline-flex'>
+                <div className='self-stretch justify-start items-start gap-1.5 inline-flex'>
+                    <div className='grow shrink basis-0 self-stretch justify-start items-center gap-1 flex'>
+                        <div className='justify-start items-center gap-0.5 flex'>
+                            <div className='text-color-neutral-900 text-xs font-normal leading-none'>
+                                Limit Price
+                            </div>
+                        </div>
+                        <div>
+                            <RefreshCcw
+                                className='text-color-neutral-500 cursor-pointer'
+                                onClick={onClickAutoFillLimitPrice}
+                                size={14}
+                            />
+                        </div>
+                    </div>
+                    <div className='flex-col justify-start items-start gap-1 inline-flex'>
+                        <div className='py-2.5 rounded-lg justify-start items-center gap-4 inline-flex'>
+                            <div className='rounded-lg justify-center items-center flex cursor-pointer'>
+                                <Minus
+                                    size={16}
+                                    className='text-color-brand-500'
+                                    onClick={() => {
+                                        setFocus('amount')
+                                        const parsedAmount = parseFloat(amount)
+                                        if (!isNaN(parsedAmount)) {
+                                            const minusAmount =
+                                                parsedAmount - 10
+                                            if (minusAmount > 0) {
+                                                setInput(minusAmount.toString())
+                                            }
+                                        } else {
+                                            setInput('0')
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div className='text-color-neutral-900 text-sm font-light leading-tight'>
+                                <ResponsiveInput
+                                    value={amount}
+                                    name='amount'
+                                    focus={focus}
+                                    onFocus={onFocus}
+                                />
+                                {' ¢'}
+                            </div>
+                            <div className='rounded-lg justify-center items-center flex cursor-pointer'>
+                                <Plus
+                                    size={16}
+                                    className='text-color-brand-500'
+                                    onClick={() => {
+                                        setFocus('amount')
+                                        const parsedAmount = parseFloat(amount)
+                                        if (!isNaN(parsedAmount)) {
+                                            const minusAmount =
+                                                parsedAmount + 10
+                                            setInput(minusAmount.toString())
+                                        } else {
+                                            setInput('10')
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <SplitLine />
+                <div className='self-stretch justify-start items-start gap-1.5 inline-flex'>
+                    <div className='self-stretch justify-start items-center gap-1 flex'>
+                        <div className='justify-start items-center gap-0.5 flex'>
+                            <div className='text-color-neutral-900 text-xs font-normal leading-none'>
+                                Share
+                            </div>
+                        </div>
+                    </div>
+                    <div className='grow shrink basis-0 flex-col justify-start items-start gap-1 flex'>
+                        <div className='w-full self-stretch py-2.5 rounded-lg justify-end items-center gap-2 flex'>
+                            {size && (
+                                <div className='rounded-full justify-center items-center gap-1 flex text-nowrap'>
+                                    <Check
+                                        size={16}
+                                        className='text-color-brand-400'
+                                    />
+                                    <div className='pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
+                                        <div className='self-stretch text-color-brand-400 text-xs font-normal leading-none'>
+                                            {size} matching
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div className='text-right text-color-neutral-900 text-sm font-light leading-tight'>
+                                <ResponsiveInput
+                                    value={size}
+                                    name='size'
+                                    focus={focus}
+                                    onFocus={onFocus}
+                                />
+                            </div>
+                        </div>
+                        {errors?.size && (
+                            <div className='w-full text-end text-color-accent-red-900 text-xs font-normal leading-none'>
+                                {errors.size?.message}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <SplitLine />
+                <div className='self-stretch h-10 justify-start items-center gap-1.5 inline-flex'>
+                    <div className='grow shrink basis-0 self-stretch justify-start items-center gap-1 flex'>
+                        <div className='justify-start items-center gap-0.5 flex'>
+                            <div className='text-color-neutral-900 text-xs font-normal leading-none'>
+                                Expiration
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex-col justify-start items-start gap-1 inline-flex'>
+                        <div
+                            className='py-1 rounded-lg justify-start items-center gap-2 inline-flex cursor-pointer'
+                            onClick={onClickExpirationTimeButton}
+                        >
+                            <div className='text-color-neutral-900 text-sm font-light leading-tight'>
+                                {expirationTime}
+                            </div>
+                            <div className='rounded-lg justify-center items-center flex'>
+                                <ChevronDown size={12} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className='self-stretch rounded-lg justify-center items-center gap-2 inline-flex'>
+                <div className='rounded-lg justify-start items-center gap-1 flex'>
+                    <div className='text-color-neutral-700 text-sm font-light leading-tight'>
+                        Your balance:
+                    </div>
+                    <div className='text-color-neutral-700 text-sm font-light leading-tight'>
+                        {formatterUSD.format(Number(balance?.cashUsd || '0'))}
+                    </div>
+                </div>
+                <div className='justify-center items-center gap-1 flex'>
+                    <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex cursor-pointer'>
+                        <div className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight'>
+                            Max
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
+const ExpirationTimeDrawer: React.FC<{
+    setExpirationTime: (value: string) => void
+}> = ({ setExpirationTime }) => {
+    const [date, setDate] = useState<Date | undefined>(undefined)
+    const [time, setTime] = useState<string | undefined>(undefined)
+
+    const [expiration, setExpiration] = useState<'UNTIL' | 'END' | 'CUSTOM'>(
+        'UNTIL'
+    )
+
+    useEffect(() => {
+        if (date && time) {
+            const formattedDate = date
+                .toLocaleDateString('en-GB')
+                .split('/')
+                .join('/')
+
+            const expirationTime = `${formattedDate} - ${time}`
+            setExpirationTime(expirationTime)
+        }
+    }, [date, time])
+
+    return (
+        <div className='h-full w-full flex flex-col px-4 pb-7'>
+            <div className='w-full h-10 grid grid-cols-5 items-center gap-1'>
+                <div className='py-0.5 flex-col justify-start items-start gap-2 inline-flex'></div>
+                <div className='grow shrink basis-0 flex-col justify-center items-center inline-flex col-span-3'>
+                    <div className='self-stretch rounded-lg justify-center items-start gap-2 inline-flex'>
+                        Expiration
+                    </div>
+                </div>
+                <div className='py-0.5 justify-end items-center flex'></div>
+            </div>
+            <div className='mb-4'>
+                <CheckBoxGroup
+                    value={expiration}
+                    name='Expiration'
+                    items={[
+                        { name: 'Until Cancelled', value: 'UNTIL' },
+                        { name: 'End of day', value: 'END' },
+                        { name: 'Custom', value: 'CUSTOM' }
+                    ]}
+                    onChange={(value) => {
+                        setExpiration(value as 'UNTIL' | 'END' | 'CUSTOM')
+                        switch (value) {
+                            case 'CUSTOM':
+                                if (date && time) {
+                                    const formattedDate = date
+                                        .toLocaleDateString('en-GB')
+                                        .split('/')
+                                        .join('/')
+
+                                    const expirationTime = `${formattedDate} - ${time}`
+                                    setExpirationTime(expirationTime)
+                                }
+                                return
+                            case 'UNTIL':
+                                setExpirationTime('Until cancelled')
+                                return
+                            case 'END':
+                                setExpirationTime('End of day')
+                                return
+                            default:
+                                return
+                        }
+                    }}
+                />
+            </div>
+            <div className='flex justify-center items-center gap-2 select-none'>
+                <DateTimePicker
+                    placeholder='DD/MM/YYYY'
+                    value={date}
+                    onChange={setDate}
+                    disabled={expiration !== 'CUSTOM'}
+                />
+                <div>-</div>
+                <TimePicker
+                    value={time}
+                    onChange={setTime}
+                    disabled={expiration !== 'CUSTOM'}
                 />
             </div>
         </div>
@@ -229,16 +623,22 @@ const FormStatusSelectButton = () => {
     }
     return (
         <div
-            className='self-stretch text-center text-color-neutral-900 text-xs font-normal leading-3'
+            className='h-5 pl-2 pr-1 py-1 rounded-3xl border border-color-neutral-900 justify-end items-center gap-1 inline-flex cursor-pointer'
             onClick={onClickSettingButton}
         >
-            {formType}
+            <div className='h-3 pb-px rounded-lg flex-col justify-center items-start inline-flex'>
+                <div className='self-stretch text-center text-color-neutral-900 text-xs font-normal leading-3'>
+                    {formType}
+                </div>
+            </div>
+            <ChevronDown size={12} />
         </div>
     )
 }
 
 const SettingTransactionDrawer = () => {
-    const { changeType } = useEventContext()
+    const { changeType, formType } = useEventContext()
+    const { closeDrawer } = useDrawerContext()
 
     return (
         <div className='px-4 flex flex-col gap-2'>
@@ -250,7 +650,31 @@ const SettingTransactionDrawer = () => {
             <div className='flex flex-col'>
                 <div
                     className='h-20 py-4 border-b border-color-neutral-50 justify-start items-center gap-1 inline-flex cursor-pointer'
-                    onClick={() => changeType(EFormType.LIMIT)}
+                    onClick={() => {
+                        changeType(EFormType.MARKET)
+                        closeDrawer()
+                    }}
+                >
+                    <div className='grow shrink basis-0 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
+                        <div className='self-stretch text-color-neutral-900 text-base font-normal leading-normal'>
+                            Market Order
+                        </div>
+                        <div className='self-stretch text-color-neutral-500 text-xs font-light leading-none'>
+                            Buy or sell at the best price in the current market
+                        </div>
+                    </div>
+                    <div>
+                        {formType === EFormType.MARKET && (
+                            <CircleCheck size={18} />
+                        )}
+                    </div>
+                </div>
+                <div
+                    className='h-20 py-4 border-b border-color-neutral-50 justify-start items-center gap-1 inline-flex cursor-pointer'
+                    onClick={() => {
+                        changeType(EFormType.LIMIT)
+                        closeDrawer()
+                    }}
                 >
                     <div className='grow shrink basis-0 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
                         <div className='self-stretch text-color-neutral-900 text-base font-normal leading-normal'>
@@ -260,6 +684,11 @@ const SettingTransactionDrawer = () => {
                             Buy or sell at a specified price or better
                         </div>
                     </div>
+                    <div>
+                        {formType === EFormType.LIMIT && (
+                            <CircleCheck size={18} />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,22 +697,51 @@ const SettingTransactionDrawer = () => {
 
 const SaleDrawer: React.FC = () => {
     const {
+        formType,
         formStatus,
         betOption,
         changeBetOption,
-        currentMarket,
         handleOrder,
-        selectedOrder,
-        resolver,
-        formType
+        createOrderResult,
+        setCreateOrderResult,
+        keyPadOptions,
+        updateKeyPadOptions,
+        currentMarket
     } = useEventContext()
     const { closeDrawer } = useDrawerContext()
-    const { isLogin } = useAuthContext()
+    const { isLogin, handleLogin } = useAuthContext()
     const {
         handleSubmit,
-        formState: { errors, isSubmitting },
-        setValue
-    } = useForm<OrderFormValues>({ resolver })
+        formState: { errors, isSubmitting, isSubmitted },
+        watch,
+        setValue,
+        setError,
+        clearErrors
+    } = useForm<OrderFormValues>()
+
+    const validateForm = (field: keyof OrderFormValues, value: number) => {
+        if (field === 'amount') {
+            if (!value || isNaN(value) || value <= 0) {
+                setError('amount', {
+                    type: 'manual',
+                    message: 'Amount is required and must be a positive number.'
+                })
+            } else {
+                clearErrors('amount')
+            }
+        }
+
+        if (field === 'size') {
+            if (!value || isNaN(value) || value < 5) {
+                setError('size', {
+                    type: 'manual',
+                    message: 'Minimum 5 shares for limit orders'
+                })
+            } else {
+                clearErrors('size')
+            }
+        }
+    }
 
     const formatterUSD = useMemo(
         () =>
@@ -291,32 +749,89 @@ const SaleDrawer: React.FC = () => {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                maximumFractionDigits: 4
             }),
         []
     )
 
     const [input, setInput] = useState<string>('')
+
     const handleChangeInput = (newValue: string) => {
         const parsedValue = Number(newValue)
-        if (!isNaN(parsedValue)) {
-            setInput(newValue)
-            setValue('amount', parsedValue)
+        updateKeyPadOptions({ decimal: false })
 
-            switch (formType) {
-                case EFormType.MARKET:
-                    setValue('size', getSize(newValue))
-                    break
-                case EFormType.LIMIT:
-                    setValue('size', getSize(newValue))
-                    break
-            }
+        if (!isNaN(parsedValue)) {
+            setValue(
+                'size',
+                Number(
+                    currentMarket?.outcomePrices[
+                        betOption === EBetOption.YES ? 0 : 1
+                    ]
+                )
+            )
+            setValue('amount', parsedValue)
+            clearErrors('size')
+            if (isSubmitted) validateForm('amount', parsedValue)
         }
     }
 
-    const getSize = (amountSize: string) => {
-        return (Number(amountSize) ?? 0) / (selectedOrder?.price ?? 0.001)
+    const handleChangeAmount = (newValue: string) => {
+        const parsedValue = Number(newValue)
+        updateKeyPadOptions({ decimal: true })
+
+        if (!isNaN(parsedValue)) {
+            setValue('amount', parsedValue)
+            if (isSubmitted) validateForm('amount', parsedValue)
+        }
     }
+
+    const handleChangeSize = (newValue: string) => {
+        const parsedValue = Number(newValue)
+        updateKeyPadOptions({ decimal: false })
+
+        if (!isNaN(parsedValue)) {
+            setValue('size', parsedValue)
+            if (isSubmitted) validateForm('size', parsedValue)
+        }
+    }
+
+    const calculatedValue = useMemo(() => {
+        const amount = Number(watch('amount')) || 0
+        const size = Number(watch('size')) || 0
+        return formType === EFormType.MARKET
+            ? `${(
+                  amount /
+                  Number(
+                      currentMarket?.outcomePrices[
+                          betOption === EBetOption.YES ? 0 : 1
+                      ] ?? '1'
+                  )
+              ).toFixed(4)} shares`
+            : `${formatterUSD.format((amount / 100) * size)}`
+    }, [watch('amount'), watch('size'), formType, currentMarket])
+
+    const toWin = useMemo(() => {
+        const amount = Number(watch('amount')) || 0
+        const size = Number(watch('size')) || 0
+
+        return formType === EFormType.MARKET
+            ? formatterUSD.format(
+                  amount /
+                      Number(
+                          currentMarket?.outcomePrices[
+                              betOption === EBetOption.YES ? 0 : 1
+                          ] ?? '1'
+                      )
+              )
+            : formatterUSD.format(size)
+    }, [watch('amount'), watch('size'), formType, currentMarket])
+
+    useEffect(() => {
+        if (createOrderResult === 'success') {
+            closeDrawer()
+            setCreateOrderResult('none')
+        }
+    }, [createOrderResult])
 
     return (
         <DrawerProvider>
@@ -342,11 +857,6 @@ const SaleDrawer: React.FC = () => {
                     </div>
                     <div className='py-0.5 justify-end items-center flex'>
                         <div className='w-auto'>
-                            {/*<FormSelect<EFormType>*/}
-                            {/*    selected={formType}*/}
-                            {/*    options={formTypeList}*/}
-                            {/*    onSelect={changeType}*/}
-                            {/*/>*/}
                             <FormStatusSelectButton />
                         </div>
                     </div>
@@ -379,9 +889,7 @@ const SaleDrawer: React.FC = () => {
                                 To win:{' '}
                             </span>
                             <span className='text-color-accent-green-900 text-xs font-normal leading-none'>
-                                {formatterUSD.format(
-                                    Number(currentMarket?.volumeNum)
-                                )}
+                                {toWin}
                             </span>
                         </div>
                     )}
@@ -389,25 +897,32 @@ const SaleDrawer: React.FC = () => {
                 <form
                     className='flex flex-col gap-4'
                     id='saleForm'
-                    onSubmit={handleSubmit((order) =>
-                        handleOrder({
-                            ...order,
-                            amount: Number(order.amount) * 100
-                        })
+                    onSubmit={handleSubmit((data) =>
+                        handleOrder(data, setError)
                     )}
                 >
-                    <BuyBetInput
-                        value={input}
-                        handleChange={handleChangeInput}
-                    />
-                    <BetEventInfo />
-                    <KeyPad value={input} handleChange={handleChangeInput} />
-
-                    {errors?.size && (
-                        <p className='text-color-accent-red-900 text-[12px]'>
-                            {errors.size.message}
-                        </p>
+                    {formType === EFormType.MARKET ? (
+                        <BuyBetInput
+                            errors={errors}
+                            input={input}
+                            setInput={setInput}
+                            handleChange={handleChangeInput}
+                        />
+                    ) : (
+                        <LimitInput
+                            errors={errors}
+                            input={input}
+                            setInput={setInput}
+                            handleChangeAmount={handleChangeAmount}
+                            handleChangeSize={handleChangeSize}
+                        />
                     )}
+                    <BetEventInfo />
+                    <KeyPad
+                        value={input}
+                        handleChange={setInput}
+                        keyPadOptions={keyPadOptions}
+                    />
                     <ActionButton
                         content={
                             <div className='rounded-lg flex-col justify-center items-center inline-flex'>
@@ -416,13 +931,20 @@ const SaleDrawer: React.FC = () => {
                                     now
                                 </div>
                                 <div className='self-stretch text-color-neutral-alpha-700 text-xs font-light leading-3'>
-                                    {getSize(input)} shares
+                                    {calculatedValue}
                                 </div>
                             </div>
                         }
                         formId={`saleForm`}
                         isLogin={isLogin}
+                        onClickLogin={() => {
+                            if (!isLogin) {
+                                closeDrawer()
+                                handleLogin()
+                            }
+                        }}
                         isPending={isSubmitting}
+                        disabled={!!errors.size}
                     />
                 </form>
             </div>

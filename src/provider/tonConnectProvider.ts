@@ -23,7 +23,7 @@ export default class TonConnectProvider {
                     wallet?.account.address
             },
             (err: TonConnectError) => {
-                console.log('TonConnectError: ', err)
+                console.error('TonConnectError: ', err)
             }
         )
     }

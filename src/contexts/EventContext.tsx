@@ -11,6 +11,7 @@ import {
     EFormType,
     EMarketDepth,
     ESide,
+    KeyPadOptions,
     Market,
     MarketDetail,
     MarketTrade,
@@ -19,9 +20,11 @@ import {
     PolyMarketDetail
 } from '@/types'
 import RequestFactory from '@/services/RequestFactory.ts'
-import { FieldErrors, Resolver } from 'react-hook-form'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { useToast } from '@/components/ui/use-toast.ts'
+import { CheckCircle } from 'lucide-react'
+import { formatToCents } from '@/lib/utils.ts'
+import { UseFormSetError } from 'react-hook-form'
 
 interface EventContextType {
     formStatus: ESide
@@ -34,19 +37,25 @@ interface EventContextType {
     changeBetOption: (option: EBetOption) => void
     selectedEvent: Market | null
     setSelectedEvent: (event: Market) => void
-    market: PolyMarketDetail | null
+    market: PolyMarketDetail | null | undefined
     loading: boolean
     handleSelectMarket: (id: string) => void
     currentMarket: MarketDetail | null
     selectedMarketId: string
     selectedOrder: Order | null
     handleSelectOrder: (order: Order | null) => void
-    handleOrder: (data: OrderFormValues) => Promise<void>
-    resolver: Resolver<OrderFormValues>
+    handleOrder: (
+        data: OrderFormValues,
+        setError: UseFormSetError<OrderFormValues>
+    ) => Promise<void>
     tradeYes: MarketTrade[] | null
     tradeNo: MarketTrade[] | null
     handleCancelMarketTrade: (orderIds: string[]) => Promise<void>
     reloadEvent: () => void
+    createOrderResult: 'none' | 'success' | 'failure'
+    setCreateOrderResult: (value: 'none' | 'success' | 'failure') => void
+    keyPadOptions: KeyPadOptions
+    updateKeyPadOptions: (value: KeyPadOptions) => void
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)
@@ -64,7 +73,9 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     id
 }) => {
     const request = RequestFactory.getRequest('MarketRequest')
-    const [market, setMarket] = useState<PolyMarketDetail | null>(null)
+    const [market, setMarket] = useState<PolyMarketDetail | null | undefined>(
+        undefined
+    )
     const [loading, setLoading] = useState<boolean>(true)
 
     const [currentMarket, setCurrentMarket] = useState<MarketDetail | null>(
@@ -82,8 +93,14 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
     const [tradeYes, setTradeYes] = useState<MarketTrade[] | null>(null)
     const [tradeNo, setTradeNo] = useState<MarketTrade[] | null>(null)
+    const [createOrderResult, setCreateOrderResult] = useState<
+        'none' | 'success' | 'failure'
+    >('none')
+    const [keyPadOptions, setKeyPadOptions] = useState<KeyPadOptions>({
+        decimal: false
+    })
 
-    const { userAddress, isLogin } = useAuthContext()
+    const { address, isLogin } = useAuthContext()
     const { toast } = useToast()
 
     const changeForm = (status: ESide) => {
@@ -128,8 +145,11 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                         response.markets[0]
                     )
                     setSelectedMarketId(maxPriceItem.id)
+                } else {
+                    setMarket(null)
                 }
             } catch (err) {
+                setMarket(null)
                 console.error(err)
             } finally {
                 setLoading(false)
@@ -155,9 +175,12 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                         response.markets[0]
                     )
                     setSelectedMarketId(maxPriceItem.id)
+                } else {
+                    setMarket(null)
                 }
             } catch (err) {
                 console.error(err)
+                setMarket(null)
             } finally {
                 setLoading(false)
             }
@@ -205,32 +228,12 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 setTradeYes(null)
             }
         }
-    }, [currentMarket, fetchActiveOrder, userAddress, isLogin])
+    }, [currentMarket, fetchActiveOrder, address, isLogin])
 
-    const resolver: Resolver<OrderFormValues> = async (values) => {
-        const errors: FieldErrors<OrderFormValues> = {}
-
-        if (!values.amount || isNaN(values.amount) || values.amount <= 0) {
-            errors.amount = {
-                type: 'required',
-                message: 'Amount is required and must be a positive number.'
-            }
-        }
-
-        if (!values.size || isNaN(values.size) || values.size < 5) {
-            errors.size = {
-                type: 'required',
-                message: 'Size is required and must be larger 5.'
-            }
-        }
-
-        return {
-            values: Object.keys(errors).length ? {} : values,
-            errors
-        }
-    }
-
-    const handleOrder = async (data: OrderFormValues) => {
+    const handleOrder = async (
+        data: OrderFormValues,
+        setError: UseFormSetError<OrderFormValues>
+    ) => {
         const payload = {
             marketId: currentMarket?.id ?? '',
             assetId:
@@ -238,26 +241,69 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                     ? (currentMarket?.clobTokenIds[0] ?? '')
                     : (currentMarket?.clobTokenIds[1] ?? ''),
             side: formStatus,
-            price: Number(data.amount / 100),
+            price:
+                formType === EFormType.MARKET
+                    ? Number(data.amount)
+                    : Number(data.amount / 100),
             size: Number(data.size)
         }
+
+        setCreateOrderResult('none')
 
         try {
             const response = await request.order(payload)
             if (response) {
+                setCreateOrderResult('success')
                 toast({
-                    variant: 'success',
-                    title: 'Successful purchase!'
+                    variant: 'transparent',
+                    title: '',
+                    description: (
+                        <div className='p-3 rounded-lg backdrop-blur-xl justify-start items-start gap-2 inline-flex'>
+                            <div className='py-0.5 justify-start items-center gap-2 flex'>
+                                <div className='p-1 bg-color-accent-green-200 rounded-md justify-center items-center flex'>
+                                    <CheckCircle
+                                        size={16}
+                                        className='text-color-accent-green-900'
+                                    />
+                                </div>
+                            </div>
+                            <div className='grow shrink basis-0 flex-col justify-start items-start gap-3 inline-flex'>
+                                <div className='self-stretch rounded-lg flex-col justify-center items-start flex'>
+                                    <div className='self-stretch text-color-neutral-900 text-base font-semibold leading-normal'>
+                                        Buy{' '}
+                                        {betOption === EBetOption.YES
+                                            ? 'Yes'
+                                            : 'No'}{' '}
+                                        placed
+                                    </div>
+                                    <div className='self-stretch text-color-neutral-800 text-sm font-light leading-tight'>
+                                        {currentMarket?.question}
+                                    </div>
+                                </div>
+                                <div className='rounded-lg justify-start items-center gap-3 inline-flex'>
+                                    <div className='rounded-lg flex-col justify-center items-start inline-flex'>
+                                        <div className='self-stretch text-color-neutral-500 text-sm font-light leading-tight'>
+                                            {payload.size} shares
+                                        </div>
+                                    </div>
+                                    <div className='rounded-lg flex-col justify-center items-start inline-flex'>
+                                        <div className='self-stretch text-color-neutral-500 text-sm font-light leading-tight'>
+                                            @ {formatToCents(payload.price)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 })
                 if (currentMarket?.id) {
                     await fetchActiveOrder(currentMarket?.id)
                 }
             }
         } catch (err: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Purchase failed!',
-                description: JSON.parse(err.message)
+            setError('size', {
+                type: 'manual',
+                message: JSON.parse(err.message)
                     .map((item: string | { message: string }) => {
                         if (typeof item === 'string') {
                             return item
@@ -269,6 +315,49 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                     })
                     .join(', ')
             })
+            setCreateOrderResult('failure')
+            // toast({
+            //     variant: 'transparent',
+            //     title: '',
+            //     description: (
+            //         <div className='p-3 rounded-lg backdrop-blur-xl justify-start items-start gap-2 inline-flex'>
+            //             <div className='py-0.5 justify-start items-center gap-2 flex'>
+            //                 <div className='p-1 bg-color-accent-red-200 rounded-md justify-center items-center flex'>
+            //                     <X
+            //                         size={16}
+            //                         className='text-color-accent-red-900'
+            //                     />
+            //                 </div>
+            //             </div>
+            //             <div className='grow shrink basis-0 flex-col justify-start items-start gap-3 inline-flex'>
+            //                 <div className='self-stretch rounded-lg flex-col justify-center items-start flex'>
+            //                     <div className='self-stretch text-color-neutral-900 text-base font-semibold leading-normal'>
+            //                         Buy{' '}
+            //                         {betOption === EBetOption.YES
+            //                             ? 'Yes'
+            //                             : 'No'}{' '}
+            //                         placed
+            //                     </div>
+            //                     <div className='self-stretch text-color-neutral-800 text-sm font-light leading-tight'>
+            //                         {currentMarket?.question}
+            //                     </div>
+            //                 </div>
+            //                 <div className='rounded-lg justify-start items-center gap-3 inline-flex'>
+            //                     <div className='rounded-lg flex-col justify-center items-start inline-flex'>
+            //                         <div className='self-stretch text-color-neutral-500 text-sm font-light leading-tight'>
+            //                             {payload.size} shares
+            //                         </div>
+            //                     </div>
+            //                     <div className='rounded-lg flex-col justify-center items-start inline-flex'>
+            //                         <div className='self-stretch text-color-neutral-500 text-sm font-light leading-tight'>
+            //                             @ {formatToCents(payload.price)}
+            //                         </div>
+            //                     </div>
+            //                 </div>
+            //             </div>
+            //         </div>
+            //     )
+            // })
         }
     }
 
@@ -301,6 +390,13 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
         }
     }
 
+    const updateKeyPadOptions = (value: KeyPadOptions) => {
+        setKeyPadOptions((prevState) => ({
+            ...prevState,
+            decimal: value.decimal
+        }))
+    }
+
     return (
         <EventContext.Provider
             value={{
@@ -322,11 +418,14 @@ const EventProvider: React.FC<{ children: ReactNode; id: string }> = ({
                 selectedOrder,
                 handleSelectOrder,
                 handleOrder,
-                resolver,
                 tradeNo,
                 tradeYes,
                 handleCancelMarketTrade,
-                reloadEvent
+                reloadEvent,
+                createOrderResult,
+                setCreateOrderResult,
+                keyPadOptions,
+                updateKeyPadOptions
             }}
         >
             {children}

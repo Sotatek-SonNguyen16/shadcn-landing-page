@@ -12,11 +12,11 @@ const CheckboxGroup: React.FC<{
     items: SettingItem[]
     onChange?: (value: string) => void
 }> = ({ value = '', name, items, onChange }) => {
-    const [selectedValue, setSelectedValue] = useState<string>('')
+    const [selectedValue, setSelectedValue] = useState<string>(value ?? '')
 
     useEffect(() => {
-        setSelectedValue(value)
-    }, [value])
+        onChange && onChange(selectedValue)
+    }, [selectedValue])
 
     return (
         <div className='w-full flex-col justify-start items-start gap-2 inline-flex'>
@@ -30,8 +30,9 @@ const CheckboxGroup: React.FC<{
                 type='single'
                 value={selectedValue}
                 onValueChange={(value: string) => {
-                    setSelectedValue(value)
-                    onChange && onChange(value)
+                    if (value) {
+                        setSelectedValue(value)
+                    }
                 }}
             >
                 {items.map(({ name, value }) => (

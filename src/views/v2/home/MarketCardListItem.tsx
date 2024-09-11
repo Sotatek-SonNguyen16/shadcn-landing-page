@@ -26,8 +26,8 @@ const MarketCardListItem: React.FC<{ data: PredictionMarket }> = ({ data }) => {
             <div className='grow shrink basis-0 py-4 border-b border-white/5 flex-col justify-start items-start gap-1 inline-flex'>
                 <div className='self-stretch min-h-6 rounded-lg flex-col justify-center items-start flex '>
                     <div
-                        onClick={() => navigate(`/v2/event/${id}`)}
-                        className='cursor-pointer self-stretch text-color-neutral-900 text-sm font-normal leading-tight cursor-pointer hover:underline'
+                        onClick={() => navigate(`/event/${id}`)}
+                        className='self-stretch text-color-neutral-900 text-sm font-normal leading-tight cursor-pointer hover:underline'
                     >
                         {title}
                     </div>

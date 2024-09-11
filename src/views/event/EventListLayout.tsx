@@ -16,7 +16,7 @@ const EventListLayout: React.FC = () => {
             market?.markets.sort(
                 (a, b) =>
                     Number(b.outcomePrices[0]) - Number(a.outcomePrices[0])
-            ) || [],
+            ) || undefined,
         [market?.markets]
     )
 
@@ -41,7 +41,7 @@ const EventListLayout: React.FC = () => {
                     />
                 </div>
             </div>
-            <MarketEventList events={sortedMarkets.slice(0, 3)} />
+            <MarketEventList events={sortedMarkets?.slice(0, 3) || undefined} />
             <div className='w-full flex justify-center items-center'>
                 <div
                     className='justify-center items-center gap-1 inline-flex'
@@ -56,7 +56,11 @@ const EventListLayout: React.FC = () => {
                     />
                 </div>
             </div>
-            {viewMore && <MarketEventList events={sortedMarkets.slice(3)} />}
+            {viewMore && (
+                <MarketEventList
+                    events={sortedMarkets?.slice(3) || undefined}
+                />
+            )}
         </div>
     )
 }

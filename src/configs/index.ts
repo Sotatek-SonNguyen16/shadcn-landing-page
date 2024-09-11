@@ -1,5 +1,6 @@
 import dev from './dev.json'
 import prod from './prod.json'
+import staging from './staging.json'
 import { WalletsListConfiguration } from '@tonconnect/ui-react'
 import { ActionConfiguration } from '@tonconnect/ui'
 
@@ -15,16 +16,38 @@ export interface Config {
     manifestUrl: string
 }
 
-const env = import.meta.env.VITE_NODE_ENV as 'dev' | 'prod'
+// Environment types
+type NodeEnv = 'dev' | 'prod' | 'staging'
 
-let config: Config
-
-if (env === 'dev') {
-    config = dev as Config
-} else if (env === 'prod') {
-    config = prod as Config
-} else {
-    throw new Error(`Unknown environment: ${env}`)
+const configMap: Record<NodeEnv, Config> = {
+    dev: dev as Config,
+    prod: prod as Config,
+    staging: staging as Config
 }
 
-export default config
+class ConfigManager {
+    private static instance: ConfigManager
+    private readonly config: Config
+
+    private constructor(env: NodeEnv) {
+        this.config = configMap[env]
+    }
+
+    public static getInstance(): ConfigManager {
+        if (!ConfigManager.instance) {
+            const env = import.meta.env.VITE_NODE_ENV as NodeEnv
+            if (!env || !configMap[env]) {
+                throw new Error(`Unknown or missing environment: ${env}`)
+            }
+            ConfigManager.instance = new ConfigManager(env)
+        }
+        return ConfigManager.instance
+    }
+
+    public getConfig(): Config {
+        return this.config
+    }
+}
+
+export { ConfigManager }
+export default ConfigManager.getInstance().getConfig()

@@ -17,4 +17,15 @@ type MarketTradesResponse = {
     tradeNo: MarketTrade[]
 }
 
-export type { DocsResponse, OrderResponse, MarketTradesResponse }
+type BalanceResponse = {
+    totalPortfolioCurrent: string
+    totalAvgPortfolio: string
+    cashUsd: string
+}
+
+export type {
+    DocsResponse,
+    OrderResponse,
+    MarketTradesResponse,
+    BalanceResponse
+}

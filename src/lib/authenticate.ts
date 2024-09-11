@@ -34,5 +34,6 @@ export const setAuthorizationToRequestLinkWallet = (
 }
 
 export const setDefaultAuthorizationToRequest = (): void => {
+    delete axios.defaults.headers.common['Authorization']
     axios.defaults.headers.common['x-app-version'] = 1
 }

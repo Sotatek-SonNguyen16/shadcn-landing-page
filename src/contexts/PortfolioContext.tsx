@@ -54,13 +54,13 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
     const [hasMore, setHasMore] = useState<boolean>(false)
     const { toast } = useToast()
 
-    const fetchMoreData = () => {
+    const fetchMoreData = useCallback(() => {
         setTimeout(() => {
-            setPage((prev) => prev + 1)
+            setPage((prevState) => prevState + 1)
         }, 1000)
-    }
+    }, [])
 
-    const fetchMarkets = async () => {
+    const fetchMarkets = useCallback(async () => {
         const marketIds = activeOrders?.map((ao) => ao.marketId) ?? []
         const response = await request.getMarketsByListId({
             id: marketIds
@@ -78,7 +78,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
                 })
             )
         }
-    }
+    }, [activeOrders, request])
 
     const fetchActiveOrders = useCallback(
         async (params: ActiveOrdersRequestParams) => {
@@ -102,7 +102,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
                 console.error(err)
             }
         },
-        [request]
+        [request, page]
     )
 
     const fetchPositions = useCallback(
@@ -131,56 +131,64 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({
     )
 
     useEffect(() => {
-        const params: ActiveOrdersRequestParams = {
-            page: page,
-            limit: limit
-        }
-
         if (isLogin) {
-            fetchActiveOrders(params)
-        }
-    }, [page, limit, fetchActiveOrders, isLogin])
-
-    useEffect(() => {
-        if (activeOrders && activeOrders.length > 0) {
-            fetchMarkets()
-        }
-    }, [activeOrders])
-
-    const handleCancelActiveOrder = async (orderIds: string[]) => {
-        try {
-            await request.deleteOrders({ orderIds: orderIds })
-            toast({
-                variant: 'success',
-                title: 'Delete order success!'
-            })
-            // re-fetch when deleting order successfully
             const params: ActiveOrdersRequestParams = {
                 page: page,
                 limit: limit
             }
 
-            if (isLogin) {
-                fetchActiveOrders(params)
-            }
-        } catch (err: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Delete order failure!',
-                description: JSON.parse(err.message)
-                    .map((item: string | { message: string }) => {
-                        if (typeof item === 'string') {
-                            return item
-                        } else if (typeof item === 'object' && item !== null) {
-                            const parsedMessage = JSON.parse(item['message'])
-                            return Object.values(parsedMessage).join(', ')
-                        }
-                        return ''
-                    })
-                    .join(', ')
-            })
+            fetchActiveOrders(params)
         }
-    }
+    }, [page, limit, fetchActiveOrders, isLogin])
+
+    useEffect(() => {
+        if (activeOrders?.length) {
+            fetchMarkets()
+        }
+    }, [activeOrders])
+
+    const handleCancelActiveOrder = useCallback(
+        async (orderIds: string[]) => {
+            try {
+                await request.deleteOrders({ orderIds: orderIds })
+                toast({
+                    variant: 'success',
+                    title: 'Delete order success!'
+                })
+                // re-fetch when deleting order successfully
+                const params: ActiveOrdersRequestParams = {
+                    page: page,
+                    limit: limit
+                }
+
+                if (isLogin) {
+                    fetchActiveOrders(params)
+                }
+            } catch (err: any) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Delete order failure!',
+                    description: JSON.parse(err.message)
+                        .map((item: string | { message: string }) => {
+                            if (typeof item === 'string') {
+                                return item
+                            } else if (
+                                typeof item === 'object' &&
+                                item !== null
+                            ) {
+                                const parsedMessage = JSON.parse(
+                                    item['message']
+                                )
+                                return Object.values(parsedMessage).join(', ')
+                            }
+                            return ''
+                        })
+                        .join(', ')
+                })
+            }
+        },
+        [request, toast, page, limit, isLogin, fetchActiveOrders]
+    )
 
     return (
         <PortfolioContext.Provider

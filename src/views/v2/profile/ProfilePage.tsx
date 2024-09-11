@@ -7,12 +7,15 @@ import {
 } from '@/components/icon.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import DrawerProvider, { useDrawerContext } from '@/contexts/DrawerContext.tsx'
+import { useMiniAppContext } from '@/contexts/MiniAppContext.tsx'
 import {
     ProfileProvider,
     useProfileContext
 } from '@/contexts/ProfileContext.tsx'
+import useBalance from '@/hooks/useBalance.ts'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard.ts'
 import useTelegram from '@/hooks/useTelegram.ts'
 import { formatToCents, formatUnixTime, truncateString } from '@/lib/utils.ts'
@@ -34,7 +37,7 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const ProfileTitle = () => {
-    const { address, isLogin } = useAuthContext()
+    const { address, isLogin, handleLogin } = useAuthContext()
     const { copyToClipboard } = useCopyToClipboard()
     const { user } = useTelegram()
 
@@ -67,23 +70,41 @@ const ProfileTitle = () => {
                             {truncateString(address, 20, 3, 3)}
                         </div>
                     ) : (
-                        <div className='text-center text-color-neutral-900 text-sm font-semibold leading-tight'>
+                        <div
+                            className='text-center text-color-neutral-900 text-sm font-semibold leading-tight cursor-pointer'
+                            onClick={handleLogin}
+                        >
                             Connect Wallet
                         </div>
                     )}
                 </div>
-                <Copy
-                    size={16}
-                    className='cursor-pointer'
-                    onClick={() => copyToClipboard(address)}
-                />
+                {isLogin && (
+                    <Copy
+                        size={16}
+                        className='cursor-pointer'
+                        onClick={() => copyToClipboard(address)}
+                    />
+                )}
             </div>
         </div>
     )
 }
 
 const BalanceCard = () => {
+    const { balance, loading } = useBalance()
     const [showBalance, setShowBalance] = useState<boolean>(false)
+    const { showComingSoon } = useMiniAppContext()
+
+    const formatedBalance = useMemo(
+        () =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 5
+            }).format(Number(balance?.cashUsd)),
+        [balance]
+    )
 
     const onToggleBalance = () => {
         setShowBalance((prevState) => !prevState)
@@ -108,7 +129,7 @@ const BalanceCard = () => {
                         className='rounded-lg justify-center items-center flex cursor-pointer'
                         onClick={onToggleBalance}
                     >
-                        {showBalance ? (
+                        {!showBalance ? (
                             <Eye
                                 size={16}
                                 className='text-color-neutral-alpha-500'
@@ -121,35 +142,103 @@ const BalanceCard = () => {
                         )}
                     </div>
                 </div>
-                <div className='self-stretch rounded-lg justify-start items-center gap-1 inline-flex'>
-                    <div className='text-color-neutral-alpha-900 text-3xl font-light leading-10'>
-                        $
+                {loading && (
+                    <Skeleton className='bg-color-neutral-250 w-[20vw] h-12' />
+                )}
+
+                {balance && (
+                    <div className='self-stretch rounded-lg justify-start items-center gap-1 inline-flex select-none'>
+                        <div className='text-color-neutral-alpha-900 text-3xl font-light leading-10'>
+                            $
+                        </div>
+                        {showBalance ? (
+                            <>
+                                <div className='text-color-neutral-alpha-900 text-4xl font-normal leading-10'>
+                                    {formatedBalance.substring(1).split('.')[0]}
+                                </div>
+                                <div className='text-color-neutral-alpha-500 text-4xl font-normal leading-10'>
+                                    .{formatedBalance.split('.')[1]}
+                                </div>
+                            </>
+                        ) : (
+                            <div className='h-auto mb-[-0.5rem] text-color-neutral-alpha-900 text-4xl font-normal leading-10'>
+                                *********
+                            </div>
+                        )}
                     </div>
-                    <div className='text-color-neutral-alpha-900 text-4xl font-normal leading-10'>
-                        15,007
-                    </div>
-                    <div className='text-color-neutral-alpha-500 text-4xl font-normal leading-10'>
-                        .99
-                    </div>
-                </div>
+                )}
             </div>
             <div className='self-stretch rounded-lg justify-start items-center gap-2 grid grid-cols-2'>
                 <Button variant='default' size='iconGroupLg'>
-                    <WithdrawIcon />
-                    <div className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex'>
+                    <div>
+                        <WithdrawIcon />
+                    </div>
+                    <div
+                        className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex cursor-pointer'
+                        onClick={showComingSoon}
+                    >
                         <div className='self-stretch text-center text-color-neutral-alpha-900 text-sm font-semibold leading-tight'>
                             Withdraw
                         </div>
                     </div>
                 </Button>
                 <Button variant='outline' size='iconGroupLg'>
-                    <DepositeIcon />
-                    <div className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex'>
+                    <div>
+                        <DepositeIcon />
+                    </div>
+                    <div
+                        className='pb-0.5 rounded-lg flex-col justify-center items-center inline-flex cursor-pointer'
+                        onClick={showComingSoon}
+                    >
                         <div className='self-stretch text-center text-color-brand-500 text-sm font-semibold leading-tight'>
                             Deposite
                         </div>
                     </div>
                 </Button>
+            </div>
+        </div>
+    )
+}
+
+const UnauthorizedBalanceCard = () => {
+    const [showBalance, setShowBalance] = useState<boolean>(false)
+
+    const onToggleBalance = () => {
+        setShowBalance((prevState) => !prevState)
+    }
+
+    return (
+        <div className='mx-4 p-4 bg-gradient-to-r from-[#D8E881] to-[#E4FE34] rounded-2xl flex-col justify-center items-start gap-6 inline-flex relative overflow-hidden'>
+            <div className='absolute overflow-hidden right-[-100px]'>
+                <BrandMask />
+            </div>
+            <div className='self-stretch h-[10vh] rounded-lg flex-col justify-start items-start gap-2 flex'>
+                <div className='self-stretch h-5 rounded-lg justify-start items-center gap-2 inline-flex'>
+                    <div className='rounded-lg justify-start items-center gap-0.5 flex'>
+                        <div className='text-color-neutral-alpha-900 text-xs font-normal leading-none'>
+                            My balance
+                        </div>
+                        <div className='text-color-neutral-alpha-500 text-xs font-normal leading-none'>
+                            /Total cash
+                        </div>
+                    </div>
+                    <div
+                        className='rounded-lg justify-center items-center flex cursor-pointer'
+                        onClick={onToggleBalance}
+                    >
+                        {!showBalance ? (
+                            <Eye
+                                size={16}
+                                className='text-color-neutral-alpha-500'
+                            />
+                        ) : (
+                            <EyeOff
+                                size={16}
+                                className='text-color-neutral-alpha-500'
+                            />
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     )
@@ -238,7 +327,7 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
     )
 
     const goToDetailEvent = (id: string) => {
-        navigate(`/v2/event/${id}`)
+        navigate(`/event/${id}`)
     }
 
     return (
@@ -320,6 +409,7 @@ const HistoryListItem = ({ trade }: { trade: ITrade }) => {
 const RecentActivities = () => {
     const { tradesHistory } = useProfileContext()
     const { openDrawer } = useDrawerContext()
+    const { isLogin } = useAuthContext()
 
     const onClickViewAll = () => {
         openDrawer({
@@ -336,17 +426,19 @@ const RecentActivities = () => {
                         Recent activities
                     </div>
                 </div>
-                <div
-                    className='justify-center items-center gap-1 flex cursor-pointer'
-                    onClick={onClickViewAll}
-                >
-                    <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
-                        <div className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight'>
-                            View All
+                {isLogin && (
+                    <div
+                        className='justify-center items-center gap-1 flex cursor-pointer'
+                        onClick={onClickViewAll}
+                    >
+                        <div className='h-4 pb-0.5 rounded-lg flex-col justify-center items-start inline-flex'>
+                            <div className='self-stretch text-center text-color-brand-500 text-sm font-normal leading-tight'>
+                                View All
+                            </div>
                         </div>
+                        <MoveRight size={16} className='text-color-brand-500' />
                     </div>
-                    <MoveRight size={16} className='text-color-brand-500' />
-                </div>
+                )}
             </div>
             <div className='overflow-auto scrollbar-hidden'>
                 <div className='flex flex-col gap-4'>
@@ -362,6 +454,14 @@ const RecentActivities = () => {
 }
 
 const ProfilePage: React.FC = () => {
+    const { handleLogin, isLogin } = useAuthContext()
+
+    useEffect(() => {
+        if (!isLogin) {
+            handleLogin()
+        }
+    }, [isLogin])
+
     return (
         <ProfileProvider>
             <div
@@ -372,8 +472,8 @@ const ProfilePage: React.FC = () => {
                 )}
             >
                 <ProfileTitle />
-                <BalanceCard />
-                <ProfileAnalyze />
+                {isLogin ? <BalanceCard /> : <UnauthorizedBalanceCard />}
+                {isLogin && <ProfileAnalyze />}
                 <DrawerProvider>
                     <RecentActivities />
                 </DrawerProvider>

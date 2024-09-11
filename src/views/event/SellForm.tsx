@@ -188,7 +188,6 @@ const SellForm: React.FC = () => {
         changeBetOption,
         selectedOrder,
         handleOrder,
-        resolver,
         formStatus
     } = useEventContext()
     const { isLogin } = useAuthContext()
@@ -198,7 +197,7 @@ const SellForm: React.FC = () => {
         formState: { errors, isSubmitting },
         setValue,
         watch
-    } = useForm<OrderFormValues>({ resolver })
+    } = useForm<OrderFormValues>()
 
     useEffect(() => {
         if (selectedOrder) {
@@ -285,11 +284,7 @@ const SellForm: React.FC = () => {
             ),
             [EFormType.LIMIT]: (
                 <>
-                    <form
-                        className='flex flex-col gap-3 mb-3'
-                        id='limitForm'
-                        onSubmit={handleSubmit(handleOrder)}
-                    >
+                    <form className='flex flex-col gap-3 mb-3' id='limitForm'>
                         <div>
                             <div className='mb-2 font-semibold'>
                                 Limit Price

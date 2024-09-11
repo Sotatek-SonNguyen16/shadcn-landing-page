@@ -2,10 +2,10 @@ import { Logo } from '@/components/icon.tsx'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
 import { useEventContext } from '@/contexts/EventContext.tsx'
 import { useEventWebSocket } from '@/contexts/WebSocketContext.tsx'
-import RequestFactory from '@/services/RequestFactory.ts'
-import { EBetOption, EInterval } from '@/types'
+import { EBetOption } from '@/types'
 import EventOrderBook from '@/views/event/order/EventOrderBook.tsx'
 import SettingChartDrawer from '@/views/v2/detail/SettingChartDrawer.tsx'
+import axios from 'axios'
 import {
     ChartOptions,
     ColorType,
@@ -85,15 +85,6 @@ const OrderBookGroupButton = () => {
     )
 }
 
-const mappingName: Record<EInterval, string> = {
-    [EInterval.ALL]: 'ALL',
-    [EInterval._1M]: '1M',
-    [EInterval._1W]: '1W',
-    [EInterval._1D]: '1D',
-    [EInterval._6H]: '6H',
-    [EInterval._1H]: '1H'
-}
-
 const MarketEventChart: React.FC = () => {
     const tvChartRef = useRef(null)
     const { currentMarket } = useEventContext()
@@ -102,29 +93,32 @@ const MarketEventChart: React.FC = () => {
     const [historyData, setHistoryData] = useState<
         { value: number; time: UTCTimestamp }[]
     >([])
-    const request = RequestFactory.getRequest('MarketRequest')
-    const [interval, setInterval] = useState<EInterval>(EInterval.ALL)
 
     const getMarketChartData = async () => {
-        const response = await request.getMarketPriceHistoryById(
-            interval,
-            currentMarket?.clobTokenIds[isShowYesChart ? 0 : 1] || ''
+        const res = await axios.get(
+            `https://clob.polymarket.com` +
+                '/prices-history?' +
+                `interval=all&market=21742633143463906290569050155826241533067272736897614950488156847949938836455&fidelity=720`
         )
-        if (response) {
-            setHistoryData(response.history as any)
-        }
+        const dataHistory = res.data.history
+        setHistoryData(
+            dataHistory.map((el: { p: number; t: number }) => ({
+                value: el.p * 100,
+                time: el.t as UTCTimestamp
+            }))
+        )
     }
 
     useEffect(() => {
         getMarketChartData()
-    }, [isShowYesChart, interval])
+    }, [currentMarket])
 
     useEffect(() => {
         if (tvChart) {
             tvChart.resize(0, 0)
             setTvChart(null)
         }
-    }, [historyData])
+    }, [isShowYesChart, historyData])
 
     useEffect(() => {
         if (tvChartRef.current && !tvChart) {
@@ -163,12 +157,19 @@ const MarketEventChart: React.FC = () => {
                 color: isShowYesChart ? '#E84A64' : '#22DD70',
                 lastPriceAnimation: 1,
                 pointMarkersVisible: false,
-                lineType: 0,
+                lineType: 2,
                 lastValueVisible: false,
                 priceLineVisible: false,
-                priceFormat: { type: 'percent', precision: 3 }
+                priceFormat: { type: 'percent', precision: 1 }
             })
-            lineSeries.setData(historyData)
+            lineSeries.setData(
+                isShowYesChart
+                    ? historyData
+                    : historyData.map((el) => ({
+                          ...el,
+                          value: 100 - el.value
+                      }))
+            )
 
             // chart.subscribeCrosshairMove((param) =>{
             // let dateStr = useWeekly
@@ -198,7 +199,7 @@ const MarketEventChart: React.FC = () => {
     }
 
     return (
-        <div className='w-full h-[calc(100vh-220px)] flex flex-col gap-4 py-4 overflow-y-scroll scrollbar-hidden'>
+        <div className='w-100 [calc(100vh-220px)] flex flex-col gap-4 py-4 overflow-y-scroll scrollbar-hidden'>
             <div className='flex flex-col gap-2'>
                 <div className='flex'>
                     <div className='flex-1 flex flex-col'>
@@ -231,25 +232,22 @@ const MarketEventChart: React.FC = () => {
 
             <div className='flex flex-col'>
                 <div className='flex w-full justify-between h-[32px]'>
-                    <div className='flex flex-row gap-[2px] justify-center items-center'>
-                        {Object.entries(mappingName)
-                            .reverse()
-                            .map(([key, value]: [any, string]) => {
-                                return (
-                                    <div
-                                        key={value}
-                                        className={
-                                            'h-[24px] text-xs text-neutral-500 font-[300] px-[8px] py-[2px] cursor-pointer flex flex-row justify-center items-center' +
-                                            (interval === key
-                                                ? ' border-white border-solid border-[1px] rounded-[32px] text-white'
-                                                : '')
-                                        }
-                                        onClick={() => setInterval(key)}
-                                    >
-                                        {value}
-                                    </div>
-                                )
-                            })}
+                    <div className='flex flex-row gap-[2px]'>
+                        {[
+                            { text: '1h' },
+                            { text: '6h' },
+                            { text: '1d' },
+                            { text: '1w' },
+                            { text: '1m' },
+                            { text: 'All time' }
+                        ].map(({ text }) => (
+                            <div
+                                key={text}
+                                className='h-[24px] text-xs text-neutral-500 font-[300] px-[8px] py-[2px] cursor-pointer'
+                            >
+                                {text}
+                            </div>
+                        ))}
                     </div>
                     <div className='flex gap-4'>
                         <ArrowRightLeft
@@ -263,7 +261,7 @@ const MarketEventChart: React.FC = () => {
                         />
                         <Settings
                             size={20}
-                            className='cursor-pointer'
+                            className='cursor-pointer hidden'
                             onClick={onClickSettingButton}
                         />
                     </div>
