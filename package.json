@@ -1,15 +1,11 @@
 {
-  "name": "tonmarket",
-  "description": "Bet on your beliefs",
+  "name": "name",
+  "description": "description",
   "author": {
-    "name": "Sotalab-PredictionMarket"
+    "name": "React Typescript Base UI"
   },
   "license": "MIT",
-  "keywords": [
-    "ton",
-    "bet",
-    "tonmarket"
-  ],
+  "keywords": [],
   "private": true,
   "version": "0.1.1",
   "type": "module",

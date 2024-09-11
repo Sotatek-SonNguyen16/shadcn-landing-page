@@ -10,10 +10,10 @@ import { clsx } from 'clsx'
 
 interface DrawerContextReturnValue {
     openDrawer: (data: {
-        title?: JSX.Element
-        description?: JSX.Element
-        content: JSX.Element
-        footer?: JSX.Element
+        title?: React.ReactNode
+        description?: React.ReactNode
+        content: React.ReactNode
+        footer?: React.ReactNode
         background?: string
         transparent?: boolean
     }) => void
@@ -21,20 +21,17 @@ interface DrawerContextReturnValue {
 }
 
 interface DrawerProviderProps {
-    children: JSX.Element
-    // drawer: JSX.Element
+    children: React.ReactNode
 }
 
-const DrawerContext = createContext<DrawerContextReturnValue | undefined>(
-    undefined
-)
+const DrawerContext = createContext<DrawerContextReturnValue | undefined>(undefined)
 
 interface DrawerProps {
     open: boolean
-    title?: JSX.Element
-    description?: JSX.Element
-    content?: JSX.Element
-    footer?: JSX.Element
+    title?: React.ReactNode
+    description?: React.ReactNode
+    content?: React.ReactNode
+    footer?: React.ReactNode
     background?: string
     transparent?: boolean
 }
@@ -47,10 +44,10 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
     const [drawer, setDrawer] = useState<DrawerProps>(initialDrawer)
 
     const openDrawer = (data: {
-        title?: JSX.Element
-        description?: JSX.Element
-        content: JSX.Element
-        footer?: JSX.Element
+        title?: React.ReactNode
+        description?: React.ReactNode
+        content: React.ReactNode
+        footer?: React.ReactNode
         background?: string
         transparent?: boolean
     }) => {
@@ -74,27 +71,15 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
             {children}
             <Drawer
                 open={drawer.open}
-                onOpenChange={(open) =>
-                    setDrawer((prevState) => ({ ...prevState, open: open }))
-                }
+                onOpenChange={open => setDrawer(prevState => ({ ...prevState, open: open }))}
                 modal={true}
                 shouldScaleBackground={true}
                 disablePreventScroll={true}
             >
-                <DrawerContent
-                    transparent={drawer.transparent}
-                    background={drawer.background}
-                >
-                    <div
-                        className={clsx(
-                            'max-h-screen',
-                            'overflow-y-scroll scrollbar-hidden'
-                        )}
-                    >
+                <DrawerContent transparent={drawer.transparent} background={drawer.background}>
+                    <div className={clsx('max-h-screen', 'overflow-y-scroll scrollbar-hidden')}>
                         <DrawerTitle>{drawer.title}</DrawerTitle>
-                        <DrawerDescription>
-                            {drawer.description}
-                        </DrawerDescription>
+                        <DrawerDescription>{drawer.description}</DrawerDescription>
                         {drawer.content}
                         <DrawerFooter>{drawer.footer}</DrawerFooter>
                     </div>
@@ -104,15 +89,12 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
     )
 }
 
-const useDrawerContext = () => {
+export const useDrawerContext = () => {
     const context = useContext(DrawerContext)
     if (context === undefined) {
-        throw new Error(
-            'useDrawerContext must be used within an DrawerProvider'
-        )
+        throw new Error('useDrawerContext must be used within an DrawerProvider')
     }
     return context
 }
 
-export { useDrawerContext }
 export default DrawerProvider

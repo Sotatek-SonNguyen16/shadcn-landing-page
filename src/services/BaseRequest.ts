@@ -1,9 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import config from '@/configs'
-import {
-    setAuthorizationToRequest,
-    setDefaultAuthorizationToRequest
-} from '@/lib/authenticate.ts'
+import { setAuthorizationToRequest, setDefaultAuthorizationToRequest } from '@/lib/authenticate.ts'
 import Storage from '@/lib/storage'
 
 interface RequestParams {
@@ -11,12 +8,7 @@ interface RequestParams {
 }
 
 interface RequestData {
-    [key: string]:
-        | number
-        | string
-        | string[]
-        | number[]
-        | Record<string, unknown>
+    [key: string]: number | string | string[] | number[] | Record<string, unknown>
 }
 
 interface ErrorResponse {
@@ -33,7 +25,7 @@ interface ErrorResponse {
 
 export default class BaseRequest {
     constructor() {
-        const accessToken = Storage.getAccessToken()
+        const accessToken = Storage.getPreference('accessToken')
         if (accessToken !== undefined) {
             setAuthorizationToRequest(accessToken)
         } else {
@@ -41,18 +33,12 @@ export default class BaseRequest {
         }
     }
 
-    async get<T>(
-        url: string,
-        params?: RequestParams
-    ): Promise<T | undefined | null> {
+    async get<T>(url: string, params?: RequestParams): Promise<T | undefined | null> {
         try {
             const config: AxiosRequestConfig = {
                 params
             }
-            const response: AxiosResponse = await axios.get(
-                this.getUrlPrefix() + url,
-                config
-            )
+            const response: AxiosResponse = await axios.get(this.getUrlPrefix() + url, config)
             return this._responseHandler(response)
         } catch (error) {
             throw await this._errorHandler(error as ErrorResponse)
@@ -61,10 +47,7 @@ export default class BaseRequest {
 
     async put(url: string, data: RequestData): Promise<unknown> {
         try {
-            const response: AxiosResponse = await axios.put(
-                this.getUrlPrefix() + url,
-                data
-            )
+            const response: AxiosResponse = await axios.put(this.getUrlPrefix() + url, data)
             return this._responseHandler(response)
         } catch (error) {
             return this._errorHandler(error as ErrorResponse)
@@ -73,25 +56,16 @@ export default class BaseRequest {
 
     async patch(url: string, data: RequestData): Promise<unknown> {
         try {
-            const response: AxiosResponse = await axios.patch(
-                this.getUrlPrefix() + url,
-                data
-            )
+            const response: AxiosResponse = await axios.patch(this.getUrlPrefix() + url, data)
             return this._responseHandler(response)
         } catch (error) {
             return this._errorHandler(error as ErrorResponse)
         }
     }
 
-    async post<T>(
-        url: string,
-        data: RequestData
-    ): Promise<T | undefined | null> {
+    async post<T>(url: string, data: RequestData): Promise<T | undefined | null> {
         try {
-            const response: AxiosResponse = await axios.post(
-                this.getUrlPrefix() + url,
-                data
-            )
+            const response: AxiosResponse = await axios.post(this.getUrlPrefix() + url, data)
             return this._responseHandler(response)
         } catch (error) {
             throw await this._errorHandler(error as ErrorResponse)
@@ -103,10 +77,7 @@ export default class BaseRequest {
             const config: AxiosRequestConfig = {
                 data
             }
-            const response: AxiosResponse = await axios.delete(
-                this.getUrlPrefix() + url,
-                config
-            )
+            const response: AxiosResponse = await axios.delete(this.getUrlPrefix() + url, config)
             return this._responseHandler(response)
         } catch (error) {
             return this._errorHandler(error as ErrorResponse)
@@ -119,10 +90,7 @@ export default class BaseRequest {
                 ...data,
                 responseType: 'blob'
             }
-            const response: AxiosResponse = await axios.get(
-                this.getUrlPrefix() + url,
-                config
-            )
+            const response: AxiosResponse = await axios.get(this.getUrlPrefix() + url, config)
             return this._responseHandler(response)
         } catch (error) {
             return this._errorHandler(error as ErrorResponse)

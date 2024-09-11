@@ -1,12 +1,6 @@
 html {
     scroll-behavior: smooth;
     overflow: auto;
-
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
 }
 
 .scrollbar-hidden {

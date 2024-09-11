@@ -3,14 +3,9 @@ import { EventsMap } from '@socket.io/component-emitter'
 
 export type EventNames<Map extends EventsMap> = keyof Map & (string | symbol)
 
-export type EventParams<
-    Map extends EventsMap,
-    Ev extends EventNames<Map>
-> = Parameters<Map[Ev]>
+export type EventParams<Map extends EventsMap, Ev extends EventNames<Map>> = Parameters<Map[Ev]>
 
-type EventHandlerArgs<T> = T extends (string | null)[]
-    ? (data: string) => void
-    : (data: T) => void
+type EventHandlerArgs<T> = T extends (string | null)[] ? (data: string) => void : (data: T) => void
 
 type DefaultServerEvents = {
     connect: () => void
@@ -23,37 +18,24 @@ export interface BaseWebSocket<
 > {
     connect(): void
 
-    send<T extends EventNames<ClientEvents>>(
-        event: T,
-        ...args: EventParams<ClientEvents, T>
-    ): void
+    send<T extends EventNames<ClientEvents>>(event: T, ...args: EventParams<ClientEvents, T>): void
 
     on<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (
-            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
-        ) => void
+        listener: (data: EventParams<DefaultServerEvents & ServerEvents, T>[0]) => void
     ): void
 
     off<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (
-            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
-        ) => void
+        listener: (data: EventParams<DefaultServerEvents & ServerEvents, T>[0]) => void
     ): void
 
     close(): void
 }
 
 export class BaseWebSocketImpl<
-    ServerEvents extends Record<
-        string,
-        (...args: never[]) => void
-    > = DefaultServerEvents,
-    ClientEvents extends Record<string, (...args: never[]) => void> = Record<
-        string,
-        () => void
-    >
+    ServerEvents extends Record<string, (...args: never[]) => void> = DefaultServerEvents,
+    ClientEvents extends Record<string, (...args: never[]) => void> = Record<string, () => void>
 > implements BaseWebSocket<ServerEvents, ClientEvents>
 {
     protected socket: Socket<ServerEvents, ClientEvents> | null = null
@@ -87,10 +69,7 @@ export class BaseWebSocketImpl<
         })
 
         this.socket.on('disconnect', () => {
-            this.emit(
-                'disconnect',
-                {} as EventParams<ServerEvents, 'disconnect'>[0]
-            )
+            this.emit('disconnect', {} as EventParams<ServerEvents, 'disconnect'>[0])
             this.socket = null
         })
 
@@ -116,9 +95,7 @@ export class BaseWebSocketImpl<
 
     public on<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (
-            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
-        ) => void
+        listener: (data: EventParams<DefaultServerEvents & ServerEvents, T>[0]) => void
     ): void {
         if (!this.eventListeners[event]) {
             this.eventListeners[event] = []
@@ -130,17 +107,13 @@ export class BaseWebSocketImpl<
 
     public off<T extends EventNames<DefaultServerEvents & ServerEvents>>(
         event: T,
-        listener: (
-            data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
-        ) => void
+        listener: (data: EventParams<DefaultServerEvents & ServerEvents, T>[0]) => void
     ): void {
         if (!this.eventListeners[event]) {
             return
         }
 
-        this.eventListeners[event] = this.eventListeners[event]?.filter(
-            (l) => l !== listener
-        )
+        this.eventListeners[event] = this.eventListeners[event]?.filter(l => l !== listener)
 
         if (this.socket) {
             this.socket.off(event as string, listener as never)
@@ -159,7 +132,7 @@ export class BaseWebSocketImpl<
         data: EventParams<DefaultServerEvents & ServerEvents, T>[0]
     ): void {
         if (this.eventListeners[event]) {
-            this.eventListeners[event]?.forEach((listener) => listener(data))
+            this.eventListeners[event]?.forEach(listener => listener(data))
         }
     }
 }

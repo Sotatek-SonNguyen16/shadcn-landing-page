@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import moment from 'moment'
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -23,16 +22,12 @@ export function formatDate(isoDate: string): string {
 
 export function formatCurrency(value: number): string {
     if (value >= 1_000_000_000) {
-        // Format billions
         return `$${(value / 1_000_000_000).toFixed(1)}b`
     } else if (value >= 1_000_000) {
-        // Format millions
         return `$${(value / 1_000_000).toFixed(1)}m`
     } else if (value >= 1_000) {
-        // Format thousands
         return `$${(value / 1_000).toFixed(1)}k`
     } else {
-        // Format small numbers
         return `$${value.toFixed(0)}`
     }
 }
@@ -69,17 +64,6 @@ export function truncateString(
     return `${start}...${end}`
 }
 
-export const formatUnixTime = (
-    unixTime: string | number | undefined,
-    formatTime = 'YYYY-MM-DD HH:mm:ss',
-    defaultValue = '--'
-) => {
-    if (!unixTime) {
-        return defaultValue
-    }
-    return moment(+unixTime).format(formatTime)
-}
-
-export const filterParams = (params: Record<string, string | number>) => {
-    return Object.fromEntries(Object.entries(params).filter(([_, v]) => v))
+export function queryParams(params: Record<string, string | number | boolean>) {
+    return Object.fromEntries(Object.entries(params).filter(param => param[1]))
 }

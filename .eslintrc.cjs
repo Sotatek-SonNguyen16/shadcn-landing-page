@@ -1,6 +1,6 @@
 module.exports = {
     root: true,
-    env: {browser: true, es2020: true},
+    env: { browser: true, es2020: true },
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
@@ -15,17 +15,17 @@ module.exports = {
         'prettier/prettier': [
             'warn',
             {
-                arrowParens: 'always',
+                arrowParens: 'avoid',
                 semi: false,
                 trailingComma: 'none',
                 tabWidth: 4,
                 endOfLine: 'auto',
                 useTabs: false,
                 singleQuote: true,
-                printWidth: 80,
+                printWidth: 100,
                 jsxSingleQuote: true
             }
         ]
 
-    },
+    }
 }

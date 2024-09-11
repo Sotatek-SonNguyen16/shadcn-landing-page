@@ -2,7 +2,7 @@ import React from 'react'
 import { clsx } from 'clsx'
 import { LoadingSpinner } from '@/components/ui/spinner.tsx'
 
-const PageSkeleton: React.FC = () => {
+const AppLayoutSkeleton: React.FC = () => {
     return (
         <div
             className={clsx(
@@ -18,4 +18,4 @@ const PageSkeleton: React.FC = () => {
     )
 }
 
-export default PageSkeleton
+export default AppLayoutSkeleton

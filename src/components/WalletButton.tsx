@@ -4,7 +4,7 @@ import { Wallet } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext.tsx'
 import { truncateString } from '@/lib/utils.ts'
 import { useDrawerContext } from '@/contexts/DrawerContext.tsx'
-import WalletInfoDrawer from '@/views/v2/home/WalletInfoDrawer.tsx'
+import WalletInfoDrawer from '@/views/home/WalletInfoDrawer.tsx'
 
 const WalletButton: React.FC = () => {
     const { address, isLogin, handleLogin } = useAuthContext()

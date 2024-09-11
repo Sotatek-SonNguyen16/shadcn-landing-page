@@ -1,12 +1,15 @@
-const PREFERENCES = 'ton-market'
+const PREFERENCES = 'base-ui'
 
 interface Preferences {
     accessToken?: string
-    userAddress?: string
-    connectorId?: string
+    // Add more preferences here as needed, e.g.:
+    // theme?: string
+    // language?: string
 }
 
 const defaultPreferences: Preferences = {}
+
+type PreferenceKey = keyof Preferences
 
 class Storage {
     static getStorage(): Preferences {
@@ -18,7 +21,7 @@ class Storage {
         }
     }
 
-    static setStorage(type: string, value: object): void {
+    static setStorage(type: string, value: Preferences): void {
         localStorage.setItem(type, JSON.stringify(value))
     }
 
@@ -27,48 +30,15 @@ class Storage {
         this.setStorage(PREFERENCES, preferences)
     }
 
-    static getAccessToken(): string | undefined {
-        const { accessToken } = this.getStorage()
-        return accessToken
-    }
-
-    static setAccessToken(accessToken: string): void {
+    static getPreference<K extends PreferenceKey>(key: K): Preferences[K] {
         const preferences = this.getStorage()
-        preferences.accessToken = accessToken
-        this.setStorage(PREFERENCES, preferences)
+        return preferences[key]
     }
 
-    static clearAccessToken(): void {
+    static setPreference<K extends PreferenceKey>(key: K, value: Preferences[K]): void {
         const preferences = this.getStorage()
-        delete preferences.accessToken
+        preferences[key] = value
         this.setStorage(PREFERENCES, preferences)
-    }
-
-    static setUserAddress(userAddress: string): void {
-        const preferences = this.getStorage()
-        preferences.userAddress = userAddress
-        this.setStorage(PREFERENCES, preferences)
-    }
-
-    static getUserAddress(): string | undefined {
-        const { userAddress } = this.getStorage()
-        return userAddress
-    }
-
-    static clearUserAddress(): void {
-        const preferences = this.getStorage()
-        delete preferences.userAddress
-        this.setStorage(PREFERENCES, preferences)
-    }
-
-    static getConnectorId(): string {
-        const { connectorId } = this.getStorage()
-        return connectorId || ''
-    }
-
-    static logout(): void {
-        this.clearAccessToken()
-        this.clearUserAddress()
     }
 }
 
