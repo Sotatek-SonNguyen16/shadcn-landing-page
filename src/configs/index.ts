@@ -1,8 +1,6 @@
 import dev from './dev.json'
 import prod from './prod.json'
 import staging from './staging.json'
-import { WalletsListConfiguration } from '@tonconnect/ui-react'
-import { ActionConfiguration } from '@tonconnect/ui'
 
 interface App {
     apiUrl: string
@@ -11,9 +9,6 @@ interface App {
 
 export interface Config {
     app: App
-    walletsListConfiguration: WalletsListConfiguration
-    twaReturnUrl: ActionConfiguration
-    manifestUrl: string
 }
 
 // Environment types
